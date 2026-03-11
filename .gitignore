@@ -1,0 +1,10 @@
+/vendor/
+/build/
+/.phpunit.result.cache
+.dev-tools-backup/
+
+# Dev Tools - Generated temporary files
+.*.tmp.*
+
+# Dev Tools - Published configs (optional, uncomment to ignore)
+# config/dev-tools/
