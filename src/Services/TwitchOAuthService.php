@@ -84,6 +84,8 @@ class TwitchOAuthService
     {
         if (null === $scopes) {
             $configScopes = config('twitch.scopes', []);
+
+            /** @var array<string> $scopes */
             $scopes       = is_array($configScopes) ? $configScopes : [];
         }
 
