@@ -38,9 +38,9 @@
         }
     ],
     "require": {
-        "php": "^8.3",
+        "php": "^8.4",
         "guzzlehttp/guzzle": "^7.8",
-        "laravel/framework": "^11.0 || ^12.0",
+        "laravel/framework": "^12.0 || ^13.0",
         "spatie/laravel-data": "^4.0"
     },
     "require-dev": {
@@ -50,7 +50,7 @@
         "laravel/pint": "^1.27",
         "mockery/mockery": "^1.6",
         "nunomaduro/phpinsights": "^2.13",
-        "orchestra/testbench": "^9.0 || ^10.0",
+        "orchestra/testbench": "^10.0 || ^11.0",
         "phpmetrics/phpmetrics": "^2.9",
         "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^12.0",
@@ -80,7 +80,7 @@
         },
         "optimize-autoloader": true,
         "platform": {
-            "php": "8.3"
+            "php": "8.4"
         },
         "preferred-install": "dist",
         "sort-packages": true
