@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Services\Concerns;
 
+use Deprecated;
+
 /**
  * Twitch Tags API methods.
  *
@@ -16,14 +18,15 @@ trait HasTagsMethods
     /**
      * Get all stream tags defined by Twitch.
      *
-     * @deprecated Deprecated by Twitch. No replacement provided.
-     *
-     * Requires: no scope
-     *
      * @param string|null $tagId A specific tag ID to look up
      *
      * @return array<string, mixed>
      */
+    #[Deprecated(message: <<<'TXT'
+    Deprecated by Twitch. No replacement provided.
+     
+     Requires: no scope
+    TXT)]
     public function getAllStreamTags(?string $tagId = null, int $first = 20, ?string $after = null): array
     {
         $params = ['first' => $first];
@@ -42,12 +45,13 @@ trait HasTagsMethods
     /**
      * Get the list of stream tags that are set on the specified channel.
      *
-     * @deprecated Deprecated by Twitch. No replacement provided.
-     *
-     * Requires: no scope
-     *
      * @return array<string, mixed>
      */
+    #[Deprecated(message: <<<'TXT'
+    Deprecated by Twitch. No replacement provided.
+     
+     Requires: no scope
+    TXT)]
     public function getStreamTags(string $broadcasterId): array
     {
         return $this->makeRequest('GET', '/streams/tags', [
