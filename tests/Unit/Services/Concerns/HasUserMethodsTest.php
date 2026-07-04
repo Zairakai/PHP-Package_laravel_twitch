@@ -89,7 +89,7 @@ final class HasUserMethodsTest extends TestCase
                         ]]]
                         : ['data' => []],
                     '/users/extensions/active', '/users/extensions' => ['data' => ['panel' => []]],
-                    default => ['data' => [], 'pagination' => []],
+                    default                                         => ['data' => [], 'pagination' => []],
                 };
             }
         };
