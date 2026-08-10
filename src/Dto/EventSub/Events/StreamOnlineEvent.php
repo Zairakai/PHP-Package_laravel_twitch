@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
-use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
@@ -30,6 +29,11 @@ class StreamOnlineEvent extends Data implements EventSubEvent
          * @var string Stream type: live, playlist, watch_party, premiere or rerun
          */
         public string $type,
-        public Carbon $startedAt,
+
+        /**
+         * @var string RFC3339 timestamp - kept as a raw string, see ChannelFollowEvent::$followedAt
+         *             for why this isn't cast to Carbon
+         */
+        public string $startedAt,
     ) {}
 }

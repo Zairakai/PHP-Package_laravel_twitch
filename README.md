@@ -120,10 +120,22 @@ Event::listen('twitch.channel.poll.begin', function (string $name, array $payloa
 });
 ```
 
-Currently mapped to a dedicated DTO (`Dto/EventSub/Events/*`): `channel.follow`, `channel.subscribe`,
-`channel.chat.message`, `stream.online`, `stream.offline`. Any other subscription type still
-dispatches a typed `GenericEventSubEvent` (`type` + raw `payload`) - add a new DTO class and
-register it in `EventSubEventFactory::TYPE_MAP` to give a type its own structure.
+All 76 EventSub subscription types Twitch documents are mapped to a dedicated DTO
+(`Dto/EventSub/Events/*`), each verified against the official example payload. Any subscription
+type Twitch adds after this table was generated still dispatches a typed `GenericEventSubEvent`
+(`type` + raw `payload`) until it earns its own DTO - add a new DTO class and register it in
+`EventSubEventFactory::TYPE_MAP` to give it structure.
+
+A few types deserve a note:
+
+- `channel.moderate` and `channel.chat.notification` are discriminated-union events - Twitch
+  populates exactly one of several optional fields depending on a discriminator field
+  (`action` / `notice_type`), the rest are always `null`.
+- `channel.channel_points_custom_reward_redemption.add` and `.update` share one DTO
+  (`ChannelPointsRedemptionEvent`) - identical shape, only `status` differs.
+- A handful of fields with no confirmed type in the official example (always `null` there) are
+  typed `mixed` rather than guessed - safe, but worth tightening once real traffic is observed.
+- `channel.follow` requires subscribing at version `2` (not the package default `1`).
 
 ---
 

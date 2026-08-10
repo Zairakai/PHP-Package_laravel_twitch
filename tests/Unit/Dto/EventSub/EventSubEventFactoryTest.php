@@ -19,10 +19,13 @@ final class EventSubEventFactoryTest extends TestCase
     #[Test]
     public function it_falls_back_to_generic_event_for_unmapped_type(): void
     {
-        $eventSubEvent = EventSubEventFactory::make('channel.poll.begin', ['id' => 'poll-1']);
+        // Type intentionally does not exist in Twitch's catalog - every real
+        // EventSub type is mapped to a dedicated DTO (see
+        // EventSubEventFactoryRealPayloadsTest for full coverage proof).
+        $eventSubEvent = EventSubEventFactory::make('channel.a_type_twitch_has_not_invented_yet', ['id' => 'poll-1']);
 
         $this->assertInstanceOf(GenericEventSubEvent::class, $eventSubEvent);
-        $this->assertSame('channel.poll.begin', $eventSubEvent->type);
+        $this->assertSame('channel.a_type_twitch_has_not_invented_yet', $eventSubEvent->type);
         $this->assertSame(['id' => 'poll-1'], $eventSubEvent->payload);
     }
 

@@ -41,11 +41,11 @@ final class TwitchAuthControllerTest extends TestCase
     #[Test]
     public function it_accepts_webhook_with_valid_twitch_hmac(): void
     {
-        $secret    = 'my-secret';
-        // Unmapped subscription type on purpose: this test is about signature
-        // validation, not typed-DTO resolution - falls back to GenericEventSubEvent
-        // regardless of the (empty) event payload.
-        $body      = '{"subscription":{"type":"channel.cheer"},"event":{}}';
+        $secret = 'my-secret';
+        // Type intentionally does not exist in Twitch's catalog - this test is about
+        // signature validation, not typed-DTO resolution - falls back to
+        // GenericEventSubEvent regardless of the (empty) event payload.
+        $body      = '{"subscription":{"type":"channel.a_type_twitch_has_not_invented_yet"},"event":{}}';
         $messageId = 'msg-001';
         $timestamp = '2024-01-01T00:00:00Z';
 

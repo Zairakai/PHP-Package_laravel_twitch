@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
-use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
@@ -28,6 +27,14 @@ class ChannelFollowEvent extends Data implements EventSubEvent
         public string $broadcasterUserId,
         public string $broadcasterUserLogin,
         public string $broadcasterUserName,
-        public Carbon $followedAt,
+
+        /**
+         * @var string RFC3339 timestamp, fractional seconds precision varies -
+         *             kept as a raw string rather than Carbon, since spatie/laravel-data's
+         *             default DateTimeInterfaceCast format (DATE_ATOM) rejects the
+         *             fractional-second precision Twitch actually sends. Parse with
+         *             `Carbon::parse()` if needed.
+         */
+        public string $followedAt,
     ) {}
 }
