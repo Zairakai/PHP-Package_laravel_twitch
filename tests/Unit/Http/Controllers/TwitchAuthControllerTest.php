@@ -9,7 +9,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Session\ArraySessionHandler;
 use Illuminate\Session\Store as SessionStore;
+use Illuminate\Support\Facades\Event;
 use PHPUnit\Framework\Attributes\Test;
+use Zairakai\LaravelTwitch\Dto\EventSub\Events\ChannelSubscribeEvent;
+use Zairakai\LaravelTwitch\Dto\EventSub\Events\GenericEventSubEvent;
 use Zairakai\LaravelTwitch\Dto\Users\User as TwitchUserDto;
 use Zairakai\LaravelTwitch\Http\Controllers\TwitchAuthController;
 use Zairakai\LaravelTwitch\Services\TwitchApiService;
@@ -39,7 +42,10 @@ final class TwitchAuthControllerTest extends TestCase
     public function it_accepts_webhook_with_valid_twitch_hmac(): void
     {
         $secret    = 'my-secret';
-        $body      = '{"subscription":{"type":"channel.follow"},"event":{}}';
+        // Unmapped subscription type on purpose: this test is about signature
+        // validation, not typed-DTO resolution - falls back to GenericEventSubEvent
+        // regardless of the (empty) event payload.
+        $body      = '{"subscription":{"type":"channel.cheer"},"event":{}}';
         $messageId = 'msg-001';
         $timestamp = '2024-01-01T00:00:00Z';
 
@@ -66,27 +72,72 @@ final class TwitchAuthControllerTest extends TestCase
     // ── Webhook: handleEventSubNotification branches ──────────────────────────
 
     #[Test]
-    public function it_dispatches_channel_subscribe_event_on_notification(): void
+    public function it_dispatches_a_generic_typed_fallback_for_unmapped_notification_type(): void
     {
-        $this->assertSame(200, $this->makeNotificationResponse('channel.subscribe')->getStatusCode());
+        Event::fake();
+
+        $jsonResponse = $this->makeNotificationResponse('channel.unknown');
+
+        $this->assertSame(200, $jsonResponse->getStatusCode());
+
+        // String-based events dispatch the event name + raw payload array to the
+        // assertion callback (not the DTO directly) - see Illuminate\Support\Testing\Fakes\EventFake.
+        Event::assertDispatched(
+            'twitch.channel.unknown',
+            /** @param array{0: GenericEventSubEvent} $payload */
+            fn (string $name, array $payload): bool => 'channel.unknown' === $payload[0]->type,
+        );
     }
 
     #[Test]
-    public function it_dispatches_default_event_for_unknown_notification_type(): void
+    public function it_dispatches_a_typed_dto_on_channel_subscribe_notification(): void
     {
-        $this->assertSame(200, $this->makeNotificationResponse('channel.unknown')->getStatusCode());
+        Event::fake();
+
+        $jsonResponse = $this->makeNotificationResponse('channel.subscribe', [
+            'user_id'                => '111',
+            'user_login'             => 'subscriber',
+            'user_name'              => 'Subscriber',
+            'broadcaster_user_id'    => '12345',
+            'broadcaster_user_login' => 'zairakai',
+            'broadcaster_user_name'  => 'Zairakai',
+            'tier'                   => '1000',
+            'is_gift'                => false,
+        ]);
+
+        $this->assertSame(200, $jsonResponse->getStatusCode());
+        Event::assertDispatched(
+            'twitch.channel.subscribe',
+            /** @param array{0: ChannelSubscribeEvent} $payload */
+            fn (string $name, array $payload): bool => '1000' === $payload[0]->tier,
+        );
     }
 
     #[Test]
     public function it_dispatches_stream_offline_event_on_notification(): void
     {
-        $this->assertSame(200, $this->makeNotificationResponse('stream.offline')->getStatusCode());
+        $jsonResponse = $this->makeNotificationResponse('stream.offline', [
+            'broadcaster_user_id'    => '12345',
+            'broadcaster_user_login' => 'zairakai',
+            'broadcaster_user_name'  => 'Zairakai',
+        ]);
+
+        $this->assertSame(200, $jsonResponse->getStatusCode());
     }
 
     #[Test]
     public function it_dispatches_stream_online_event_on_notification(): void
     {
-        $this->assertSame(200, $this->makeNotificationResponse('stream.online')->getStatusCode());
+        $jsonResponse = $this->makeNotificationResponse('stream.online', [
+            'id'                     => 'stream-1',
+            'broadcaster_user_id'    => '12345',
+            'broadcaster_user_login' => 'zairakai',
+            'broadcaster_user_name'  => 'Zairakai',
+            'type'                   => 'live',
+            'started_at'             => '2024-01-01T00:00:00Z',
+        ]);
+
+        $this->assertSame(200, $jsonResponse->getStatusCode());
     }
 
     #[Test]
@@ -417,10 +468,13 @@ final class TwitchAuthControllerTest extends TestCase
         $router->get('/', static fn (): string => 'home')->name('home');
     }
 
-    private function makeNotificationResponse(string $eventType): JsonResponse
+    /**
+     * @param array<string, mixed> $eventData
+     */
+    private function makeNotificationResponse(string $eventType, array $eventData = []): JsonResponse
     {
         $secret    = 'my-secret';
-        $body      = json_encode(['subscription' => ['type' => $eventType], 'event' => []]);
+        $body      = json_encode(['subscription' => ['type' => $eventType], 'event' => $eventData]);
         $messageId = 'msg-' . str_replace('.', '-', $eventType);
         $timestamp = '2024-01-01T00:00:00Z';
 

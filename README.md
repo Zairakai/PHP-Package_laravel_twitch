@@ -105,15 +105,25 @@ Twitch::createEventSubSubscription(
 // Handle webhooks — in routes/web.php
 Route::post('/twitch/webhook', [TwitchAuthController::class, 'webhook']);
 
-// Listen to dispatched Laravel events (string-based)
-Event::listen('twitch.stream.online', function (array $eventData) {
-    // handle the stream.online payload
+// Listen to dispatched Laravel events (string-based, one event per subscription type)
+// Every notification is typed: mapped types get a dedicated DTO, everything else
+// gets GenericEventSubEvent - no notification is ever silently dropped or untyped.
+Event::listen('twitch.channel.follow', function (string $name, array $payload) {
+    /** @var \Zairakai\LaravelTwitch\Dto\EventSub\Events\ChannelFollowEvent $event */
+    $event = $payload[0];
+    // handle the typed follow event
 });
 
-Event::listen('twitch.channel.follow', function (array $eventData) {
-    // handle the channel.follow payload
+Event::listen('twitch.channel.poll.begin', function (string $name, array $payload) {
+    /** @var \Zairakai\LaravelTwitch\Dto\EventSub\Events\GenericEventSubEvent $event */
+    $event = $payload[0]; // no dedicated DTO yet - raw payload via ->payload
 });
 ```
+
+Currently mapped to a dedicated DTO (`Dto/EventSub/Events/*`): `channel.follow`, `channel.subscribe`,
+`channel.chat.message`, `stream.online`, `stream.offline`. Any other subscription type still
+dispatches a typed `GenericEventSubEvent` (`type` + raw `payload`) - add a new DTO class and
+register it in `EventSubEventFactory::TYPE_MAP` to give a type its own structure.
 
 ---
 

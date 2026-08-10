@@ -150,6 +150,7 @@ return [
             'channel.update',
             'channel.follow',
             'channel.subscribe',
+            'channel.chat.message',
             'channel.subscription.gift',
             'channel.subscription.message',
             'channel.cheer',

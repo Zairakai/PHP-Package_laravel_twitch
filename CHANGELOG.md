@@ -9,12 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Typed DTOs for EventSub notifications (`Dto/EventSub/Events/*`): `ChannelFollowEvent`,
+  `ChannelSubscribeEvent`, `ChannelChatMessageEvent`, `StreamOnlineEvent`, `StreamOfflineEvent`
+- `GenericEventSubEvent` fallback DTO for any subscription type without a dedicated DTO yet -
+  every notification is now typed at the object level, none are silently dropped
+- `EventSubEventFactory` resolving a raw notification into its typed DTO
+- `channel.chat.message` added to the default `enabled_events` list in `config/twitch.php`
 - GitLab CI/CD pipeline for automated testing and publishing
 - Enhanced test coverage reporting
 - Security audit and dependency checking automation
 
 ### Changed
 
+- **Breaking**: `TwitchAuthController::handleEventSubNotification()` now dispatches a
+  `twitch.{type}` Laravel event with a typed DTO payload for every EventSub subscription type,
+  replacing the previous hardcoded 4-type dispatch (raw arrays) and the `twitch.webhook.received`
+  catch-all event
 - Improved development workflow with standardized scripts
 - Enhanced code quality with PHPStan strict analysis
 
