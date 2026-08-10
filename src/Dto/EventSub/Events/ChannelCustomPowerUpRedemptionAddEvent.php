@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
+use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
 
 /**
  * Payload of a `channel.custom_power_up_redemption.add` EventSub notification.
@@ -33,6 +36,7 @@ class ChannelCustomPowerUpRedemptionAddEvent extends Data implements EventSubEve
          * @var array<string, mixed>
          */
         public array $customPowerUp,
-        public string $redeemedAt,
+        #[WithCast(FlexibleDateTimeCast::class)]
+        public Carbon $redeemedAt,
     ) {}
 }

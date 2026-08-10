@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
+use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
 
 /**
  * Payload of a `automod.message.update` EventSub notification.
@@ -33,7 +36,8 @@ class AutomodMessageUpdateEvent extends Data implements EventSubEvent
         public int $level,
         public string $category,
         public string $status,
-        public string $heldAt,
+        #[WithCast(FlexibleDateTimeCast::class)]
+        public Carbon $heldAt,
 
         /**
          * @var array<string, mixed>

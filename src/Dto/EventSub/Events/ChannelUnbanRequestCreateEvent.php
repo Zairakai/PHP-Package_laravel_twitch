@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
+use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
 
 /**
  * Payload of a `channel.unban_request.create` EventSub notification.
@@ -27,6 +30,7 @@ class ChannelUnbanRequestCreateEvent extends Data implements EventSubEvent
         public string $userLogin,
         public string $userName,
         public string $text,
-        public string $createdAt,
+        #[WithCast(FlexibleDateTimeCast::class)]
+        public Carbon $createdAt,
     ) {}
 }

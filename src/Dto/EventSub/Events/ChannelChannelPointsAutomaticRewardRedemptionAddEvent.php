@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
+use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
 
 /**
  * Payload of a `channel.channel_points_automatic_reward_redemption.add` EventSub notification.
@@ -37,6 +40,7 @@ class ChannelChannelPointsAutomaticRewardRedemptionAddEvent extends Data impleme
          */
         public array $message,
         public string $userInput,
-        public string $redeemedAt,
+        #[WithCast(FlexibleDateTimeCast::class)]
+        public Carbon $redeemedAt,
     ) {}
 }

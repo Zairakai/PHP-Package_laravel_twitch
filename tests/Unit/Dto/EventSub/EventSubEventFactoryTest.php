@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Tests\Unit\Dto\EventSub;
 
+use Carbon\Carbon;
 use PHPUnit\Framework\Attributes\Test;
 use Zairakai\LaravelTwitch\Dto\EventSub\Events\ChannelChatMessageEvent;
 use Zairakai\LaravelTwitch\Dto\EventSub\Events\ChannelFollowEvent;
@@ -16,6 +17,27 @@ use Zairakai\LaravelTwitch\Tests\TestCase;
 
 final class EventSubEventFactoryTest extends TestCase
 {
+    #[Test]
+    public function it_casts_follow_timestamps_with_fractional_seconds_to_carbon(): void
+    {
+        // Real Twitch payloads use variable-precision fractional seconds
+        // (microsecond here) that spatie/laravel-data's default DateTimeInterfaceCast
+        // rejects outright - FlexibleDateTimeCast must handle it.
+        $eventSubEvent = EventSubEventFactory::make('channel.follow', [
+            'user_id'                => '111',
+            'user_login'             => 'follower',
+            'user_name'              => 'Follower',
+            'broadcaster_user_id'    => '12345',
+            'broadcaster_user_login' => 'zairakai',
+            'broadcaster_user_name'  => 'Zairakai',
+            'followed_at'            => '2020-07-15T17:16:03.171067Z',
+        ]);
+
+        $this->assertInstanceOf(ChannelFollowEvent::class, $eventSubEvent);
+        $this->assertInstanceOf(Carbon::class, $eventSubEvent->followedAt);
+        $this->assertSame('2020-07-15T17:16:03+00:00', $eventSubEvent->followedAt->toIso8601String());
+    }
+
     #[Test]
     public function it_falls_back_to_generic_event_for_unmapped_type(): void
     {

@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
+use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
 
 /**
  * Payload of a `channel.shoutout.create` EventSub notification.
@@ -28,9 +31,12 @@ class ChannelShoutoutCreateEvent extends Data implements EventSubEvent
         public string $toBroadcasterUserId,
         public string $toBroadcasterUserName,
         public string $toBroadcasterUserLogin,
-        public string $startedAt,
+        #[WithCast(FlexibleDateTimeCast::class)]
+        public Carbon $startedAt,
         public int $viewerCount,
-        public string $cooldownEndsAt,
-        public string $targetCooldownEndsAt,
+        #[WithCast(FlexibleDateTimeCast::class)]
+        public Carbon $cooldownEndsAt,
+        #[WithCast(FlexibleDateTimeCast::class)]
+        public Carbon $targetCooldownEndsAt,
     ) {}
 }

@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
+use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
 
 /**
  * Payload of a `channel.charity_campaign.start` EventSub notification.
@@ -37,6 +40,7 @@ class ChannelCharityCampaignStartEvent extends Data implements EventSubEvent
          * @var array<string, mixed>
          */
         public array $targetAmount,
-        public string $startedAt,
+        #[WithCast(FlexibleDateTimeCast::class)]
+        public Carbon $startedAt,
     ) {}
 }

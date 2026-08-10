@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
+use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
 
 /**
  * Payload of a `channel.ban` EventSub notification.
@@ -29,8 +32,10 @@ class ChannelBanEvent extends Data implements EventSubEvent
         public string $moderatorUserLogin,
         public string $moderatorUserName,
         public string $reason,
-        public string $bannedAt,
-        public string $endsAt,
+        #[WithCast(FlexibleDateTimeCast::class)]
+        public Carbon $bannedAt,
+        #[WithCast(FlexibleDateTimeCast::class)]
+        public Carbon $endsAt,
         public bool $isPermanent,
     ) {}
 }

@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
+use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
 
 /**
  * Payload of a `channel.goal.end` EventSub notification.
@@ -28,7 +31,9 @@ class ChannelGoalEndEvent extends Data implements EventSubEvent
         public bool $isAchieved,
         public int $currentAmount,
         public int $targetAmount,
-        public string $startedAt,
-        public string $endedAt,
+        #[WithCast(FlexibleDateTimeCast::class)]
+        public Carbon $startedAt,
+        #[WithCast(FlexibleDateTimeCast::class)]
+        public Carbon $endedAt,
     ) {}
 }

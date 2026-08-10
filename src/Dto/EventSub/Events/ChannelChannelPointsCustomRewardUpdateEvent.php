@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
+use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
 
 /**
  * Payload of a `channel.channel_points_custom_reward.update` EventSub notification.
@@ -31,7 +34,8 @@ class ChannelChannelPointsCustomRewardUpdateEvent extends Data implements EventS
         public string $prompt,
         public bool $isUserInputRequired,
         public bool $shouldRedemptionsSkipRequestQueue,
-        public string $cooldownExpiresAt,
+        #[WithCast(FlexibleDateTimeCast::class)]
+        public Carbon $cooldownExpiresAt,
         public int $redemptionsRedeemedCurrentStream,
 
         /**

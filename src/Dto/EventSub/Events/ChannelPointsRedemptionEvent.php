@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
+use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
 
 /**
  * Payload shared by `channel.channel_points_custom_reward_redemption.add` and
@@ -32,12 +35,8 @@ class ChannelPointsRedemptionEvent extends Data implements EventSubEvent
          */
         public string $status,
         public ChannelPointsReward $reward,
-
-        /**
-         * @var string RFC3339 timestamp - kept as a raw string, see ChannelFollowEvent::$followedAt
-         *             for why this isn't cast to Carbon
-         */
-        public string $redeemedAt,
+        #[WithCast(FlexibleDateTimeCast::class)]
+        public Carbon $redeemedAt,
 
         /**
          * @var string|null Text the user typed if the reward required input

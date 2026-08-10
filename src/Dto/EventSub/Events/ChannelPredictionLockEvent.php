@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
+use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
 
 /**
  * Payload of a `channel.prediction.lock` EventSub notification.
@@ -29,7 +32,9 @@ class ChannelPredictionLockEvent extends Data implements EventSubEvent
          * @var array<int, mixed>
          */
         public array $outcomes,
-        public string $startedAt,
-        public string $lockedAt,
+        #[WithCast(FlexibleDateTimeCast::class)]
+        public Carbon $startedAt,
+        #[WithCast(FlexibleDateTimeCast::class)]
+        public Carbon $lockedAt,
     ) {}
 }
