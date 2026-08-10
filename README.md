@@ -166,7 +166,14 @@ Key options in `config/twitch.php`:
 make quality        # pint + phpstan + rector + insights + markdownlint + shellcheck
 make quality-fast   # pint + phpstan + markdownlint
 make test           # phpunit / pest
+make docs           # generate browsable API docs (phpDocumentor) into build/docs, alias: make doc
 ```
+
+`make docs` (or `make doc`) downloads phpDocumentor (pinned version, cached in `build/`,
+gitignored) and generates a full class reference from the source itself - including every
+EventSub DTO and how they nest - so it can never drift from the code the way a hand-maintained
+type catalog would. Nothing is committed or published - open `build/docs/index.html` locally
+after running it.
 
 ---
 
