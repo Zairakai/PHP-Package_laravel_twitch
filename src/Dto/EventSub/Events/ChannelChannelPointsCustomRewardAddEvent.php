@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
+use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
 
 /**
  * Payload of a `channel.channel_points_custom_reward.add` EventSub notification.
@@ -59,13 +62,14 @@ class ChannelChannelPointsCustomRewardAddEvent extends Data implements EventSubE
         public array $defaultImage,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var Carbon|null When the global cooldown expires - null when the reward has no active cooldown
          */
-        public mixed $cooldownExpiresAt = null,
+        #[WithCast(FlexibleDateTimeCast::class)]
+        public ?Carbon $cooldownExpiresAt = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var int|null Number of redemptions during the current stream - null outside a live stream
          */
-        public mixed $redemptionsRedeemedCurrentStream = null,
+        public ?int $redemptionsRedeemedCurrentStream = null,
     ) {}
 }

@@ -30,8 +30,8 @@ class ChannelChatSettingsUpdateEvent extends Data implements EventSubEvent
         public bool $uniqueChatMode,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var int|null Minutes a viewer must follow before chatting - null when follower mode is off
          */
-        public mixed $followerModeDurationMinutes = null,
+        public ?int $followerModeDurationMinutes = null,
     ) {}
 }

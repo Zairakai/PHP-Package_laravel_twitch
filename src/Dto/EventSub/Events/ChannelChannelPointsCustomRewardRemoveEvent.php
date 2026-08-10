@@ -34,9 +34,6 @@ class ChannelChannelPointsCustomRewardRemoveEvent extends Data implements EventS
         public string $prompt,
         public bool $isUserInputRequired,
         public bool $shouldRedemptionsSkipRequestQueue,
-        #[WithCast(FlexibleDateTimeCast::class)]
-        public Carbon $cooldownExpiresAt,
-        public int $redemptionsRedeemedCurrentStream,
 
         /**
          * @var array<string, mixed>
@@ -63,5 +60,16 @@ class ChannelChannelPointsCustomRewardRemoveEvent extends Data implements EventS
          * @var array<string, mixed>
          */
         public array $defaultImage,
+
+        /**
+         * @var Carbon|null When the global cooldown expires - null when the reward has no active cooldown
+         */
+        #[WithCast(FlexibleDateTimeCast::class)]
+        public ?Carbon $cooldownExpiresAt = null,
+
+        /**
+         * @var int|null Number of redemptions during the current stream - null outside a live stream
+         */
+        public ?int $redemptionsRedeemedCurrentStream = null,
     ) {}
 }

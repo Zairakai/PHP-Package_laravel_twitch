@@ -47,9 +47,9 @@ class ChannelChatNotificationEvent extends Data implements EventSubEvent
         public string $noticeType,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Present when notice_type is 'sub': {sub_tier, is_prime, duration_months}
          */
-        public mixed $sub = null,
+        public ?array $sub = null,
 
         /**
          * @var array<string, mixed>|null
@@ -57,143 +57,143 @@ class ChannelChatNotificationEvent extends Data implements EventSubEvent
         public ?array $resub = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Present when notice_type is 'sub_gift'
          */
-        public mixed $subGift = null,
+        public ?array $subGift = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Present when notice_type is 'community_sub_gift'
          */
-        public mixed $communitySubGift = null,
+        public ?array $communitySubGift = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Present when notice_type is 'gift_paid_upgrade'
          */
-        public mixed $giftPaidUpgrade = null,
+        public ?array $giftPaidUpgrade = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Present when notice_type is 'prime_paid_upgrade'
          */
-        public mixed $primePaidUpgrade = null,
+        public ?array $primePaidUpgrade = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Present when notice_type is 'pay_it_forward'
          */
-        public mixed $payItForward = null,
+        public ?array $payItForward = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Present when notice_type is 'raid': {user_id, user_login, user_name, viewer_count, profile_image_url}
          */
-        public mixed $raid = null,
+        public ?array $raid = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Present when notice_type is 'unraid'
          */
-        public mixed $unraid = null,
+        public ?array $unraid = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Present when notice_type is 'announcement': {color}
          */
-        public mixed $announcement = null,
+        public ?array $announcement = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Present when notice_type is 'bits_badge_tier': {tier}
          */
-        public mixed $bitsBadgeTier = null,
+        public ?array $bitsBadgeTier = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Present when notice_type is 'charity_donation'
          */
-        public mixed $charityDonation = null,
+        public ?array $charityDonation = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Present when notice_type is 'watch_streak': {watch_streak_months}
          */
-        public mixed $watchStreak = null,
+        public ?array $watchStreak = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Present when notice_type is 'shared_chat_modiversary' or 'modiversary'
          */
-        public mixed $modiversary = null,
+        public ?array $modiversary = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Shared-chat mirror of sub, present when notice_type is 'shared_chat_sub'
          */
-        public mixed $sharedChatSub = null,
+        public ?array $sharedChatSub = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Shared-chat mirror of resub
          */
-        public mixed $sharedChatResub = null,
+        public ?array $sharedChatResub = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Shared-chat mirror of sub_gift
          */
-        public mixed $sharedChatSubGift = null,
+        public ?array $sharedChatSubGift = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Shared-chat mirror of community_sub_gift
          */
-        public mixed $sharedChatCommunitySubGift = null,
+        public ?array $sharedChatCommunitySubGift = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Shared-chat mirror of gift_paid_upgrade
          */
-        public mixed $sharedChatGiftPaidUpgrade = null,
+        public ?array $sharedChatGiftPaidUpgrade = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Shared-chat mirror of prime_paid_upgrade
          */
-        public mixed $sharedChatPrimePaidUpgrade = null,
+        public ?array $sharedChatPrimePaidUpgrade = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Shared-chat mirror of pay_it_forward
          */
-        public mixed $sharedChatPayItForward = null,
+        public ?array $sharedChatPayItForward = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Shared-chat mirror of raid
          */
-        public mixed $sharedChatRaid = null,
+        public ?array $sharedChatRaid = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Shared-chat mirror of announcement
          */
-        public mixed $sharedChatAnnouncement = null,
+        public ?array $sharedChatAnnouncement = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Shared-chat mirror of modiversary
          */
-        public mixed $sharedChatModiversary = null,
+        public ?array $sharedChatModiversary = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var string|null Shared chat session source broadcaster - see ChannelChatMessageEvent::$sourceBroadcasterUserId
          */
-        public mixed $sourceBroadcasterUserId = null,
+        public ?string $sourceBroadcasterUserId = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var string|null Shared chat session source broadcaster
          */
-        public mixed $sourceBroadcasterUserLogin = null,
+        public ?string $sourceBroadcasterUserLogin = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var string|null Shared chat session source broadcaster
          */
-        public mixed $sourceBroadcasterUserName = null,
+        public ?string $sourceBroadcasterUserName = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var string|null Shared chat session source message ID
          */
-        public mixed $sourceMessageId = null,
+        public ?string $sourceMessageId = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<int, array{set_id: string, id: string, info: string}>|null Shared chat session badges
          */
-        public mixed $sourceBadges = null,
+        public ?array $sourceBadges = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var bool|null True if only sent to the source channel during a shared chat session
          */
-        public mixed $isSourceOnly = null,
+        public ?bool $isSourceOnly = null,
     ) {}
 }

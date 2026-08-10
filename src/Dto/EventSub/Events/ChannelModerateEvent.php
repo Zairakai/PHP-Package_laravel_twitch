@@ -33,24 +33,24 @@ class ChannelModerateEvent extends Data implements EventSubEvent
         public string $action,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array{follow_duration_minutes: int}|null Present when action is 'followers'
          */
-        public mixed $followers = null,
+        public ?array $followers = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array{wait_time_seconds: int}|null Present when action is 'slow'
          */
-        public mixed $slow = null,
+        public ?array $slow = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array{user_id: string, user_login: string, user_name: string}|null Present when action is 'vip'
          */
-        public mixed $vip = null,
+        public ?array $vip = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array{user_id: string, user_login: string, user_name: string}|null Present when action is 'unvip'
          */
-        public mixed $unvip = null,
+        public ?array $unvip = null,
 
         /**
          * @var array<string, mixed>|null
@@ -58,78 +58,78 @@ class ChannelModerateEvent extends Data implements EventSubEvent
         public ?array $mod = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array{user_id: string, user_login: string, user_name: string}|null Present when action is 'unmod'
          */
-        public mixed $unmod = null,
+        public ?array $unmod = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Present when action is 'ban': {user_id, user_login, user_name, reason}
          */
-        public mixed $ban = null,
+        public ?array $ban = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array{user_id: string, user_login: string, user_name: string}|null Present when action is 'unban'
          */
-        public mixed $unban = null,
+        public ?array $unban = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Present when action is 'timeout': {user_id, user_login, user_name, reason, expires_at}
          */
-        public mixed $timeout = null,
+        public ?array $timeout = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array{user_id: string, user_login: string, user_name: string}|null Present when action is 'untimeout'
          */
-        public mixed $untimeout = null,
+        public ?array $untimeout = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Present when notice_type is 'raid': {user_id, user_login, user_name, viewer_count, profile_image_url}
          */
-        public mixed $raid = null,
+        public ?array $raid = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Present when notice_type is 'unraid'
          */
-        public mixed $unraid = null,
+        public ?array $unraid = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Present when action is 'delete': {user_id, user_login, user_name, message_id, message_body}
          */
-        public mixed $delete = null,
+        public ?array $delete = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Present when action is 'automod_terms': {action, list, terms, from_automod}
          */
-        public mixed $automodTerms = null,
+        public ?array $automodTerms = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Present when action is 'unban_request': {is_approved, user_id, user_login, user_name, moderator_message}
          */
-        public mixed $unbanRequest = null,
+        public ?array $unbanRequest = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Shared-chat mirror of ban
          */
-        public mixed $sharedChatBan = null,
+        public ?array $sharedChatBan = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Shared-chat mirror of unban
          */
-        public mixed $sharedChatUnban = null,
+        public ?array $sharedChatUnban = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Shared-chat mirror of timeout
          */
-        public mixed $sharedChatTimeout = null,
+        public ?array $sharedChatTimeout = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Shared-chat mirror of untimeout
          */
-        public mixed $sharedChatUntimeout = null,
+        public ?array $sharedChatUntimeout = null,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<string, mixed>|null Shared-chat mirror of delete
          */
-        public mixed $sharedChatDelete = null,
+        public ?array $sharedChatDelete = null,
     ) {}
 }

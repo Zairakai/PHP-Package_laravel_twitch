@@ -31,8 +31,8 @@ class ChannelWarningSendEvent extends Data implements EventSubEvent
         public string $reason,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<int, string>|null Chat rule text cited by the moderator, if any
          */
-        public mixed $chatRulesCited = null,
+        public ?array $chatRulesCited = null,
     ) {}
 }

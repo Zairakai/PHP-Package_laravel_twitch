@@ -27,16 +27,24 @@ class ChannelPredictionEndEvent extends Data implements EventSubEvent
         public string $broadcasterUserLogin,
         public string $broadcasterUserName,
         public string $title,
-        public string $winningOutcomeId,
 
         /**
          * @var array<int, mixed>
          */
         public array $outcomes,
+
+        /**
+         * @var string resolved or canceled
+         */
         public string $status,
         #[WithCast(FlexibleDateTimeCast::class)]
         public Carbon $startedAt,
         #[WithCast(FlexibleDateTimeCast::class)]
         public Carbon $endedAt,
+
+        /**
+         * @var string|null ID of the winning outcome - null when status is canceled (no winner)
+         */
+        public ?string $winningOutcomeId = null,
     ) {}
 }

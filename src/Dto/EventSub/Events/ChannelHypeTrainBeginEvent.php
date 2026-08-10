@@ -45,8 +45,8 @@ class ChannelHypeTrainBeginEvent extends Data implements EventSubEvent
         public int $allTimeHighTotal,
 
         /**
-         * @var mixed Not present in the reference example payload (always null there) - real type unconfirmed
+         * @var array<int, array{user_id: string, user_login: string, user_name: string, type: string, total: int}>|null Present when is_shared_train is true
          */
-        public mixed $sharedTrainParticipants = null,
+        public ?array $sharedTrainParticipants = null,
     ) {}
 }
