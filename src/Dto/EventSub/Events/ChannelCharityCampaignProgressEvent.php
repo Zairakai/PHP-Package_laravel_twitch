@@ -27,15 +27,7 @@ class ChannelCharityCampaignProgressEvent extends Data implements EventSubEvent
         public string $charityDescription,
         public string $charityLogo,
         public string $charityWebsite,
-
-        /**
-         * @var array<string, mixed>
-         */
-        public array $currentAmount,
-
-        /**
-         * @var array<string, mixed>
-         */
-        public array $targetAmount,
+        public CharityAmount $currentAmount,
+        public CharityAmount $targetAmount,
     ) {}
 }

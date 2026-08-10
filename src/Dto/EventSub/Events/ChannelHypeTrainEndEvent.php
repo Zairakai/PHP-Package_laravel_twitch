@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
 use Carbon\Carbon;
+use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Data;
+use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
 
@@ -29,9 +31,10 @@ class ChannelHypeTrainEndEvent extends Data implements EventSubEvent
         public int $total,
 
         /**
-         * @var array<int, mixed>
+         * @var DataCollection<int, HypeTrainContribution>
          */
-        public array $topContributions,
+        #[DataCollectionOf(HypeTrainContribution::class)]
+        public DataCollection $topContributions,
         public int $level,
         #[WithCast(FlexibleDateTimeCast::class)]
         public Carbon $startedAt,
@@ -43,8 +46,9 @@ class ChannelHypeTrainEndEvent extends Data implements EventSubEvent
         public string $type,
 
         /**
-         * @var array<int, array{user_id: string, user_login: string, user_name: string, type: string, total: int}>|null Present when is_shared_train is true
+         * @var DataCollection<int, HypeTrainContribution>|null Present when is_shared_train is true
          */
-        public ?array $sharedTrainParticipants = null,
+        #[DataCollectionOf(HypeTrainContribution::class)]
+        public ?DataCollection $sharedTrainParticipants = null,
     ) {}
 }

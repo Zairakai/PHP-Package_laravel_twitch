@@ -4,19 +4,25 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
+use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Data;
+use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\Chat\Structures\Message;
 
 /**
  * Payload of a `channel.chat.notification` EventSub notification.
  *
  * This is a discriminated-union event: exactly one of the optional fields
- * below is populated depending on the value of the discriminator field -
- * all others are null. Every optional field is nullable regardless of what
- * the single reference example happened to show.
+ * below is populated depending on the value of `notice_type` - all others
+ * are null, regardless of which one the single reference example happened
+ * to show (only `resub` was populated there, confirming that shape).
  *
- * Fields generated from the official example payload on 2026-08-09.
+ * A handful of notice types (`unraid`, `charity_donation`, `modiversary`
+ * and their `shared_chat_*` mirrors) are kept as documented arrays rather
+ * than dedicated classes - their exact shape isn't confirmed by any fetched
+ * example, guessing further nested structure risks being wrong.
  *
  * @see https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/#channelchatnotification
  */
@@ -34,132 +40,88 @@ class ChannelChatNotificationEvent extends Data implements EventSubEvent
         public string $color,
 
         /**
-         * @var array<int, mixed>
+         * @var DataCollection<int, ChatBadge>
          */
-        public array $badges,
+        #[DataCollectionOf(ChatBadge::class)]
+        public DataCollection $badges,
         public string $systemMessage,
         public string $messageId,
-
-        /**
-         * @var array<string, mixed>
-         */
-        public array $message,
+        public Message $message,
         public string $noticeType,
+        public ?ChatNotificationSub $sub = null,
+        public ?ChatNotificationResub $resub = null,
+        public ?ChatNotificationSubGift $subGift = null,
+        public ?ChatNotificationCommunitySubGift $communitySubGift = null,
+        public ?ChatNotificationGiftPaidUpgrade $giftPaidUpgrade = null,
+        public ?ChatNotificationPrimePaidUpgrade $primePaidUpgrade = null,
+        public ?ChatNotificationPayItForward $payItForward = null,
+        public ?ChatNotificationRaid $raid = null,
 
         /**
-         * @var array<string, mixed>|null Present when notice_type is 'sub': {sub_tier, is_prime, duration_months}
-         */
-        public ?array $sub = null,
-
-        /**
-         * @var array<string, mixed>|null
-         */
-        public ?array $resub = null,
-
-        /**
-         * @var array<string, mixed>|null Present when notice_type is 'sub_gift'
-         */
-        public ?array $subGift = null,
-
-        /**
-         * @var array<string, mixed>|null Present when notice_type is 'community_sub_gift'
-         */
-        public ?array $communitySubGift = null,
-
-        /**
-         * @var array<string, mixed>|null Present when notice_type is 'gift_paid_upgrade'
-         */
-        public ?array $giftPaidUpgrade = null,
-
-        /**
-         * @var array<string, mixed>|null Present when notice_type is 'prime_paid_upgrade'
-         */
-        public ?array $primePaidUpgrade = null,
-
-        /**
-         * @var array<string, mixed>|null Present when notice_type is 'pay_it_forward'
-         */
-        public ?array $payItForward = null,
-
-        /**
-         * @var array<string, mixed>|null Present when notice_type is 'raid': {user_id, user_login, user_name, viewer_count, profile_image_url}
-         */
-        public ?array $raid = null,
-
-        /**
-         * @var array<string, mixed>|null Present when notice_type is 'unraid'
+         * @var array<string, mixed>|null Present when notice_type is 'unraid' - likely an empty object
          */
         public ?array $unraid = null,
+        public ?ChatNotificationAnnouncement $announcement = null,
+        public ?ChatNotificationBitsBadgeTier $bitsBadgeTier = null,
 
         /**
-         * @var array<string, mixed>|null Present when notice_type is 'announcement': {color}
-         */
-        public ?array $announcement = null,
-
-        /**
-         * @var array<string, mixed>|null Present when notice_type is 'bits_badge_tier': {tier}
-         */
-        public ?array $bitsBadgeTier = null,
-
-        /**
-         * @var array<string, mixed>|null Present when notice_type is 'charity_donation'
+         * @var array<string, mixed>|null Present when notice_type is 'charity_donation':
+         *                                {charity_name, amount: {value, decimal_places, currency}} - shape not
+         *                                independently confirmed
          */
         public ?array $charityDonation = null,
+        public ?ChatNotificationWatchStreak $watchStreak = null,
 
         /**
-         * @var array<string, mixed>|null Present when notice_type is 'watch_streak': {watch_streak_months}
-         */
-        public ?array $watchStreak = null,
-
-        /**
-         * @var array<string, mixed>|null Present when notice_type is 'shared_chat_modiversary' or 'modiversary'
+         * @var array<string, mixed>|null Present when notice_type is 'modiversary' - shape
+         *                                not independently confirmed
          */
         public ?array $modiversary = null,
 
         /**
-         * @var array<string, mixed>|null Shared-chat mirror of sub, present when notice_type is 'shared_chat_sub'
+         * Shared-chat mirror of sub.
          */
-        public ?array $sharedChatSub = null,
+        public ?ChatNotificationSub $sharedChatSub = null,
 
         /**
-         * @var array<string, mixed>|null Shared-chat mirror of resub
+         * Shared-chat mirror of resub.
          */
-        public ?array $sharedChatResub = null,
+        public ?ChatNotificationResub $sharedChatResub = null,
 
         /**
-         * @var array<string, mixed>|null Shared-chat mirror of sub_gift
+         * Shared-chat mirror of sub_gift.
          */
-        public ?array $sharedChatSubGift = null,
+        public ?ChatNotificationSubGift $sharedChatSubGift = null,
 
         /**
-         * @var array<string, mixed>|null Shared-chat mirror of community_sub_gift
+         * Shared-chat mirror of community_sub_gift.
          */
-        public ?array $sharedChatCommunitySubGift = null,
+        public ?ChatNotificationCommunitySubGift $sharedChatCommunitySubGift = null,
 
         /**
-         * @var array<string, mixed>|null Shared-chat mirror of gift_paid_upgrade
+         * Shared-chat mirror of gift_paid_upgrade.
          */
-        public ?array $sharedChatGiftPaidUpgrade = null,
+        public ?ChatNotificationGiftPaidUpgrade $sharedChatGiftPaidUpgrade = null,
 
         /**
-         * @var array<string, mixed>|null Shared-chat mirror of prime_paid_upgrade
+         * Shared-chat mirror of prime_paid_upgrade.
          */
-        public ?array $sharedChatPrimePaidUpgrade = null,
+        public ?ChatNotificationPrimePaidUpgrade $sharedChatPrimePaidUpgrade = null,
 
         /**
-         * @var array<string, mixed>|null Shared-chat mirror of pay_it_forward
+         * Shared-chat mirror of pay_it_forward.
          */
-        public ?array $sharedChatPayItForward = null,
+        public ?ChatNotificationPayItForward $sharedChatPayItForward = null,
 
         /**
-         * @var array<string, mixed>|null Shared-chat mirror of raid
+         * Shared-chat mirror of raid.
          */
-        public ?array $sharedChatRaid = null,
+        public ?ChatNotificationRaid $sharedChatRaid = null,
 
         /**
-         * @var array<string, mixed>|null Shared-chat mirror of announcement
+         * Shared-chat mirror of announcement.
          */
-        public ?array $sharedChatAnnouncement = null,
+        public ?ChatNotificationAnnouncement $sharedChatAnnouncement = null,
 
         /**
          * @var array<string, mixed>|null Shared-chat mirror of modiversary
@@ -187,9 +149,10 @@ class ChannelChatNotificationEvent extends Data implements EventSubEvent
         public ?string $sourceMessageId = null,
 
         /**
-         * @var array<int, array{set_id: string, id: string, info: string}>|null Shared chat session badges
+         * @var DataCollection<int, ChatBadge>|null Shared chat session badges
          */
-        public ?array $sourceBadges = null,
+        #[DataCollectionOf(ChatBadge::class)]
+        public ?DataCollection $sourceBadges = null,
 
         /**
          * @var bool|null True if only sent to the source channel during a shared chat session

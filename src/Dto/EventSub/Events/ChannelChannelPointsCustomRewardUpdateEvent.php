@@ -34,21 +34,9 @@ class ChannelChannelPointsCustomRewardUpdateEvent extends Data implements EventS
         public string $prompt,
         public bool $isUserInputRequired,
         public bool $shouldRedemptionsSkipRequestQueue,
-
-        /**
-         * @var array<string, mixed>
-         */
-        public array $maxPerStream,
-
-        /**
-         * @var array<string, mixed>
-         */
-        public array $maxPerUserPerStream,
-
-        /**
-         * @var array<string, mixed>
-         */
-        public array $globalCooldown,
+        public RewardLimitSetting $maxPerStream,
+        public RewardLimitSetting $maxPerUserPerStream,
+        public RewardCooldownSetting $globalCooldown,
         public string $backgroundColor,
 
         /**

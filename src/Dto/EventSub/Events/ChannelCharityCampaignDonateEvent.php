@@ -31,10 +31,6 @@ class ChannelCharityCampaignDonateEvent extends Data implements EventSubEvent
         public string $charityDescription,
         public string $charityLogo,
         public string $charityWebsite,
-
-        /**
-         * @var array<string, mixed>
-         */
-        public array $amount,
+        public CharityAmount $amount,
     ) {}
 }

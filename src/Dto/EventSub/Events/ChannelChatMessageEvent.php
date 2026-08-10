@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
+use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Data;
+use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 use Zairakai\LaravelTwitch\Dto\Chat\Structures\Message;
 
@@ -36,25 +38,18 @@ class ChannelChatMessageEvent extends Data implements EventSubEvent
         public string $color,
 
         /**
-         * @var array<int, array{set_id: string, id: string, info: string}> Badges displayed with this message
+         * @var DataCollection<int, ChatBadge> Badges displayed with this message
          */
-        public array $badges,
+        #[DataCollectionOf(ChatBadge::class)]
+        public DataCollection $badges,
 
         /**
          * @var string text, channel_points_highlighted, channel_points_sub_only,
          *             user_intro, power_ups_message_effect or power_ups_gigantified_emote
          */
         public string $messageType,
-
-        /**
-         * @var array{bits: int}|null Present when the message included a cheer
-         */
-        public ?array $cheer = null,
-
-        /**
-         * @var array<string, mixed>|null Present when this message is a reply to another message
-         */
-        public ?array $reply = null,
+        public ?ChatMessageCheer $cheer = null,
+        public ?ChatMessageReply $reply = null,
         public ?string $channelPointsCustomRewardId = null,
 
         // ── Shared chat session fields - present only when the message was sent
@@ -66,9 +61,10 @@ class ChannelChatMessageEvent extends Data implements EventSubEvent
         public ?string $sourceMessageId = null,
 
         /**
-         * @var array<int, array{set_id: string, id: string, info: string}>|null
+         * @var DataCollection<int, ChatBadge>|null
          */
-        public ?array $sourceBadges = null,
+        #[DataCollectionOf(ChatBadge::class)]
+        public ?DataCollection $sourceBadges = null,
         public ?bool $isSourceOnly = null,
     ) {}
 }
