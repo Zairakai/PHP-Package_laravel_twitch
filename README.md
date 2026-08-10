@@ -114,17 +114,26 @@ Event::listen('twitch.channel.follow', function (string $name, array $payload) {
     // handle the typed follow event
 });
 
-Event::listen('twitch.channel.poll.begin', function (string $name, array $payload) {
+// Hypothetical type Twitch hasn't invented yet, to illustrate the fallback -
+// every type Twitch currently documents (76) already has a dedicated DTO.
+Event::listen('twitch.channel.some_future_type', function (string $name, array $payload) {
     /** @var \Zairakai\LaravelTwitch\Dto\EventSub\Events\GenericEventSubEvent $event */
     $event = $payload[0]; // no dedicated DTO yet - raw payload via ->payload
 });
 ```
 
 All 76 EventSub subscription types Twitch documents are mapped to a dedicated DTO
-(`Dto/EventSub/Events/*`), each verified against the official example payload. Any subscription
-type Twitch adds after this table was generated still dispatches a typed `GenericEventSubEvent`
-(`type` + raw `payload`) until it earns its own DTO - add a new DTO class and register it in
-`EventSubEventFactory::TYPE_MAP` to give it structure.
+(`Dto/EventSub/Events/*`), each verified field-by-field against the official example payload.
+Any subscription type Twitch adds after this map was generated still dispatches a typed
+`GenericEventSubEvent` (`type` + raw `payload`) until it earns its own DTO - add a new DTO class
+and register it in `EventSubEventFactory::TYPE_MAP` to give it structure.
+
+Nested structures follow the same rule as the top-level DTOs - one class per shape, reused
+wherever the exact same shape repeats (e.g. `EventSubUserReference`, `ChatBadge`,
+`RewardLimitSetting`, `CharityAmount`), a dedicated class where it doesn't (e.g. `ModerateBanAction`
+vs `ModerateTimeoutAction`). A handful of fields whose shape isn't confirmed by any fetched
+example (`channel.chat.notification`'s `unraid`/`charity_donation`/`modiversary`, automod message
+fragments) are kept as documented `array` rather than guessed.
 
 A few types deserve a note:
 
@@ -133,8 +142,6 @@ A few types deserve a note:
   (`action` / `notice_type`), the rest are always `null`.
 - `channel.channel_points_custom_reward_redemption.add` and `.update` share one DTO
   (`ChannelPointsRedemptionEvent`) - identical shape, only `status` differs.
-- A handful of fields with no confirmed type in the official example (always `null` there) are
-  typed `mixed` rather than guessed - safe, but worth tightening once real traffic is observed.
 - `channel.follow` requires subscribing at version `2` (not the package default `1`).
 
 ---
