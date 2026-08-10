@@ -16,7 +16,22 @@ include vendor/zairakai/laravel-dev-tools/tools/make/core.mk
 # CMD_PHPSTAN := docker exec my-app vendor/bin/phpstan
 
 # Add your custom project-specific targets below
-# Example:
-# .PHONY: deploy
-# deploy: ## Deploy the application
-# 	@echo "Deploying application…"
+
+## —— 📚 Documentation ——
+
+PHPDOC_VERSION := v3.10.0
+PHPDOC_PHAR := build/phpDocumentor.phar
+
+$(PHPDOC_PHAR):
+	@mkdir -p build
+	@echo "Downloading phpDocumentor $(PHPDOC_VERSION)…"
+	@curl -sL "https://github.com/phpDocumentor/phpDocumentor/releases/download/$(PHPDOC_VERSION)/phpDocumentor.phar" -o $(PHPDOC_PHAR)
+	@chmod +x $(PHPDOC_PHAR)
+
+.PHONY: docs
+docs: $(PHPDOC_PHAR) ## Generate API documentation (phpDocumentor) into build/docs
+	@php $(PHPDOC_PHAR) run -c phpdoc.dist.xml
+	@echo "Documentation generated at build/docs/index.html"
+
+.PHONY: doc
+doc: docs

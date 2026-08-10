@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Zairakai\LaravelTwitch\Dto\EventSub\EventSubEventFactory;
 use Zairakai\LaravelTwitch\Dto\Users\User;
 use Zairakai\LaravelTwitch\Models\TwitchUser;
 use Zairakai\LaravelTwitch\Services\TwitchApiService;
@@ -144,22 +145,29 @@ class TwitchAuthController
     /**
      * Handle EventSub notification.
      *
+     * Dispatches a `twitch.{type}` Laravel event carrying a typed DTO for every
+     * subscription type - types without a dedicated DTO yet still get a typed
+     * GenericEventSubEvent fallback, so no notification is ever silently dropped.
+     *
      * @param array<string, mixed> $payload
+     *
+     * @see EventSubEventFactory
      */
     protected function handleEventSubNotification(array $payload): void
     {
         $subscription = is_array($payload['subscription'] ?? null) ? $payload['subscription'] : [];
         $eventType    = is_string($subscription['type'] ?? null) ? $subscription['type'] : null;
-        $eventData    = is_array($payload['event'] ?? null) ? $payload['event'] : [];
 
-        // Dispatch Laravel events based on Twitch event type
-        match ($eventType) {
-            'channel.follow'    => event('twitch.channel.follow', [$eventData]),
-            'channel.subscribe' => event('twitch.channel.subscribe', [$eventData]),
-            'stream.online'     => event('twitch.stream.online', [$eventData]),
-            'stream.offline'    => event('twitch.stream.offline', [$eventData]),
-            default             => event('twitch.webhook.received', [$eventType, $eventData]),
-        };
+        if (null === $eventType) {
+            return;
+        }
+
+        /** @var array<string, mixed> $eventData */
+        $eventData = is_array($payload['event'] ?? null) ? $payload['event'] : [];
+
+        $eventSubEvent = EventSubEventFactory::make($eventType, $eventData);
+
+        event("twitch.{$eventType}", [$eventSubEvent]);
     }
 
     /**
