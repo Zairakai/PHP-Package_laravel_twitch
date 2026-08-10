@@ -105,15 +105,44 @@ Twitch::createEventSubSubscription(
 // Handle webhooks — in routes/web.php
 Route::post('/twitch/webhook', [TwitchAuthController::class, 'webhook']);
 
-// Listen to dispatched Laravel events (string-based)
-Event::listen('twitch.stream.online', function (array $eventData) {
-    // handle the stream.online payload
+// Listen to dispatched Laravel events (string-based, one event per subscription type)
+// Every notification is typed: mapped types get a dedicated DTO, everything else
+// gets GenericEventSubEvent - no notification is ever silently dropped or untyped.
+Event::listen('twitch.channel.follow', function (string $name, array $payload) {
+    /** @var \Zairakai\LaravelTwitch\Dto\EventSub\Events\ChannelFollowEvent $event */
+    $event = $payload[0];
+    // handle the typed follow event
 });
 
-Event::listen('twitch.channel.follow', function (array $eventData) {
-    // handle the channel.follow payload
+// Hypothetical type Twitch hasn't invented yet, to illustrate the fallback -
+// every type Twitch currently documents (76) already has a dedicated DTO.
+Event::listen('twitch.channel.some_future_type', function (string $name, array $payload) {
+    /** @var \Zairakai\LaravelTwitch\Dto\EventSub\Events\GenericEventSubEvent $event */
+    $event = $payload[0]; // no dedicated DTO yet - raw payload via ->payload
 });
 ```
+
+All 76 EventSub subscription types Twitch documents are mapped to a dedicated DTO
+(`Dto/EventSub/Events/*`), each verified field-by-field against the official example payload.
+Any subscription type Twitch adds after this map was generated still dispatches a typed
+`GenericEventSubEvent` (`type` + raw `payload`) until it earns its own DTO - add a new DTO class
+and register it in `EventSubEventFactory::TYPE_MAP` to give it structure.
+
+Nested structures follow the same rule as the top-level DTOs - one class per shape, reused
+wherever the exact same shape repeats (e.g. `EventSubUserReference`, `ChatBadge`,
+`RewardLimitSetting`, `CharityAmount`), a dedicated class where it doesn't (e.g. `ModerateBanAction`
+vs `ModerateTimeoutAction`). A handful of fields whose shape isn't confirmed by any fetched
+example (`channel.chat.notification`'s `unraid`/`charity_donation`/`modiversary`, automod message
+fragments) are kept as documented `array` rather than guessed.
+
+A few types deserve a note:
+
+- `channel.moderate` and `channel.chat.notification` are discriminated-union events - Twitch
+  populates exactly one of several optional fields depending on a discriminator field
+  (`action` / `notice_type`), the rest are always `null`.
+- `channel.channel_points_custom_reward_redemption.add` and `.update` share one DTO
+  (`ChannelPointsRedemptionEvent`) - identical shape, only `status` differs.
+- `channel.follow` requires subscribing at version `2` (not the package default `1`).
 
 ---
 
@@ -137,7 +166,14 @@ Key options in `config/twitch.php`:
 make quality        # pint + phpstan + rector + insights + markdownlint + shellcheck
 make quality-fast   # pint + phpstan + markdownlint
 make test           # phpunit / pest
+make docs           # generate browsable API docs (phpDocumentor) into build/docs, alias: make doc
 ```
+
+`make docs` (or `make doc`) downloads phpDocumentor (pinned version, cached in `build/`,
+gitignored) and generates a full class reference from the source itself - including every
+EventSub DTO and how they nest - so it can never drift from the code the way a hand-maintained
+type catalog would. Nothing is committed or published - open `build/docs/index.html` locally
+after running it.
 
 ---
 
