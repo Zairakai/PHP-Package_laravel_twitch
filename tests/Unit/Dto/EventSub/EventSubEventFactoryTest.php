@@ -41,13 +41,43 @@ final class EventSubEventFactoryTest extends TestCase
                 'text'      => '!ping',
                 'fragments' => [],
             ],
-            'message_type' => 'text',
+            'color'        => '#00FF7F',
             'badges'       => [],
+            'message_type' => 'text',
         ]);
 
         $this->assertInstanceOf(ChannelChatMessageEvent::class, $eventSubEvent);
         $this->assertSame('!ping', $eventSubEvent->message->text);
         $this->assertSame('viewer', $eventSubEvent->chatterUserLogin);
+        $this->assertNull($eventSubEvent->sourceBroadcasterUserId);
+    }
+
+    #[Test]
+    public function it_resolves_channel_chat_message_event_from_a_shared_chat_session(): void
+    {
+        $eventSubEvent = EventSubEventFactory::make('channel.chat.message', [
+            'broadcaster_user_id'             => '1971641',
+            'broadcaster_user_login'          => 'streamer',
+            'broadcaster_user_name'           => 'streamer',
+            'chatter_user_id'                 => '4145994',
+            'chatter_user_login'              => 'viewer32',
+            'chatter_user_name'               => 'viewer32',
+            'message_id'                      => 'cc106a89-1814-919d-454c-f4f2f970aae7',
+            'message'                         => ['text' => 'Hi chat', 'fragments' => []],
+            'color'                           => '#00FF7F',
+            'badges'                          => [],
+            'message_type'                    => 'text',
+            'source_broadcaster_user_id'      => '112233',
+            'source_broadcaster_user_login'   => 'streamer33',
+            'source_broadcaster_user_name'    => 'streamer33',
+            'source_message_id'               => 'e03f6d5d-8ec8-4c63-b473-9e5fe61e289b',
+            'source_badges'                   => [['set_id' => 'subscriber', 'id' => '3', 'info' => '3']],
+            'is_source_only'                  => true,
+        ]);
+
+        $this->assertInstanceOf(ChannelChatMessageEvent::class, $eventSubEvent);
+        $this->assertSame('112233', $eventSubEvent->sourceBroadcasterUserId);
+        $this->assertTrue($eventSubEvent->isSourceOnly);
     }
 
     #[Test]

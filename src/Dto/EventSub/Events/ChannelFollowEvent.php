@@ -12,6 +12,10 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 /**
  * Payload of a `channel.follow` EventSub notification.
  *
+ * Requires subscribing at version 2 (requires the `moderator:read:followers`
+ * scope) - version 1 of this subscription type is deprecated. Pass
+ * `version: '2'` to `Twitch::createEventSubSubscription()`.
+ *
  * @see https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/#channelfollow
  */
 #[MapInputName(SnakeCaseMapper::class)]
