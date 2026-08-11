@@ -30,4 +30,9 @@ class ChannelSubscriptionEndEvent extends Data implements EventSubEvent
         public string $tier,
         public bool $isGift,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

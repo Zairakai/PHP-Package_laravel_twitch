@@ -36,4 +36,9 @@ class ChannelGoalEndEvent extends Data implements EventSubEvent
         #[WithCast(FlexibleDateTimeCast::class)]
         public Carbon $endedAt,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

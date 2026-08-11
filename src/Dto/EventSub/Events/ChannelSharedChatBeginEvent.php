@@ -32,4 +32,9 @@ class ChannelSharedChatBeginEvent extends Data implements EventSubEvent
          */
         public array $participants,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

@@ -27,4 +27,17 @@ class AutomodSettingsUpdateEvent extends Data implements EventSubEvent
          */
         public array $data,
     ) {}
+
+    public function getBroadcasterUserId(): ?string
+    {
+        $settings = $this->data[0] ?? null;
+
+        if (! is_array($settings)) {
+            return null;
+        }
+
+        $broadcasterUserId = $settings['broadcaster_user_id'] ?? null;
+
+        return is_string($broadcasterUserId) ? $broadcasterUserId : null;
+    }
 }

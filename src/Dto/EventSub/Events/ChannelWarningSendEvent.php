@@ -35,4 +35,9 @@ class ChannelWarningSendEvent extends Data implements EventSubEvent
          */
         public ?array $chatRulesCited = null,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

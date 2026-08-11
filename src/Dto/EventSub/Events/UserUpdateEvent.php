@@ -26,4 +26,9 @@ class UserUpdateEvent extends Data implements EventSubEvent
         public bool $emailVerified,
         public string $description,
     ) {}
+
+    public function getBroadcasterUserId(): ?string
+    {
+        return null;
+    }
 }

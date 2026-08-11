@@ -52,6 +52,16 @@ final class EventSubEventFactoryTest extends TestCase
     }
 
     #[Test]
+    public function it_resolves_broadcaster_user_id_from_the_generic_event_payload_when_present(): void
+    {
+        $eventSubEvent = EventSubEventFactory::make('channel.a_type_twitch_has_not_invented_yet', [
+            'broadcaster_user_id' => '12345',
+        ]);
+
+        $this->assertSame('12345', $eventSubEvent->getBroadcasterUserId());
+    }
+
+    #[Test]
     public function it_resolves_channel_chat_message_event(): void
     {
         $eventSubEvent = EventSubEventFactory::make('channel.chat.message', [
@@ -168,5 +178,13 @@ final class EventSubEventFactoryTest extends TestCase
 
         $this->assertInstanceOf(StreamOnlineEvent::class, $eventSubEvent);
         $this->assertSame('live', $eventSubEvent->type);
+    }
+
+    #[Test]
+    public function it_returns_null_broadcaster_user_id_from_the_generic_event_payload_when_absent(): void
+    {
+        $eventSubEvent = EventSubEventFactory::make('channel.a_type_twitch_has_not_invented_yet', ['id' => 'poll-1']);
+
+        $this->assertNull($eventSubEvent->getBroadcasterUserId());
     }
 }

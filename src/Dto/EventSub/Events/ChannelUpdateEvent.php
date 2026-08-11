@@ -32,4 +32,9 @@ class ChannelUpdateEvent extends Data implements EventSubEvent
          */
         public array $contentClassificationLabels,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

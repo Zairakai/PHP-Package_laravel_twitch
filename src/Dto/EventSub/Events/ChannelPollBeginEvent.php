@@ -42,4 +42,9 @@ class ChannelPollBeginEvent extends Data implements EventSubEvent
         #[WithCast(FlexibleDateTimeCast::class)]
         public Carbon $endsAt,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

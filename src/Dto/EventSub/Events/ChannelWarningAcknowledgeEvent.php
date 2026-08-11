@@ -26,4 +26,9 @@ class ChannelWarningAcknowledgeEvent extends Data implements EventSubEvent
         public string $userLogin,
         public string $userName,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

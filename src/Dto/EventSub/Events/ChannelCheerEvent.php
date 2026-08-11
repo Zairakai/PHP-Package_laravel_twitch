@@ -30,4 +30,9 @@ class ChannelCheerEvent extends Data implements EventSubEvent
         public ?string $userLogin = null,
         public ?string $userName = null,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

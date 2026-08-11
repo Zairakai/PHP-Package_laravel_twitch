@@ -43,4 +43,9 @@ class ChannelChannelPointsAutomaticRewardRedemptionAddEvent extends Data impleme
         #[WithCast(FlexibleDateTimeCast::class)]
         public Carbon $redeemedAt,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

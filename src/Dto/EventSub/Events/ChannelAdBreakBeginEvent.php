@@ -33,4 +33,9 @@ class ChannelAdBreakBeginEvent extends Data implements EventSubEvent
         public string $requesterUserLogin,
         public string $requesterUserName,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }
