@@ -25,4 +25,9 @@ class ChannelRaidEvent extends Data implements EventSubEvent
         public string $toBroadcasterUserName,
         public int $viewers,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->toBroadcasterUserId;
+    }
 }

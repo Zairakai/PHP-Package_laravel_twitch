@@ -159,4 +159,9 @@ class ChannelChatNotificationEvent extends Data implements EventSubEvent
          */
         public ?bool $isSourceOnly = null,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

@@ -32,4 +32,9 @@ class UserWhisperMessageEvent extends Data implements EventSubEvent
          */
         public array $whisper,
     ) {}
+
+    public function getBroadcasterUserId(): ?string
+    {
+        return null;
+    }
 }

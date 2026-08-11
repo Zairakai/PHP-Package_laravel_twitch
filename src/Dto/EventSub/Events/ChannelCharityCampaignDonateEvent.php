@@ -33,4 +33,9 @@ class ChannelCharityCampaignDonateEvent extends Data implements EventSubEvent
         public string $charityWebsite,
         public CharityAmount $amount,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

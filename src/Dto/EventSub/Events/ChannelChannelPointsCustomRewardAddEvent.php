@@ -60,4 +60,9 @@ class ChannelChannelPointsCustomRewardAddEvent extends Data implements EventSubE
          */
         public ?int $redemptionsRedeemedCurrentStream = null,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

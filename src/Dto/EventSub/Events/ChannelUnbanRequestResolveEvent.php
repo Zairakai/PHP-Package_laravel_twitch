@@ -32,4 +32,9 @@ class ChannelUnbanRequestResolveEvent extends Data implements EventSubEvent
         public string $resolutionText,
         public string $status,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

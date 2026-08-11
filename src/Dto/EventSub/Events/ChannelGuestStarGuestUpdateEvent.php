@@ -35,4 +35,9 @@ class ChannelGuestStarGuestUpdateEvent extends Data implements EventSubEvent
         public bool $hostAudioEnabled,
         public int $hostVolume,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

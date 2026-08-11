@@ -35,4 +35,9 @@ class ChannelCharityCampaignStopEvent extends Data implements EventSubEvent
         #[WithCast(FlexibleDateTimeCast::class)]
         public Carbon $stoppedAt,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterId;
+    }
 }

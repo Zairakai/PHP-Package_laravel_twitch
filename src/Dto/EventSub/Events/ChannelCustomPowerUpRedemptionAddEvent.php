@@ -39,4 +39,9 @@ class ChannelCustomPowerUpRedemptionAddEvent extends Data implements EventSubEve
         #[WithCast(FlexibleDateTimeCast::class)]
         public Carbon $redeemedAt,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

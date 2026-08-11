@@ -30,4 +30,9 @@ class ChannelSuspiciousUserUpdateEvent extends Data implements EventSubEvent
         public string $userLogin,
         public string $lowTrustStatus,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }
