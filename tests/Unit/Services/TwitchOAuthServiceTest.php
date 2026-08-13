@@ -8,8 +8,10 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\Attributes\Test;
+use Psr\Http\Message\RequestInterface;
 use ReflectionProperty;
 use Zairakai\LaravelTwitch\Services\TwitchOAuthService;
 use Zairakai\LaravelTwitch\Tests\TestCase;
@@ -22,7 +24,7 @@ final class TwitchOAuthServiceTest extends TestCase
     public function it_builds_authorization_url_with_default_scopes(): void
     {
         $this->app['config']->set('twitch.scopes', ['user:read:email']);
-        $this->app['config']->set('twitch.api.auth_url', 'https://id.twitch.tv/oauth2');
+        $this->app['config']->set('twitch.api.auth_url', 'https://id.twitch.tv/oauth2/');
 
         $twitchOAuthService = new TwitchOAuthService('client-id', 'secret', 'http://localhost/cb');
 
@@ -37,7 +39,7 @@ final class TwitchOAuthServiceTest extends TestCase
     #[Test]
     public function it_builds_authorization_url_with_explicit_scopes(): void
     {
-        $this->app['config']->set('twitch.api.auth_url', 'https://id.twitch.tv/oauth2');
+        $this->app['config']->set('twitch.api.auth_url', 'https://id.twitch.tv/oauth2/');
 
         $twitchOAuthService = new TwitchOAuthService('client-id', 'secret', 'http://localhost/cb');
 
@@ -92,6 +94,50 @@ final class TwitchOAuthServiceTest extends TestCase
 
         $this->assertSame('new-token', $result['access_token']);
         $this->assertSame('new-refresh', $result['refresh_token']);
+    }
+
+    // ── base_uri resolution ──────────────────────────────────────────────────
+
+    #[Test]
+    public function it_resolves_token_against_the_configured_auth_base_uri(): void
+    {
+        /** @var array<int, array{request: RequestInterface}> $history */
+        $history = [];
+
+        $mockHandler = new MockHandler([
+            new Response(200, [], json_encode([
+                'access_token'  => 'tok',
+                'refresh_token' => 'ref',
+                'expires_in'    => 14400,
+                'scope'         => 'user:read:email',
+                'token_type'    => 'bearer',
+            ])),
+        ]);
+        $handlerStack = HandlerStack::create($mockHandler);
+        $handlerStack->push(Middleware::history($history));
+
+        // Mirrors the real client construction (constructor uses config
+        // 'twitch.api.auth_url' as base_uri).
+        $client = new Client([
+            'base_uri' => config('twitch.api.auth_url'),
+            'handler'  => $handlerStack,
+        ]);
+
+        $twitchOAuthService = new TwitchOAuthService('client-id', 'secret', 'http://localhost/cb');
+
+        $reflectionProperty = new ReflectionProperty(TwitchOAuthService::class, 'client');
+        $reflectionProperty->setValue($twitchOAuthService, $client);
+
+        $twitchOAuthService->getAccessToken('auth-code');
+
+        // RFC3986 base URI merging drops the base_uri path (`/oauth2`) when
+        // the reference starts with a slash - resolves to
+        // https://id.twitch.tv/token instead of .../oauth2/token otherwise,
+        // a real 404 confirmed against the live Twitch endpoint.
+        $this->assertSame(
+            'https://id.twitch.tv/oauth2/token',
+            (string) $history[0]['request']->getUri(),
+        );
     }
 
     // ── revokeToken: error path ───────────────────────────────────────────────
