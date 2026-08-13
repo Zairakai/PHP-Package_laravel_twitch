@@ -112,7 +112,12 @@ trait HasEventSubMethods
      *
      * Requires: app access token
      *
-     * @param string|null $type   Filter by subscription type
+     * @param string|null $type   Filter by subscription type. Mutually exclusive with $status -
+     *                            Twitch's API rejects a request specifying both with a 400
+     *                            "cannot specify more than one filter" (confirmed live against
+     *                            the real API, not documented explicitly). Passing both here
+     *                            is the caller's responsibility to avoid; see
+     *                            getEventSubSubscriptionsByType() for the type+status use case.
      * @param string|null $status Filter by status (enabled, webhook_callback_verification_pending, etc.)
      *
      * @return PaginatedResult<Subscription>
@@ -145,10 +150,25 @@ trait HasEventSubMethods
     /**
      * Get all active EventSub subscriptions of a given type.
      *
+     * Filters by type only against the API and narrows to status=enabled
+     * client-side, rather than passing both filters to Twitch - the real
+     * API rejects `type` and `status` together with a 400 "cannot specify
+     * more than one filter" (confirmed live, not called out in the written
+     * docs). A single page (100 items) is fetched - a broadcaster with more
+     * than 100 subscriptions of the very same type is not a case this
+     * package needs to paginate through today.
+     *
      * @return PaginatedResult<Subscription>
      */
     public function getEventSubSubscriptionsByType(string $type): PaginatedResult
     {
-        return $this->getEventSubSubscriptions(type: $type, status: 'enabled');
+        $paginatedResult = $this->getEventSubSubscriptions(type: $type);
+
+        $enabled = array_values(array_filter(
+            $paginatedResult->items,
+            static fn (Subscription $subscription): bool => 'enabled' === $subscription->status,
+        ));
+
+        return new PaginatedResult(items: $enabled, cursor: $paginatedResult->cursor, total: count($enabled));
     }
 }
