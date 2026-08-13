@@ -91,6 +91,89 @@ final class HasEventSubMethodsTest extends TestCase
         $this->assertInstanceOf(Subscription::class, $subscription);
     }
 
+    // ── getEventSubSubscriptionsByType ────────────────────────────────────────
+
+    #[Test]
+    public function it_filters_by_type_only_against_the_api_never_both_type_and_status(): void
+    {
+        $capturedParams = null;
+
+        $service = new class('client-id', 'secret', $capturedParams) extends TwitchApiService
+        {
+            public function __construct(
+                string $clientId,
+                string $clientSecret,
+                public mixed &$captured,
+            ) {
+                parent::__construct($clientId, $clientSecret);
+            }
+
+            /**
+             * @param array<string, mixed> $params
+             */
+            protected function makeRequest(string $method, string $endpoint, array $params = []): array
+            {
+                $this->captured = $params;
+
+                return ['data' => [], 'pagination' => ['cursor' => '']];
+            }
+        };
+
+        $service->getEventSubSubscriptionsByType('channel.follow');
+
+        // Twitch's real API rejects type + status together with a 400
+        // "cannot specify more than one filter" - status must never be sent
+        // here alongside type.
+        $this->assertSame(['first' => 100, 'type' => 'channel.follow'], $capturedParams);
+    }
+
+    #[Test]
+    public function it_narrows_to_enabled_subscriptions_client_side(): void
+    {
+        $service = new class('client-id', 'secret') extends TwitchApiService
+        {
+            /**
+             * @param array<string, mixed> $params
+             */
+            protected function makeRequest(string $method, string $endpoint, array $params = []): array
+            {
+                return [
+                    'data' => [
+                        $this->subscriptionRow('sub-1', 'enabled'),
+                        $this->subscriptionRow('sub-2', 'webhook_callback_verification_pending'),
+                        $this->subscriptionRow('sub-3', 'enabled'),
+                    ],
+                    'pagination' => ['cursor' => ''],
+                ];
+            }
+
+            /**
+             * @return array<string, mixed>
+             */
+            private function subscriptionRow(string $id, string $status): array
+            {
+                return [
+                    'id'         => $id,
+                    'status'     => $status,
+                    'type'       => 'channel.follow',
+                    'version'    => '1',
+                    'condition'  => ['broadcaster_user_id' => '1'],
+                    'created_at' => '2024-01-01T00:00:00Z',
+                    'transport'  => ['method' => 'webhook', 'callback' => 'https://example.com/webhook'],
+                    'cost'       => 1,
+                ];
+            }
+        };
+
+        $paginatedResult = $service->getEventSubSubscriptionsByType('channel.follow');
+
+        $this->assertCount(2, $paginatedResult->items);
+        $this->assertSame(['sub-1', 'sub-3'], array_map(
+            static fn (Subscription $subscription): string => $subscription->id,
+            $paginatedResult->items,
+        ));
+    }
+
     #[Test]
     public function it_returns_a_paginated_result_of_eventsub_subscriptions(): void
     {
