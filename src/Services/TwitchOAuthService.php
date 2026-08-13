@@ -36,7 +36,7 @@ class TwitchOAuthService
     public function getAccessToken(string $code, ?string $state = null): array
     {
         try {
-            $response = $this->client->post('/token', [
+            $response = $this->client->post('token', [
                 'form_params' => [
                     'client_id'     => $this->clientId,
                     'client_secret' => $this->clientSecret,
@@ -102,7 +102,7 @@ class TwitchOAuthService
         /** @var string $authUrl */
         $authUrl = config('twitch.api.auth_url');
 
-        return $authUrl . '/authorize?' . $params;
+        return $authUrl . 'authorize?' . $params;
     }
 
     /**
@@ -113,7 +113,7 @@ class TwitchOAuthService
     public function refreshToken(string $refreshToken): array
     {
         try {
-            $response = $this->client->post('/token', [
+            $response = $this->client->post('token', [
                 'form_params' => [
                     'client_id'     => $this->clientId,
                     'client_secret' => $this->clientSecret,
@@ -157,7 +157,7 @@ class TwitchOAuthService
     public function revokeToken(string $accessToken): bool
     {
         try {
-            $this->client->post('/revoke', [
+            $this->client->post('revoke', [
                 'form_params' => [
                     'client_id' => $this->clientId,
                     'token'     => $accessToken,
@@ -184,7 +184,7 @@ class TwitchOAuthService
     public function validateToken(string $accessToken): array
     {
         try {
-            $response = $this->client->get('/validate', [
+            $response = $this->client->get('validate', [
                 'headers' => [
                     'Authorization' => 'OAuth ' . $accessToken,
                 ],
