@@ -8,6 +8,7 @@ use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Str;
 use Zairakai\LaravelTwitch\Dto\EventSub\EventSubEventFactory;
 use Zairakai\LaravelTwitch\Dto\Users\User;
@@ -109,7 +110,7 @@ class TwitchAuthController
     /**
      * Handle Twitch EventSub webhook.
      */
-    public function webhook(Request $request): JsonResponse
+    public function webhook(Request $request): JsonResponse|Response
     {
         // Verify webhook signature
         $headerSignature = $request->header('Twitch-Eventsub-Message-Signature');
@@ -129,9 +130,14 @@ class TwitchAuthController
         /** @var array<string, mixed> $payload */
         $payload = $request->json()->all();
 
-        // Handle webhook verification challenge
+        // Handle webhook verification challenge - Twitch requires the raw
+        // challenge string as a plain-text body, not JSON-wrapped, or the
+        // subscription is marked webhook_callback_verification_failed.
         if ('webhook_callback_verification' === $messageType) {
-            return response()->json(['challenge' => $payload['challenge'] ?? '']);
+            $rawChallenge = $payload['challenge'] ?? '';
+            $challenge    = is_string($rawChallenge) ? $rawChallenge : '';
+
+            return response($challenge, 200, ['Content-Type' => 'text/plain']);
         }
 
         // Handle EventSub notifications

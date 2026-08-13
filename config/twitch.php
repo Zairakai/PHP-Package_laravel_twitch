@@ -23,7 +23,7 @@ return [
     |
     */
     'api' => [
-        'base_url' => 'https://api.twitch.tv/helix',
+        'base_url' => 'https://api.twitch.tv/helix/',
         'auth_url' => 'https://id.twitch.tv/oauth2',
         'timeout'  => 30,
         'retry'    => [

@@ -34,4 +34,26 @@ final class SubscriptionTest extends TestCase
         $this->assertSame('webhook', $subscription->transport['method']);
         $this->assertInstanceOf(Carbon::class, $subscription->createdAt);
     }
+
+    #[Test]
+    public function it_casts_created_at_with_fractional_seconds_to_carbon(): void
+    {
+        // Real Twitch payloads use variable-precision fractional seconds
+        // (microsecond here) that spatie/laravel-data's default
+        // DateTimeInterfaceCast rejects outright - FlexibleDateTimeCast must
+        // be applied, same as every other EventSub timestamp field.
+        $subscription = Subscription::from([
+            'id'         => 'sub-002',
+            'type'       => 'channel.chat.message',
+            'version'    => '1',
+            'status'     => 'enabled',
+            'cost'       => 0,
+            'condition'  => ['broadcaster_user_id' => '12345'],
+            'transport'  => ['method' => 'webhook', 'callback' => 'https://example.com/hook'],
+            'created_at' => '2020-07-15T17:16:03.171067Z',
+        ]);
+
+        $this->assertInstanceOf(Carbon::class, $subscription->createdAt);
+        $this->assertSame('2020-07-15 17:16:03', $subscription->createdAt?->toDateTimeString());
+    }
 }

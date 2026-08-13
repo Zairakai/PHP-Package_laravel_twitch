@@ -6,8 +6,10 @@ namespace Zairakai\LaravelTwitch\Dto\EventSub;
 
 use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
 
 /**
  * Represents an EventSub subscription.
@@ -56,6 +58,7 @@ class Subscription extends Data
         /**
          * @var Carbon|null When the subscription was created
          */
+        #[WithCast(FlexibleDateTimeCast::class)]
         public ?Carbon $createdAt = null,
     ) {}
 }

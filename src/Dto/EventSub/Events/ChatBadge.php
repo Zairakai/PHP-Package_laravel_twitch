@@ -21,6 +21,9 @@ class ChatBadge extends Data
     public function __construct(
         public string $setId,
         public string $id,
-        public string $info,
+        // Twitch sends null for most badges (only a handful, e.g. subscriber
+        // tier, actually populate this field) - was typed non-nullable string,
+        // rejecting the majority of real chat message payloads outright.
+        public ?string $info = null,
     ) {}
 }

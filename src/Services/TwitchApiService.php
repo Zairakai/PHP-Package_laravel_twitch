@@ -215,7 +215,7 @@ class TwitchApiService
         }
 
         try {
-            $response = $this->client->request($method, $endpoint, $options);
+            $response = $this->client->request($method, ltrim($endpoint, '/'), $options);
 
             return (string) $response->getBody();
         }
@@ -259,7 +259,7 @@ class TwitchApiService
         }
 
         try {
-            $response = $this->client->request($method, $endpoint, $options);
+            $response = $this->client->request($method, ltrim($endpoint, '/'), $options);
 
             if (204 === $response->getStatusCode()) {
                 return [];

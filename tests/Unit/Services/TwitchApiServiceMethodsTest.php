@@ -8,9 +8,11 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use Illuminate\Support\Facades\Cache;
 use PHPUnit\Framework\Attributes\Test;
+use Psr\Http\Message\RequestInterface;
 use ReflectionMethod;
 use ReflectionProperty;
 use Zairakai\LaravelTwitch\Services\TwitchApiService;
@@ -90,6 +92,47 @@ final class TwitchApiServiceMethodsTest extends TestCase
             ->invoke($twitchApiService, 'POST', '/some/endpoint', ['key' => 'value']);
 
         $this->assertStringContainsString('ok', $result);
+    }
+
+    // ── base_uri resolution ──────────────────────────────────────────────────
+
+    #[Test]
+    public function it_resolves_relative_endpoints_against_the_configured_helix_base_uri(): void
+    {
+        /** @var array<int, array{request: RequestInterface}> $history */
+        $history = [];
+
+        $mockHandler = new MockHandler([
+            new Response(200, [], json_encode(['data' => []])),
+        ]);
+        $handlerStack = HandlerStack::create($mockHandler);
+        $handlerStack->push(Middleware::history($history));
+
+        // Mirrors the real client construction (constructor uses config
+        // 'twitch.api.base_url' as base_uri) - call sites pass a leading
+        // slash, e.g. makeRequest('GET', '/eventsub/subscriptions').
+        $client = new Client([
+            'base_uri' => config('twitch.api.base_url'),
+            'handler'  => $handlerStack,
+        ]);
+
+        $twitchApiService = new TwitchApiService('test-client-id', 'test-client-secret');
+        $twitchApiService->setAccessToken('test-token');
+
+        $reflectionProperty = new ReflectionProperty(TwitchApiService::class, 'client');
+        $reflectionProperty->setValue($twitchApiService, $client);
+
+        (new ReflectionMethod(TwitchApiService::class, 'makeRequest'))
+            ->invoke($twitchApiService, 'GET', '/eventsub/subscriptions', []);
+
+        // RFC3986 base URI merging drops the base_uri path (`/helix`) when the
+        // reference starts with a slash - without ltrim() this resolves to
+        // https://api.twitch.tv/eventsub/subscriptions, silently dropping
+        // /helix on every single API call.
+        $this->assertSame(
+            'https://api.twitch.tv/helix/eventsub/subscriptions',
+            (string) $history[0]['request']->getUri(),
+        );
     }
 
     // ── getGame ───────────────────────────────────────────────────────────────
