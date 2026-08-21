@@ -33,9 +33,13 @@ class ChannelChatMessageEvent extends Data implements EventSubEvent
         public Message $message,
 
         /**
-         * @var string Chat name color, empty string if not set - never null
+         * @var string|null Chat name color - Twitch's own docs example shows an empty
+         *                  string when not set, but real production payloads send null
+         *                  (confirmed 2026-08-21 against live traffic, was typed
+         *                  non-nullable string, crashing on every chatter without a
+         *                  set color)
          */
-        public string $color,
+        public ?string $color,
 
         /**
          * @var DataCollection<int, ChatBadge> Badges displayed with this message
