@@ -18,23 +18,23 @@ final class ChannelChatMessageEventTest extends TestCase
         // docs example shows an empty string instead, which is what the DTO
         // was typed against. Was non-nullable string, crashed on every one
         // of those messages before they could be persisted.
-        $event = ChannelChatMessageEvent::from(self::minimalPayload(null));
+        $channelChatMessageEvent = ChannelChatMessageEvent::from($this->minimalPayload(null));
 
-        $this->assertNull($event->color);
+        $this->assertNull($channelChatMessageEvent->color);
     }
 
     #[Test]
     public function it_accepts_a_populated_color_field(): void
     {
-        $event = ChannelChatMessageEvent::from(self::minimalPayload('#00FF7F'));
+        $channelChatMessageEvent = ChannelChatMessageEvent::from($this->minimalPayload('#00FF7F'));
 
-        $this->assertSame('#00FF7F', $event->color);
+        $this->assertSame('#00FF7F', $channelChatMessageEvent->color);
     }
 
     /**
      * @return array<string, mixed>
      */
-    private static function minimalPayload(?string $color): array
+    private function minimalPayload(?string $color): array
     {
         return [
             'broadcaster_user_id'    => '1971641',

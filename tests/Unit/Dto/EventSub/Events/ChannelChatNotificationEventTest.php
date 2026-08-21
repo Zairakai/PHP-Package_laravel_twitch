@@ -16,23 +16,23 @@ final class ChannelChatNotificationEventTest extends TestCase
         // Same real-world field as ChannelChatMessageEvent::$color - null for
         // any chatter without a set name color, not the empty string shown in
         // Twitch's docs example.
-        $event = ChannelChatNotificationEvent::from(self::minimalPayload(null));
+        $channelChatNotificationEvent = ChannelChatNotificationEvent::from($this->minimalPayload(null));
 
-        $this->assertNull($event->color);
+        $this->assertNull($channelChatNotificationEvent->color);
     }
 
     #[Test]
     public function it_accepts_a_populated_color_field(): void
     {
-        $event = ChannelChatNotificationEvent::from(self::minimalPayload('#00FF7F'));
+        $channelChatNotificationEvent = ChannelChatNotificationEvent::from($this->minimalPayload('#00FF7F'));
 
-        $this->assertSame('#00FF7F', $event->color);
+        $this->assertSame('#00FF7F', $channelChatNotificationEvent->color);
     }
 
     /**
      * @return array<string, mixed>
      */
-    private static function minimalPayload(?string $color): array
+    private function minimalPayload(?string $color): array
     {
         return [
             'broadcaster_user_id'    => '1971641',
