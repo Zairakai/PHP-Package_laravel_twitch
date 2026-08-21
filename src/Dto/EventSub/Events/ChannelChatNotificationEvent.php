@@ -37,7 +37,14 @@ class ChannelChatNotificationEvent extends Data implements EventSubEvent
         public string $chatterUserLogin,
         public string $chatterUserName,
         public bool $chatterIsAnonymous,
-        public string $color,
+
+        /**
+         * @var string|null Chat name color - same field as
+         *                  ChannelChatMessageEvent::$color, same real-world
+         *                  behavior: null when the chatter has no color set,
+         *                  not an empty string
+         */
+        public ?string $color,
 
         /**
          * @var DataCollection<int, ChatBadge>
