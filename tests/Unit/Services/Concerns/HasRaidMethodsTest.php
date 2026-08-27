@@ -115,6 +115,52 @@ final class HasRaidMethodsTest extends TestCase
         $this->assertSame('/raids', $capturedParams['endpoint']);
     }
 
+    // ── sendWhisper ───────────────────────────────────────────────────────────
+
+    #[Test]
+    public function it_calls_the_whispers_endpoint_with_query_and_body_params(): void
+    {
+        $captured = null;
+
+        $service = new class('client-id', 'secret', $captured) extends TwitchApiService
+        {
+            public function __construct(
+                string $clientId,
+                string $clientSecret,
+                public mixed &$captured,
+            ) {
+                parent::__construct($clientId, $clientSecret);
+            }
+
+            /**
+             * @param array<string, mixed> $queryParams
+             * @param array<string, mixed> $bodyParams
+             */
+            protected function makeQueryAndBodyRequest(
+                string $method,
+                string $endpoint,
+                array $queryParams,
+                array $bodyParams = [],
+            ): array {
+                $this->captured = [
+                    'method'      => $method,
+                    'endpoint'    => $endpoint,
+                    'queryParams' => $queryParams,
+                    'bodyParams'  => $bodyParams,
+                ];
+
+                return [];
+            }
+        };
+
+        $service->sendWhisper('123', '456', 'hello');
+
+        $this->assertSame('POST', $captured['method']);
+        $this->assertSame('/whispers', $captured['endpoint']);
+        $this->assertSame(['from_user_id' => '123', 'to_user_id' => '456'], $captured['queryParams']);
+        $this->assertSame(['message' => 'hello'], $captured['bodyParams']);
+    }
+
     #[Test]
     public function it_returns_a_paginated_result_of_hype_train_events(): void
     {

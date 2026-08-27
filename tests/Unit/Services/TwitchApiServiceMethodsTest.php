@@ -327,6 +327,36 @@ final class TwitchApiServiceMethodsTest extends TestCase
         $this->assertArrayHasKey('data', $result);
     }
 
+    #[Test]
+    public function it_sends_whisper_with_query_params_and_json_body_together(): void
+    {
+        // Send Whisper is the one endpoint that genuinely needs both at
+        // once (from_user_id/to_user_id as query, message as body) -
+        // confirmed verbatim against Twitch's own docs (2026-08-27).
+        /** @var array<int, array{request: RequestInterface}> $history */
+        $history = [];
+
+        $mockHandler  = new MockHandler([new Response(204)]);
+        $handlerStack = HandlerStack::create($mockHandler);
+        $handlerStack->push(Middleware::history($history));
+
+        $client = new Client(['base_uri' => config('twitch.api.base_url'), 'handler' => $handlerStack]);
+
+        $twitchApiService = new TwitchApiService('test-client-id', 'test-client-secret');
+        $twitchApiService->setAccessToken('test-token');
+
+        $reflectionProperty = new ReflectionProperty(TwitchApiService::class, 'client');
+        $reflectionProperty->setValue($twitchApiService, $client);
+
+        $twitchApiService->sendWhisper('123', '456', 'hello');
+
+        $request = $history[0]['request'];
+
+        $this->assertSame('POST', $request->getMethod());
+        $this->assertSame('from_user_id=123&to_user_id=456', $request->getUri()->getQuery());
+        $this->assertSame('{"message":"hello"}', (string) $request->getBody());
+    }
+
     // ── setAccessToken ────────────────────────────────────────────────────────
 
     #[Test]
