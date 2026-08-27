@@ -65,6 +65,78 @@ final class EventSubEventFactoryRealPayloadsTest extends TestCase
     }
 
     #[Test]
+    public function it_accepts_a_null_prompt_on_a_redeemed_reward(): void
+    {
+        $payload = [
+            'id'                     => '17fa2df1-ad76-4804-bfa5-a40ef63efe63',
+            'broadcaster_user_id'    => '1337',
+            'broadcaster_user_login' => 'cool_user',
+            'broadcaster_user_name'  => 'Cool_User',
+            'user_id'                => '9001',
+            'user_login'             => 'cooler_user',
+            'user_name'              => 'Cooler_User',
+            'user_input'             => '',
+            'status'                 => 'unfulfilled',
+            'reward'                 => [
+                'id'     => '92af127c-7326-4483-a52b-b0da0be61c01',
+                'title'  => 'Reward with no prompt',
+                'cost'   => 100,
+                'prompt' => null,
+            ],
+            'redeemed_at' => '2026-08-27T18:00:00Z',
+        ];
+
+        $eventSubEvent = EventSubEventFactory::make('channel.channel_points_custom_reward_redemption.add', $payload);
+
+        $this->assertNotInstanceOf(GenericEventSubEvent::class, $eventSubEvent);
+        $this->assertNull($eventSubEvent->reward->prompt);
+    }
+
+    /**
+     * Regression test for a real production crash (2026-08-27, live stream):
+     * Twitch's own docs example always shows a non-empty `prompt` string for
+     * channel points rewards, but a real reward configured with no prompt
+     * text sends `"prompt": null` - the fixture above never exercised this,
+     * only the always-populated example. `$prompt` used to be typed
+     * non-nullable `string`, crashing every update/add/remove notification
+     * (and every redemption of such a reward, via the embedded
+     * ChannelPointsReward) with a TypeError, 500ing the webhook and losing
+     * the event - Twitch retried and kept losing it until this was caught
+     * and fixed live.
+     */
+    #[Test]
+    public function it_accepts_a_null_prompt_on_channel_points_custom_reward_update(): void
+    {
+        $payload = [
+            'id'                                      => '9001',
+            'broadcaster_user_id'                     => '1337',
+            'broadcaster_user_login'                  => 'cool_user',
+            'broadcaster_user_name'                   => 'Cool_User',
+            'is_enabled'                              => true,
+            'is_paused'                               => false,
+            'is_in_stock'                             => true,
+            'title'                                   => 'Reward with no prompt',
+            'cost'                                    => 100,
+            'prompt'                                  => null,
+            'is_user_input_required'                  => false,
+            'should_redemptions_skip_request_queue'   => false,
+            'cooldown_expires_at'                     => null,
+            'redemptions_redeemed_current_stream'     => null,
+            'max_per_stream'                          => ['is_enabled' => false, 'value' => 0],
+            'max_per_user_per_stream'                 => ['is_enabled' => false, 'value' => 0],
+            'global_cooldown'                         => ['is_enabled' => false, 'seconds' => 0],
+            'background_color'                        => '#4A90D9',
+            'image'                                   => [],
+            'default_image'                           => [],
+        ];
+
+        $eventSubEvent = EventSubEventFactory::make('channel.channel_points_custom_reward.update', $payload);
+
+        $this->assertNotInstanceOf(GenericEventSubEvent::class, $eventSubEvent);
+        $this->assertNull($eventSubEvent->prompt);
+    }
+
+    #[Test]
     #[DataProvider('mappedTypes')]
     public function it_constructs_the_mapped_dto_from_the_official_example_payload(string $type): void
     {
