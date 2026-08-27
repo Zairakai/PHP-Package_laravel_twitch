@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Zairakai\LaravelTwitch\Dto\EventSub\EventSubEventFactory;
 use Zairakai\LaravelTwitch\Dto\Users\User;
@@ -145,6 +146,16 @@ class TwitchAuthController
             $this->handleEventSubNotification($payload);
         }
 
+        // Handle EventSub revocations - found missing entirely during the
+        // 2026-08-27 full doc audit (laravel-twitch#12): a revoked
+        // subscription (token revoked, moderator removed, version removed,
+        // too many callback failures...) used to fall through this method
+        // silently, acked 200 with no log and no signal to the consuming
+        // app that a trigger has gone dark.
+        if ('revocation' === $messageType) {
+            $this->handleEventSubRevocation($payload);
+        }
+
         return response()->json(['status' => 'ok']);
     }
 
@@ -174,6 +185,38 @@ class TwitchAuthController
         $eventSubEvent = EventSubEventFactory::make($eventType, $eventData);
 
         event("twitch.{$eventType}", [$eventSubEvent]);
+    }
+
+    /**
+     * Handle EventSub revocation.
+     *
+     * Twitch revokes a subscription for one of four reasons: user_removed,
+     * authorization_revoked, notification_failures_exceeded, or
+     * version_removed. There is no dedicated DTO here (unlike
+     * handleEventSubNotification) - the subscription's own type/condition
+     * still identify what died precisely enough for a log line, and a
+     * revocation carries no `event` payload to model in the first place.
+     *
+     * Always logged (the safety net every consumer gets for free) and also
+     * dispatched as a Laravel event so an app that wants to react - alert,
+     * mark a local record, prompt for re-auth - can listen for it.
+     *
+     * @param array<string, mixed> $payload
+     *
+     * @see https://dev.twitch.tv/docs/eventsub/handling-webhook-events/#revoking-your-subscription
+     */
+    protected function handleEventSubRevocation(array $payload): void
+    {
+        $subscription = is_array($payload['subscription'] ?? null) ? $payload['subscription'] : [];
+
+        Log::warning('Twitch EventSub subscription revoked', [
+            'subscription_id'  => $subscription['id']        ?? null,
+            'type'             => $subscription['type']      ?? null,
+            'status'           => $subscription['status']    ?? null,
+            'condition'        => $subscription['condition'] ?? null,
+        ]);
+
+        event('twitch.eventsub.revoked', [$subscription]);
     }
 
     /**

@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Session\ArraySessionHandler;
 use Illuminate\Session\Store as SessionStore;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
 use PHPUnit\Framework\Attributes\Test;
 use Zairakai\LaravelTwitch\Dto\EventSub\Events\ChannelSubscribeEvent;
 use Zairakai\LaravelTwitch\Dto\EventSub\Events\GenericEventSubEvent;
@@ -111,6 +112,31 @@ final class TwitchAuthControllerTest extends TestCase
             /** @param array{0: ChannelSubscribeEvent} $payload */
             fn (string $name, array $payload): bool => '1000' === $payload[0]->tier,
         );
+    }
+
+    // ── Webhook: handleEventSubRevocation branch ──────────────────────────────
+
+    #[Test]
+    public function it_dispatches_and_logs_on_revocation(): void
+    {
+        Event::fake();
+        Log::spy();
+
+        $jsonResponse = $this->makeRevocationResponse('channel.follow', 'authorization_revoked');
+
+        $this->assertSame(200, $jsonResponse->getStatusCode());
+
+        Event::assertDispatched(
+            'twitch.eventsub.revoked',
+            /** @param array{0: array<string, mixed>} $payload */
+            fn (string $name, array $payload): bool => 'authorization_revoked' === $payload[0]['status'],
+        );
+
+        Log::shouldHaveReceived('warning')
+            ->once()
+            ->withArgs(fn (string $message, array $context): bool => 'Twitch EventSub subscription revoked' === $message
+                && 'channel.follow'                                                                         === $context['type']
+                && 'authorization_revoked'                                                                  === $context['status']);
     }
 
     #[Test]
@@ -489,6 +515,28 @@ final class TwitchAuthControllerTest extends TestCase
             'HTTP_TWITCH_EVENTSUB_MESSAGE_ID'        => $messageId,
             'HTTP_TWITCH_EVENTSUB_MESSAGE_TIMESTAMP' => $timestamp,
             'HTTP_TWITCH_EVENTSUB_MESSAGE_TYPE'      => 'notification',
+            'HTTP_TWITCH_EVENTSUB_MESSAGE_SIGNATURE' => $sig,
+            'CONTENT_TYPE'                           => 'application/json',
+        ], $body);
+
+        return $this->twitchAuthController->webhook($request);
+    }
+
+    private function makeRevocationResponse(string $eventType, string $status): JsonResponse
+    {
+        $secret    = 'my-secret';
+        $body      = json_encode(['subscription' => ['id' => 'sub-1', 'type' => $eventType, 'status' => $status]]);
+        $messageId = 'msg-revoke-' . str_replace('.', '-', $eventType);
+        $timestamp = '2024-01-01T00:00:00Z';
+
+        config(['twitch.eventsub.webhook_secret' => $secret]);
+
+        $sig = 'sha256=' . hash_hmac('sha256', $messageId . $timestamp . $body, $secret);
+
+        $request = Request::create('/twitch/webhook', 'POST', [], [], [], [
+            'HTTP_TWITCH_EVENTSUB_MESSAGE_ID'        => $messageId,
+            'HTTP_TWITCH_EVENTSUB_MESSAGE_TIMESTAMP' => $timestamp,
+            'HTTP_TWITCH_EVENTSUB_MESSAGE_TYPE'      => 'revocation',
             'HTTP_TWITCH_EVENTSUB_MESSAGE_SIGNATURE' => $sig,
             'CONTENT_TYPE'                           => 'application/json',
         ], $body);
