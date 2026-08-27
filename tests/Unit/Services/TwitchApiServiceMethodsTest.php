@@ -266,6 +266,46 @@ final class TwitchApiServiceMethodsTest extends TestCase
         $this->assertSame([], $result);
     }
 
+    // ── makeQueryRequest on non-GET/DELETE (pinMessage, updateUserChatColor) ────
+
+    #[Test]
+    public function it_sends_pin_message_params_as_query_string_not_json_body(): void
+    {
+        // Regression: Twitch's Pin Chat Message is a PUT that takes its
+        // params as query string, confirmed verbatim against Twitch's own
+        // docs (2026-08-27). makeRequest() only ever sends query params for
+        // GET/DELETE - pinMessage() (and updateUserChatColor()) route
+        // through the dedicated makeQueryRequest() instead, which always
+        // sends query regardless of method. Without it, these params would
+        // silently go into the JSON body, and Twitch would reject the
+        // request with a 400 ("required query parameter missing").
+        /** @var array<int, array{request: RequestInterface}> $history */
+        $history = [];
+
+        $mockHandler  = new MockHandler([new Response(204)]);
+        $handlerStack = HandlerStack::create($mockHandler);
+        $handlerStack->push(Middleware::history($history));
+
+        $client = new Client(['base_uri' => config('twitch.api.base_url'), 'handler' => $handlerStack]);
+
+        $twitchApiService = new TwitchApiService('test-client-id', 'test-client-secret');
+        $twitchApiService->setAccessToken('test-token');
+
+        $reflectionProperty = new ReflectionProperty(TwitchApiService::class, 'client');
+        $reflectionProperty->setValue($twitchApiService, $client);
+
+        $twitchApiService->pinMessage('197886470', '141981764', 'abc-def-123', 300);
+
+        $request = $history[0]['request'];
+
+        $this->assertSame('PUT', $request->getMethod());
+        $this->assertSame(
+            'broadcaster_id=197886470&moderator_id=141981764&message_id=abc-def-123&duration_seconds=300',
+            $request->getUri()->getQuery(),
+        );
+        $this->assertSame('', (string) $request->getBody());
+    }
+
     #[Test]
     public function it_sends_post_request_with_json_body(): void
     {

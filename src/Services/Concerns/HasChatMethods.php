@@ -10,6 +10,7 @@ use Zairakai\LaravelTwitch\Dto\Chat\ChatColor;
 use Zairakai\LaravelTwitch\Dto\Chat\ChatSettings;
 use Zairakai\LaravelTwitch\Dto\Chat\Chatter;
 use Zairakai\LaravelTwitch\Dto\Chat\Emote;
+use Zairakai\LaravelTwitch\Dto\Chat\PinnedChatMessage;
 use Zairakai\LaravelTwitch\Dto\Chat\Requests\UpdateChatSettingsRequest;
 use Zairakai\LaravelTwitch\Dto\Chat\SentMessage;
 use Zairakai\LaravelTwitch\Dto\Chat\SharedChatSession;
@@ -213,6 +214,27 @@ trait HasChatMethods
     }
 
     /**
+     * Get the broadcaster's currently mod-pinned chat message, if any.
+     *
+     * Requires: moderator:manage:chat_messages or moderator:read:chat_messages
+     *
+     * Confirmed verbatim against Twitch's own docs (2026-08-27) - GET
+     * /helix/chat/pins.
+     */
+    public function getPinnedMessage(string $broadcasterId, string $moderatorId): ?PinnedChatMessage
+    {
+        $raw = $this->makeRequest('GET', '/chat/pins', [
+            'broadcaster_id' => $broadcasterId,
+            'moderator_id'   => $moderatorId,
+        ]);
+
+        /** @var list<array<string, mixed>> $items */
+        $items = $raw['data'] ?? [];
+
+        return [] === $items ? null : PinnedChatMessage::from($items[0]);
+    }
+
+    /**
      * Get the active shared chat session for a channel.
      *
      * Requires: no scope
@@ -278,6 +300,39 @@ trait HasChatMethods
         $raw = $this->makeRequest('GET', '/chat/user_emotes', $params);
 
         return PaginatedResult::fromRaw($raw, Emote::class);
+    }
+
+    /**
+     * Pins a chat message to the top of the broadcaster's chat room. Only one
+     * mod-pinned message can be active per channel - pinning a new one
+     * automatically replaces any existing pin.
+     *
+     * Requires: moderator:manage:chat_messages
+     *
+     * Confirmed verbatim against Twitch's own docs (2026-08-27, official
+     * example request/response) - PUT /helix/chat/pins, all params as query
+     * string (not JSON body), 204 No Content on success, no response body.
+     *
+     * @param int|null $durationSeconds How long to pin for, 30-1800 seconds.
+     *                                  Omit to pin until the stream ends.
+     */
+    public function pinMessage(
+        string $broadcasterId,
+        string $moderatorId,
+        string $messageId,
+        ?int $durationSeconds = null,
+    ): void {
+        $params = [
+            'broadcaster_id' => $broadcasterId,
+            'moderator_id'   => $moderatorId,
+            'message_id'     => $messageId,
+        ];
+
+        if (null !== $durationSeconds) {
+            $params['duration_seconds'] = $durationSeconds;
+        }
+
+        $this->makeQueryRequest('PUT', '/chat/pins', $params);
     }
 
     /**
@@ -371,6 +426,23 @@ trait HasChatMethods
     }
 
     /**
+     * Unpins a pinned chat message before its timer/stream-end would have.
+     *
+     * Requires: moderator:manage:chat_messages
+     *
+     * Confirmed verbatim against Twitch's own docs (2026-08-27) - DELETE
+     * /helix/chat/pins, 204 No Content, no response body.
+     */
+    public function unpinMessage(string $broadcasterId, string $moderatorId, string $messageId): void
+    {
+        $this->makeRequest('DELETE', '/chat/pins', [
+            'broadcaster_id' => $broadcasterId,
+            'moderator_id'   => $moderatorId,
+            'message_id'     => $messageId,
+        ]);
+    }
+
+    /**
      * Update chat settings for a broadcaster's channel.
      *
      * Requires: moderator:manage:chat_settings
@@ -395,6 +467,38 @@ trait HasChatMethods
     }
 
     /**
+     * Updates the duration of an already-pinned chat message, starting from
+     * now.
+     *
+     * Requires: moderator:manage:chat_messages
+     *
+     * Confirmed verbatim against Twitch's own docs (2026-08-27) - PATCH
+     * /helix/chat/pins, all params as query string, 204 No Content, no
+     * response body.
+     *
+     * @param int|null $durationSeconds New duration, 30-1800 seconds. Omit to
+     *                                  pin until the stream ends.
+     */
+    public function updatePinnedMessage(
+        string $broadcasterId,
+        string $moderatorId,
+        string $messageId,
+        ?int $durationSeconds = null,
+    ): void {
+        $params = [
+            'broadcaster_id' => $broadcasterId,
+            'moderator_id'   => $moderatorId,
+            'message_id'     => $messageId,
+        ];
+
+        if (null !== $durationSeconds) {
+            $params['duration_seconds'] = $durationSeconds;
+        }
+
+        $this->makeQueryRequest('PATCH', '/chat/pins', $params);
+    }
+
+    /**
      * Update the color used for the user's name in chat.
      *
      * Requires: user:manage:chat_color
@@ -405,7 +509,10 @@ trait HasChatMethods
      */
     public function updateUserChatColor(string $userId, string $color): void
     {
-        $this->makeRequest('PUT', '/chat/color', [
+        // makeQueryRequest: confirmed against Twitch's own docs - Update User
+        // Chat Color takes user_id/color as query params on this PUT, not a
+        // JSON body.
+        $this->makeQueryRequest('PUT', '/chat/color', [
             'user_id' => $userId,
             'color'   => $color,
         ]);
