@@ -127,10 +127,15 @@ final class HasStreamMethodsTest extends TestCase
                             'thumbnail_url'    => 'https://example.com/thumb.jpg',
                             'is_featured'      => false,
                         ]], 'pagination' => []],
-                    '/clips/vod' => ['data' => [[
+                    '/videos/clips' => ['data' => [[
                         'id'       => 'clip-edit-2',
                         'edit_url' => 'https://clips.twitch.tv/clip-edit-2/edit',
                     ]], 'pagination' => []],
+                    '/clips/downloads' => ['data' => [[
+                        'clip_id'                => 'clip-1',
+                        'landscape_download_url' => 'https://cdn.example.com/clip-1-landscape.mp4',
+                        'portrait_download_url'  => null,
+                    ]]],
                     '/streams/markers' => 'POST' === $method
                         ? ['data' => [[
                             'id'                  => 'marker-1',
@@ -153,13 +158,13 @@ final class HasStreamMethodsTest extends TestCase
             }
         };
 
-        $service->createClip('b-1', true);
-        $service->createClipFromVod('b-1', 120);
+        $service->createClip('b-1', 'My clip', 45.0);
+        $service->createClipFromVod('e-1', 'b-1', 'vod-1', 120, 'My VOD clip');
         $service->createStreamMarker('u-1', 'marker');
 
         $deleted = $service->deleteVideo(['v1', 'v2']);
         $service->getClips('b-1', ['clip-1'], 5, 'cur-1');
-        $service->getClipsDownload(['clip-1']);
+        $service->getClipsDownloads('e-1', 'b-1', ['clip-1']);
         $service->getFollowedStreams('u-1', 5, 'cur-2');
         $service->getStreamKey('b-1');
         $service->getStreamMarkers('u-1', 'vid-1', 5, 'cur-3');

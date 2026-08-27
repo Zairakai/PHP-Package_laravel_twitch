@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Services\Concerns;
 
+use Spatie\LaravelData\DataCollection;
 use Zairakai\LaravelTwitch\Dto\PaginatedResult;
 use Zairakai\LaravelTwitch\Dto\Streams\Clip;
+use Zairakai\LaravelTwitch\Dto\Streams\ClipDownload;
 use Zairakai\LaravelTwitch\Dto\Streams\ClipEdit;
 use Zairakai\LaravelTwitch\Dto\Streams\Stream;
 use Zairakai\LaravelTwitch\Dto\Streams\StreamKey;
@@ -24,13 +26,29 @@ trait HasStreamMethods
      * Create a clip from a broadcaster's stream.
      *
      * Requires: clips:edit
+     *
+     * Confirmed verbatim against Twitch's own docs (2026-08-27) - POST
+     * /helix/clips, query params broadcaster_id/title/duration. Real bug
+     * fixed here: this used to send a fabricated has_delay param that does
+     * not exist in Twitch's API (silently ignored by Twitch, so the
+     * daemon-side "capture delay" toggle wired to it did nothing) and never
+     * exposed the real, documented title/duration params.
+     *
+     * @param float|null $duration Clip length in seconds, 5-60, precision 0.1. Defaults to 30.
      */
-    public function createClip(string $broadcasterId, bool $hasDelay = false): ClipEdit
+    public function createClip(string $broadcasterId, ?string $title = null, ?float $duration = null): ClipEdit
     {
-        $raw = $this->makeRequest('POST', '/clips', [
-            'broadcaster_id' => $broadcasterId,
-            'has_delay'      => $hasDelay,
-        ]);
+        $params = ['broadcaster_id' => $broadcasterId];
+
+        if (null !== $title) {
+            $params['title'] = $title;
+        }
+
+        if (null !== $duration) {
+            $params['duration'] = $duration;
+        }
+
+        $raw = $this->makeRequest('POST', '/clips', $params);
 
         /** @var array<int, array<string, mixed>> $items */
         $items = $raw['data'];
@@ -39,18 +57,44 @@ trait HasStreamMethods
     }
 
     /**
-     * Create a clip from a VOD (Video on Demand) at a specific timestamp.
+     * Create a clip from a broadcaster's VOD (or the current live stream's
+     * in-progress VOD) at a specific offset.
      *
-     * Requires: clips:edit
+     * Requires: editor:manage:clips or channel:manage:clips
      *
-     * @param int $vodOffset Offset in seconds from the start of the VOD
+     * Confirmed verbatim against Twitch's own docs (2026-08-27) - POST
+     * /helix/videos/clips, query params editor_id/broadcaster_id/vod_id/
+     * vod_offset/duration/title. Real bug fixed here: this used to call the
+     * non-existent /clips/vod (which would 404 on every call, broken since
+     * first written) with only broadcaster_id/vod_offset, missing the
+     * required editor_id, vod_id, and title params entirely.
+     *
+     * @param string     $editorId  The editor's user ID - same as $broadcasterId when
+     *                              using the broadcaster's own token
+     * @param int        $vodOffset Zero-based offset, in seconds, where the clip ends
+     * @param float|null $duration  Clip length in seconds, 5-60, precision 0.1. Defaults to 30.
      */
-    public function createClipFromVod(string $broadcasterId, int $vodOffset): ClipEdit
-    {
-        $raw = $this->makeRequest('POST', '/clips/vod', [
+    public function createClipFromVod(
+        string $editorId,
+        string $broadcasterId,
+        string $vodId,
+        int $vodOffset,
+        string $title,
+        ?float $duration = null,
+    ): ClipEdit {
+        $params = [
+            'editor_id'      => $editorId,
             'broadcaster_id' => $broadcasterId,
+            'vod_id'         => $vodId,
             'vod_offset'     => $vodOffset,
-        ]);
+            'title'          => $title,
+        ];
+
+        if (null !== $duration) {
+            $params['duration'] = $duration;
+        }
+
+        $raw = $this->makeRequest('POST', '/videos/clips', $params);
 
         /** @var array<int, array<string, mixed>> $items */
         $items = $raw['data'];
@@ -142,21 +186,32 @@ trait HasStreamMethods
     }
 
     /**
-     * Get clips by their IDs (includes thumbnail_url for deriving download URLs).
+     * Get download URLs for one or more clips.
      *
-     * Requires: no scope
+     * Requires: editor:manage:clips or channel:manage:clips
      *
-     * @param string|array<string> $clipIds One or more clip IDs
+     * Confirmed verbatim against Twitch's own docs (2026-08-27) - GET
+     * /helix/clips/downloads. New endpoint, was entirely missing.
      *
-     * @return PaginatedResult<Clip>
+     * @param string|array<string> $clipIds One or more clip IDs to download (max 10)
+     *
+     * @return DataCollection<int, ClipDownload>
      */
-    public function getClipsDownload(string|array $clipIds): PaginatedResult
+    public function getClipsDownloads(string $editorId, string $broadcasterId, string|array $clipIds): DataCollection
     {
-        $raw = $this->makeRequest('GET', '/clips', [
-            'id' => $clipIds,
+        $raw = $this->makeRequest('GET', '/clips/downloads', [
+            'editor_id'      => $editorId,
+            'broadcaster_id' => $broadcasterId,
+            'clip_id'        => $clipIds,
         ]);
 
-        return PaginatedResult::fromRaw($raw, Clip::class);
+        /** @var list<array<string, mixed>> $items */
+        $items = $raw['data'] ?? [];
+
+        /** @var DataCollection<int, ClipDownload> $dataCollection */
+        $dataCollection = ClipDownload::collect($items, DataCollection::class);
+
+        return $dataCollection;
     }
 
     /**

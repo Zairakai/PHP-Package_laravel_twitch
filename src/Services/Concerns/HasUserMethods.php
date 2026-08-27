@@ -6,13 +6,13 @@ namespace Zairakai\LaravelTwitch\Services\Concerns;
 
 use Spatie\LaravelData\DataCollection;
 use Zairakai\LaravelTwitch\Dto\PaginatedResult;
-use Zairakai\LaravelTwitch\Dto\Users\AuthorizedApp;
 use Zairakai\LaravelTwitch\Dto\Users\BlockedUser;
 use Zairakai\LaravelTwitch\Dto\Users\FollowedChannel;
 use Zairakai\LaravelTwitch\Dto\Users\Follower;
 use Zairakai\LaravelTwitch\Dto\Users\Subscription;
 use Zairakai\LaravelTwitch\Dto\Users\SubscriptionCheck;
 use Zairakai\LaravelTwitch\Dto\Users\User;
+use Zairakai\LaravelTwitch\Dto\Users\UserAuthorization;
 
 /**
  * Twitch User API methods.
@@ -74,21 +74,33 @@ trait HasUserMethods
     }
 
     /**
-     * Get the apps that the user has authorized to access their Twitch account.
+     * Get the authorization scopes that the specified user(s) have granted
+     * this application.
      *
-     * Requires: user:read:authorized_apps
+     * Requires: app access token
      *
-     * @return DataCollection<int, AuthorizedApp>
+     * Confirmed verbatim against Twitch's own docs (2026-08-27) - GET
+     * /helix/authorization/users. Real bug fixed here: this used to call the
+     * reversed, non-existent /users/authorization (which would 404 on every
+     * call, broken since first written) with no user_id param and returned
+     * a fabricated DTO (client_id/description/created_at/updated_at) that
+     * matched no real Twitch response shape.
+     *
+     * @param string|array<string> $userIds One or more user IDs to check (max 10)
+     *
+     * @return DataCollection<int, UserAuthorization>
      */
-    public function getAuthorizationByUser(): DataCollection
+    public function getAuthorizationByUser(string|array $userIds): DataCollection
     {
-        $raw = $this->makeRequest('GET', '/users/authorization', []);
+        $raw = $this->makeRequest('GET', '/authorization/users', [
+            'user_id' => $userIds,
+        ]);
 
         /** @var list<array<string, mixed>> $items */
         $items = $raw['data'] ?? [];
 
-        /** @var DataCollection<int, AuthorizedApp> $dataCollection */
-        $dataCollection = AuthorizedApp::collect($items, DataCollection::class);
+        /** @var DataCollection<int, UserAuthorization> $dataCollection */
+        $dataCollection = UserAuthorization::collect($items, DataCollection::class);
 
         return $dataCollection;
     }
@@ -195,6 +207,12 @@ trait HasUserMethods
      * maps indexed by slot number). Returned as raw array until a dedicated DTO
      * is available in a future release.
      *
+     * Confirmed verbatim against Twitch's own docs (2026-08-27) - GET
+     * /helix/users/extensions. Real bug fixed here: this used to call the
+     * non-existent /users/extensions/active, which would 404 on every call,
+     * broken since first written - it also had swapped URLs with
+     * getUserExtensions() below.
+     *
      * @return array<string, mixed>
      */
     public function getUserActiveExtensions(?string $userId = null): array
@@ -205,7 +223,7 @@ trait HasUserMethods
             $params['user_id'] = $userId;
         }
 
-        return $this->makeRequest('GET', '/users/extensions/active', $params);
+        return $this->makeRequest('GET', '/users/extensions', $params);
     }
 
     /**
@@ -232,25 +250,29 @@ trait HasUserMethods
     }
 
     /**
-     * Get the list of extensions installed for a user.
+     * Get the list of all extensions (active and inactive) installed by the
+     * authenticated broadcaster. Unlike getUserActiveExtensions(), this always
+     * identifies the broadcaster from the access token - Twitch's API takes
+     * no user_id parameter here.
      *
-     * Requires: user:read:broadcast or user:edit:broadcast (for own extensions)
+     * Requires: user:read:broadcast or user:edit:broadcast (to include
+     * inactive extensions)
      *
      * Note: the response has a complex nested structure (panel/overlay/component
      * maps indexed by slot number). Returned as raw array until a dedicated DTO
      * is available in a future release.
      *
+     * Confirmed verbatim against Twitch's own docs (2026-08-27) - GET
+     * /helix/users/extensions/list, no query parameters. Real bug fixed here:
+     * this used to call /users/extensions (no path suffix) with an
+     * undocumented user_id param - that URL is actually
+     * getUserActiveExtensions()'s endpoint, the two were swapped.
+     *
      * @return array<string, mixed>
      */
-    public function getUserExtensions(?string $userId = null): array
+    public function getUserExtensions(): array
     {
-        $params = [];
-
-        if (null !== $userId) {
-            $params['user_id'] = $userId;
-        }
-
-        return $this->makeRequest('GET', '/users/extensions', $params);
+        return $this->makeRequest('GET', '/users/extensions/list', []);
     }
 
     /**
