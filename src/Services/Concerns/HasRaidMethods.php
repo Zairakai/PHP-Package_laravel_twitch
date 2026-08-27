@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Services\Concerns;
 
-use Zairakai\LaravelTwitch\Dto\HypeTrain\HypeTrain;
-use Zairakai\LaravelTwitch\Dto\PaginatedResult;
+use Zairakai\LaravelTwitch\Dto\HypeTrain\HypeTrainStatus;
 use Zairakai\LaravelTwitch\Dto\Raids\Raid;
 
 /**
@@ -28,29 +27,28 @@ trait HasRaidMethods
     }
 
     /**
-     * Get information about the broadcaster's Hype Train events.
+     * Get the status of a broadcaster's Hype Train.
      *
      * Requires: channel:read:hype_train
      *
-     * @return PaginatedResult<HypeTrain>
+     * Confirmed verbatim against Twitch's own docs (2026-08-27) - GET
+     * /helix/hypetrain/status. Real bug fixed here: this used to call Get
+     * Hype Train Events at GET /hypetrain/events, an endpoint Twitch has
+     * since removed entirely - it would 404 on every call. Get Hype Train
+     * Status is the only Hype Train read endpoint that still exists, and
+     * has a completely different (nested current/all_time_high/
+     * shared_all_time_high) response shape, hence the full DTO rewrite.
      */
-    public function getHypeTrainEvents(
-        string $broadcasterId,
-        int $first = 1,
-        ?string $after = null,
-    ): PaginatedResult {
-        $params = [
+    public function getHypeTrainStatus(string $broadcasterId): HypeTrainStatus
+    {
+        $raw = $this->makeRequest('GET', '/hypetrain/status', [
             'broadcaster_id' => $broadcasterId,
-            'first'          => $first,
-        ];
+        ]);
 
-        if (null !== $after) {
-            $params['after'] = $after;
-        }
+        /** @var array<int, array<string, mixed>> $items */
+        $items = $raw['data'];
 
-        $raw = $this->makeRequest('GET', '/hypetrain/events', $params);
-
-        return PaginatedResult::fromRaw($raw, HypeTrain::class);
+        return HypeTrainStatus::from($items[0]);
     }
 
     /**

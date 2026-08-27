@@ -51,7 +51,7 @@ use Zairakai\LaravelTwitch\Dto\GuestStar\GuestStarSession;
 use Zairakai\LaravelTwitch\Dto\GuestStar\GuestStarSettings;
 use Zairakai\LaravelTwitch\Dto\GuestStar\Requests\UpdateGuestStarSettingsRequest;
 use Zairakai\LaravelTwitch\Dto\GuestStar\Requests\UpdateGuestStarSlotSettingsRequest;
-use Zairakai\LaravelTwitch\Dto\HypeTrain\HypeTrain;
+use Zairakai\LaravelTwitch\Dto\HypeTrain\HypeTrainStatus;
 use Zairakai\LaravelTwitch\Dto\Moderation\AutoModCheckResult;
 use Zairakai\LaravelTwitch\Dto\Moderation\AutoModSettings;
 use Zairakai\LaravelTwitch\Dto\Moderation\BannedUser;
@@ -73,6 +73,7 @@ use Zairakai\LaravelTwitch\Dto\Predictions\Prediction;
 use Zairakai\LaravelTwitch\Dto\Predictions\Requests\CreatePredictionRequest;
 use Zairakai\LaravelTwitch\Dto\Raids\Raid;
 use Zairakai\LaravelTwitch\Dto\Streams\Clip;
+use Zairakai\LaravelTwitch\Dto\Streams\ClipDownload;
 use Zairakai\LaravelTwitch\Dto\Streams\ClipEdit;
 use Zairakai\LaravelTwitch\Dto\Streams\Stream;
 use Zairakai\LaravelTwitch\Dto\Streams\StreamKey;
@@ -80,13 +81,13 @@ use Zairakai\LaravelTwitch\Dto\Streams\StreamMarker;
 use Zairakai\LaravelTwitch\Dto\Streams\StreamMarkerGroup;
 use Zairakai\LaravelTwitch\Dto\Streams\Video;
 use Zairakai\LaravelTwitch\Dto\Teams\Team;
-use Zairakai\LaravelTwitch\Dto\Users\AuthorizedApp;
 use Zairakai\LaravelTwitch\Dto\Users\BlockedUser;
 use Zairakai\LaravelTwitch\Dto\Users\FollowedChannel;
 use Zairakai\LaravelTwitch\Dto\Users\Follower;
 use Zairakai\LaravelTwitch\Dto\Users\Subscription;
 use Zairakai\LaravelTwitch\Dto\Users\SubscriptionCheck;
 use Zairakai\LaravelTwitch\Dto\Users\User;
+use Zairakai\LaravelTwitch\Dto\Users\UserAuthorization;
 use Zairakai\LaravelTwitch\Services\TwitchApiService;
 
 /**
@@ -247,16 +248,16 @@ use Zairakai\LaravelTwitch\Services\TwitchApiService;
  * @method static Raid                    startRaid(string $fromBroadcasterId, string $toBroadcasterId)
  * @method static void                    cancelRaid(string $broadcasterId)
  * @method static void                    sendWhisper(string $fromUserId, string $toUserId, string $message)
- * @method static PaginatedResult<HypeTrain> getHypeTrainEvents(string $broadcasterId, int $first = 1, string|null $after = null)
+ * @method static HypeTrainStatus            getHypeTrainStatus(string $broadcasterId)
  *
  * ── Streams, Clips & Videos (HasStreamMethods) ────────────────────────────────
  * @method static StreamKey                       getStreamKey(string $broadcasterId)
  * @method static PaginatedResult<Stream>         getStreams(string|array<string>|null $userIds = null, string|array<string>|null $gameIds = null, string|array<string>|null $languages = null, int $first = 20, string|null $after = null)
  * @method static PaginatedResult<Stream>         getFollowedStreams(string $userId, int $first = 20, string|null $after = null)
- * @method static ClipEdit                        createClip(string $broadcasterId, bool $hasDelay = false)
- * @method static ClipEdit                        createClipFromVod(string $broadcasterId, int $vodOffset)
+ * @method static ClipEdit                        createClip(string $broadcasterId, string|null $title = null, float|null $duration = null)
+ * @method static ClipEdit                        createClipFromVod(string $editorId, string $broadcasterId, string $vodId, int $vodOffset, string $title, float|null $duration = null)
  * @method static PaginatedResult<Clip>           getClips(string $broadcasterId, string|array<string>|null $clipIds = null, int $first = 20, string|null $after = null, string|null $startedAt = null, string|null $endedAt = null)
- * @method static PaginatedResult<Clip>           getClipsDownload(string|array<string> $clipIds)
+ * @method static DataCollection<int, ClipDownload> getClipsDownloads(string $editorId, string $broadcasterId, string|array<string> $clipIds)
  * @method static StreamMarker                    createStreamMarker(string $userId, string|null $description = null)
  * @method static PaginatedResult<StreamMarkerGroup> getStreamMarkers(string $userId, string|null $videoId = null, int $first = 20, string|null $after = null)
  * @method static PaginatedResult<Video>          getVideos(string|null $userId = null, string|null $gameId = null, string|array<string>|null $videoIds = null, string $type = 'all', int $first = 20, string|null $after = null)
@@ -295,10 +296,10 @@ use Zairakai\LaravelTwitch\Services\TwitchApiService;
  * @method static PaginatedResult<Follower>      getChannelFollowers(string $broadcasterId, string|null $userId = null, int $first = 20, string|null $after = null)
  * @method static PaginatedResult<Subscription>  getSubscriptions(string $broadcasterId, string|null $userId = null, int $first = 20, string|null $after = null)
  * @method static SubscriptionCheck              checkUserSubscription(string $broadcasterId, string $userId)
- * @method static array                          getUserExtensions(string|null $userId = null)
+ * @method static array                          getUserExtensions()
  * @method static array                          getUserActiveExtensions(string|null $userId = null)
  * @method static array                          updateUserExtensions(array $data)
- * @method static DataCollection<int, AuthorizedApp> getAuthorizationByUser()
+ * @method static DataCollection<int, UserAuthorization> getAuthorizationByUser(string|array $userIds)
  */
 class Twitch extends Facade
 {
