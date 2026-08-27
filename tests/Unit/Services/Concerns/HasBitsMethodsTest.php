@@ -8,6 +8,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Spatie\LaravelData\DataCollection;
 use Zairakai\LaravelTwitch\Dto\Bits\BitsLeaderboardEntry;
 use Zairakai\LaravelTwitch\Dto\Bits\Cheermote;
+use Zairakai\LaravelTwitch\Dto\Bits\CustomPowerUp;
 use Zairakai\LaravelTwitch\Dto\Bits\ExtensionTransaction;
 use Zairakai\LaravelTwitch\Dto\PaginatedResult;
 use Zairakai\LaravelTwitch\Services\TwitchApiService;
@@ -81,6 +82,41 @@ final class HasBitsMethodsTest extends TestCase
 
         $this->assertSame('GET', $capturedParams['method']);
         $this->assertSame('/bits/cheermotes', $capturedParams['endpoint']);
+    }
+
+    // ── getCustomPowerUps ─────────────────────────────────────────────────────
+
+    #[Test]
+    public function it_calls_the_custom_power_ups_endpoint(): void
+    {
+        $capturedParams = null;
+
+        $service = new class('client-id', 'secret', $capturedParams) extends TwitchApiService
+        {
+            public function __construct(
+                string $clientId,
+                string $clientSecret,
+                public mixed &$captured,
+            ) {
+                parent::__construct($clientId, $clientSecret);
+            }
+
+            /**
+             * @param array<string, mixed> $params
+             */
+            protected function makeRequest(string $method, string $endpoint, array $params = []): array
+            {
+                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+
+                return ['data' => []];
+            }
+        };
+
+        $service->getCustomPowerUps('12345');
+
+        $this->assertSame('GET', $capturedParams['method']);
+        $this->assertSame('/bits/custom_power_ups', $capturedParams['endpoint']);
+        $this->assertSame('12345', $capturedParams['params']['broadcaster_id']);
     }
 
     // ── getExtensionTransactions ──────────────────────────────────────────────
@@ -179,6 +215,45 @@ final class HasBitsMethodsTest extends TestCase
         $this->assertInstanceOf(DataCollection::class, $dataCollection);
         $this->assertInstanceOf(Cheermote::class, $dataCollection->first());
         $this->assertSame('Cheer', $dataCollection->first()->prefix);
+    }
+
+    #[Test]
+    public function it_returns_a_data_collection_of_custom_power_ups(): void
+    {
+        $service = new class('client-id', 'secret') extends TwitchApiService
+        {
+            /**
+             * @param array<string, mixed> $params
+             */
+            protected function makeRequest(string $method, string $endpoint, array $params = []): array
+            {
+                return [
+                    'data' => [
+                        [
+                            'broadcaster_id'         => '12345',
+                            'broadcaster_login'      => 'streamer',
+                            'broadcaster_name'       => 'Streamer',
+                            'id'                     => 'power-up-1',
+                            'title'                  => 'Confetti',
+                            'prompt'                 => 'Rain confetti on screen',
+                            'bits'                   => 500,
+                            'background_color'       => '#FA1ED2',
+                            'is_enabled'             => true,
+                            'is_user_input_required' => false,
+                            'is_paused'              => false,
+                            'is_in_stock'            => true,
+                        ],
+                    ],
+                ];
+            }
+        };
+
+        $dataCollection = $service->getCustomPowerUps('12345');
+
+        $this->assertInstanceOf(DataCollection::class, $dataCollection);
+        $this->assertInstanceOf(CustomPowerUp::class, $dataCollection->first());
+        $this->assertSame('power-up-1', $dataCollection->first()->id);
+        $this->assertSame(500, $dataCollection->first()->bits);
     }
 
     #[Test]
