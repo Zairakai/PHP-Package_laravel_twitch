@@ -31,7 +31,12 @@ class ChannelChannelPointsCustomRewardAddEvent extends Data implements EventSubE
         public bool $isInStock,
         public string $title,
         public int $cost,
-        public string $prompt,
+
+        /**
+         * @var string|null Reward description shown to viewers - null when the
+         *                  reward has no prompt text configured
+         */
+        public ?string $prompt,
         public bool $isUserInputRequired,
         public bool $shouldRedemptionsSkipRequestQueue,
         public RewardLimitSetting $maxPerStream,

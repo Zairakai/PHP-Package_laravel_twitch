@@ -22,6 +22,11 @@ class ChannelPointsReward extends Data
         public string $id,
         public string $title,
         public int $cost,
-        public string $prompt,
+
+        /**
+         * @var string|null Reward description shown to viewers - null when the
+         *                  reward has no prompt text configured
+         */
+        public ?string $prompt = null,
     ) {}
 }
