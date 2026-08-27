@@ -191,6 +191,65 @@ class TwitchApiService
     }
 
     /**
+     * Make an authenticated API request that needs BOTH query string and
+     * JSON body params at once - Send Whisper is the one endpoint in the
+     * package that does (from_user_id/to_user_id as query, message as
+     * body), confirmed against Twitch's own docs (2026-08-27). Every other
+     * request shape needs at most one or the other, hence makeRequest()/
+     * makeQueryRequest() only ever populate a single Guzzle option key.
+     *
+     * @param array<string, mixed> $queryParams
+     * @param array<string, mixed> $bodyParams
+     *
+     * @return array<string, mixed>
+     */
+    protected function makeQueryAndBodyRequest(
+        string $method,
+        string $endpoint,
+        array $queryParams,
+        array $bodyParams = [],
+    ): array {
+        $token = $this->accessToken ?? $this->getAppAccessToken();
+
+        $options = [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $token,
+                'Client-ID'     => $this->clientId,
+            ],
+        ];
+
+        if ([] !== $queryParams) {
+            $options['query'] = $queryParams;
+        }
+
+        if ([] !== $bodyParams) {
+            $options['json'] = $bodyParams;
+        }
+
+        try {
+            $response = $this->client->request($method, ltrim($endpoint, '/'), $options);
+
+            if (204 === $response->getStatusCode()) {
+                return [];
+            }
+
+            /** @var array<string, mixed> $result */
+            $result = json_decode((string) $response->getBody(), true);
+
+            return $result;
+        }
+        catch (RequestException $requestException) {
+            Log::error('Twitch API request failed', [
+                'method'   => $method,
+                'endpoint' => $endpoint,
+                'error'    => $requestException->getMessage(),
+            ]);
+
+            throw $requestException;
+        }
+    }
+
+    /**
      * Make an authenticated API request whose params always belong in the
      * query string, regardless of HTTP method - a handful of Twitch
      * endpoints take their identifying parameters (broadcaster_id,
