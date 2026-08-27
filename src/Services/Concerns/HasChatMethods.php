@@ -308,12 +308,28 @@ trait HasChatMethods
      * If bot is not moderator: also needs channel:bot from broadcaster.
      *
      * @param string|null $replyParentMessageId ID of message to reply to
+     * @param bool|null   $pin                  Send and pin in one call - requires
+     *                                          moderator:manage:chat_messages, sender must be the
+     *                                          broadcaster or a moderator, always pins for 20
+     *                                          minutes (not configurable via this endpoint). Added
+     *                                          2026-05-15 alongside the open-beta pin/unpin
+     *                                          endpoints (Pin Chat Message, Get/Update Pinned Chat
+     *                                          Message, Unpin Chat Message) - those four are NOT
+     *                                          implemented here, Twitch's own reference page never
+     *                                          rendered their exact request/response shape even
+     *                                          via three independent lookup attempts, and no
+     *                                          third-party Twitch API client had them either as of
+     *                                          2026-08-27. Confirmed only via the changelog entry
+     *                                          and Twitch's own dev forum, both of which describe
+     *                                          the parameter but not the pin/unpin bodies -
+     *                                          deliberately not guessing an unverified shape.
      */
     public function sendMessage(
         string $broadcasterId,
         string $senderId,
         string $message,
         ?string $replyParentMessageId = null,
+        ?bool $pin = null,
     ): SentMessage {
         $body = [
             'broadcaster_id' => $broadcasterId,
@@ -323,6 +339,10 @@ trait HasChatMethods
 
         if (null !== $replyParentMessageId) {
             $body['reply_parent_message_id'] = $replyParentMessageId;
+        }
+
+        if (null !== $pin) {
+            $body['pin'] = $pin;
         }
 
         $raw = $this->makeRequest('POST', '/chat/messages', $body);

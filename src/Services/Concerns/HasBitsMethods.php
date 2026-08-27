@@ -7,6 +7,7 @@ namespace Zairakai\LaravelTwitch\Services\Concerns;
 use Spatie\LaravelData\DataCollection;
 use Zairakai\LaravelTwitch\Dto\Bits\BitsLeaderboardEntry;
 use Zairakai\LaravelTwitch\Dto\Bits\Cheermote;
+use Zairakai\LaravelTwitch\Dto\Bits\CustomPowerUp;
 use Zairakai\LaravelTwitch\Dto\Bits\ExtensionTransaction;
 use Zairakai\LaravelTwitch\Dto\PaginatedResult;
 
@@ -79,6 +80,36 @@ trait HasBitsMethods
 
         /** @var DataCollection<int, Cheermote> $dataCollection */
         $dataCollection = Cheermote::collect($items, DataCollection::class);
+
+        return $dataCollection;
+    }
+
+    /**
+     * Get a broadcaster's custom Bits Power-ups (the catalog entries -
+     * distinct from a specific redemption of one, see
+     * ChannelCustomPowerUpRedemptionAddEvent).
+     *
+     * Requires: bits:read
+     *
+     * @param string|array<string>|null $powerUpIds Filter by specific Power-up id(s), max 50
+     *
+     * @return DataCollection<int, CustomPowerUp>
+     */
+    public function getCustomPowerUps(string $broadcasterId, string|array|null $powerUpIds = null): DataCollection
+    {
+        $params = ['broadcaster_id' => $broadcasterId];
+
+        if (null !== $powerUpIds) {
+            $params['id'] = $powerUpIds;
+        }
+
+        $raw = $this->makeRequest('GET', '/bits/custom_power_ups', $params);
+
+        /** @var list<array<string, mixed>> $items */
+        $items = $raw['data'] ?? [];
+
+        /** @var DataCollection<int, CustomPowerUp> $dataCollection */
+        $dataCollection = CustomPowerUp::collect($items, DataCollection::class);
 
         return $dataCollection;
     }

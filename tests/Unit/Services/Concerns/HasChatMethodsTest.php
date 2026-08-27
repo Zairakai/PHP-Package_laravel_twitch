@@ -44,6 +44,7 @@ final class HasChatMethodsTest extends TestCase
 
         $this->assertSame('POST', $capturedParams['method']);
         $this->assertSame('/chat/messages', $capturedParams['endpoint']);
+        $this->assertArrayNotHasKey('pin', $capturedParams['params']);
     }
 
     // ── getChatSettings ───────────────────────────────────────────────────────
@@ -200,5 +201,36 @@ final class HasChatMethodsTest extends TestCase
         $this->assertInstanceOf(SentMessage::class, $sentMessage);
         $this->assertSame('msg-1', $sentMessage->messageId);
         $this->assertTrue($sentMessage->isSent);
+    }
+
+    #[Test]
+    public function it_sends_the_pin_flag_when_provided(): void
+    {
+        $capturedParams = null;
+
+        $service = new class('client-id', 'secret', $capturedParams) extends TwitchApiService
+        {
+            public function __construct(
+                string $clientId,
+                string $clientSecret,
+                public mixed &$captured,
+            ) {
+                parent::__construct($clientId, $clientSecret);
+            }
+
+            /**
+             * @param array<string, mixed> $params
+             */
+            protected function makeRequest(string $method, string $endpoint, array $params = []): array
+            {
+                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+
+                return ['data' => [['message_id' => 'msg-1', 'is_sent' => true, 'drop_reason' => null]]];
+            }
+        };
+
+        $service->sendMessage('1', '2', 'Hello world!', pin: true);
+
+        $this->assertTrue($capturedParams['params']['pin']);
     }
 }
