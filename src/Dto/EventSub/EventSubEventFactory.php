@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Dto\EventSub;
 
+use Zairakai\LaravelTwitch\Dto\EventSub\Events\AutomodMessageHoldEvent;
 use Zairakai\LaravelTwitch\Dto\EventSub\Events\AutomodMessageUpdateEvent;
 use Zairakai\LaravelTwitch\Dto\EventSub\Events\AutomodSettingsUpdateEvent;
 use Zairakai\LaravelTwitch\Dto\EventSub\Events\AutomodTermsUpdateEvent;
@@ -103,6 +104,7 @@ final class EventSubEventFactory
      * @var array<string, class-string<EventSubEvent>>
      */
     private const array TYPE_MAP = [
+        'automod.message.hold'                                   => AutomodMessageHoldEvent::class,
         'automod.message.update'                                 => AutomodMessageUpdateEvent::class,
         'automod.settings.update'                                => AutomodSettingsUpdateEvent::class,
         'automod.terms.update'                                   => AutomodTermsUpdateEvent::class,
