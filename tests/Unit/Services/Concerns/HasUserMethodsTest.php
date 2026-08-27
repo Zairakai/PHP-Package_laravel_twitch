@@ -88,21 +88,21 @@ final class HasUserMethodsTest extends TestCase
                             'view_count'        => 1,
                         ]]]
                         : ['data' => []],
-                    '/users/extensions/active', '/users/extensions' => ['data' => ['panel' => []]],
-                    default                                         => ['data' => [], 'pagination' => []],
+                    '/users/extensions', '/users/extensions/list'  => ['data' => ['panel' => []]],
+                    default                                        => ['data' => [], 'pagination' => []],
                 };
             }
         };
 
         $service->blockUser('u-1', 'spam');
         $service->checkUserSubscription('b-1', 'u-1');
-        $service->getAuthorizationByUser();
+        $service->getAuthorizationByUser('u-1');
         $service->getChannelFollowers('b-1', 'u-1', 5, 'cur-1');
         $service->getFollowedChannels('u-1', 'b-1', 5, 'cur-2');
         $service->getSubscriptions('b-1', 'u-1', 5, 'cur-3');
         $service->getUserActiveExtensions('u-1');
         $service->getUserBlocks('b-1', 5, 'cur-4');
-        $service->getUserExtensions('u-1');
+        $service->getUserExtensions();
         $service->getUsers(['1', '2'], ['a', 'b']);
         $service->unblockUser('u-1');
         $service->updateUser('new bio');
@@ -111,7 +111,7 @@ final class HasUserMethodsTest extends TestCase
         $this->assertCount(13, $service->calls);
         $this->assertSame('/users/blocks', $service->calls[0]['endpoint']);
         $this->assertSame('/subscriptions/user', $service->calls[1]['endpoint']);
-        $this->assertSame('/users/extensions/active', $service->calls[6]['endpoint']);
+        $this->assertSame('/users/extensions', $service->calls[6]['endpoint']);
         $this->assertSame('/users', $service->calls[11]['endpoint']);
         $this->assertSame('PUT', $service->calls[11]['method']);
     }

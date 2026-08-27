@@ -154,13 +154,18 @@ trait HasChatMethods
      *
      * Requires: no scope
      *
+     * Confirmed verbatim against Twitch's own docs (2026-08-27) - GET
+     * /helix/chat/emotes/set. Real bug fixed here: this used to call the
+     * non-existent /chat/emote_sets, which would 404 on every call, broken
+     * since first written.
+     *
      * @param string|array<string> $emoteSetIds One or more emote set IDs
      *
      * @return DataCollection<int, Emote>
      */
     public function getEmoteSets(string|array $emoteSetIds): DataCollection
     {
-        $raw = $this->makeRequest('GET', '/chat/emote_sets', [
+        $raw = $this->makeRequest('GET', '/chat/emotes/set', [
             'emote_set_id' => $emoteSetIds,
         ]);
 
@@ -238,10 +243,15 @@ trait HasChatMethods
      * Get the active shared chat session for a channel.
      *
      * Requires: no scope
+     *
+     * Confirmed verbatim against Twitch's own docs (2026-08-27) - GET
+     * /helix/shared_chat/session (singular). Real bug fixed here: this used
+     * to call the non-existent /shared_chat/sessions (plural), which would
+     * 404 on every call, broken since first written.
      */
     public function getSharedChatSession(string $broadcasterId): SharedChatSession
     {
-        $raw = $this->makeRequest('GET', '/shared_chat/sessions', [
+        $raw = $this->makeRequest('GET', '/shared_chat/session', [
             'broadcaster_id' => $broadcasterId,
         ]);
 
@@ -280,6 +290,11 @@ trait HasChatMethods
      *
      * Requires: user:read:emotes
      *
+     * Confirmed verbatim against Twitch's own docs (2026-08-27) - GET
+     * /helix/chat/emotes/user. Real bug fixed here: this used to call the
+     * non-existent /chat/user_emotes, which would 404 on every call, broken
+     * since first written.
+     *
      * @return PaginatedResult<Emote>
      */
     public function getUserEmotes(
@@ -297,7 +312,7 @@ trait HasChatMethods
             $params['after'] = $after;
         }
 
-        $raw = $this->makeRequest('GET', '/chat/user_emotes', $params);
+        $raw = $this->makeRequest('GET', '/chat/emotes/user', $params);
 
         return PaginatedResult::fromRaw($raw, Emote::class);
     }

@@ -216,7 +216,7 @@ final class HasChatMethodsTest extends TestCase
                 ];
 
                 return match ($endpoint) {
-                    '/shared_chat/sessions' => [
+                    '/shared_chat/session' => [
                         'data' => [[
                             'session_id'             => 'session-1',
                             'host_broadcaster_id'    => 'b-1',
@@ -255,7 +255,7 @@ final class HasChatMethodsTest extends TestCase
 
         $this->assertCount(14, $service->calls);
         $this->assertSame('/moderation/chat', $service->calls[0]['endpoint']);
-        $this->assertSame('/shared_chat/sessions', $service->calls[8]['endpoint']);
+        $this->assertSame('/shared_chat/session', $service->calls[8]['endpoint']);
         $this->assertSame('/chat/color', $service->calls[13]['endpoint']);
     }
 
