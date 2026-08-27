@@ -191,6 +191,67 @@ class TwitchApiService
     }
 
     /**
+     * Make an authenticated API request whose params always belong in the
+     * query string, regardless of HTTP method - a handful of Twitch
+     * endpoints take their identifying parameters (broadcaster_id,
+     * moderator_id, message_id, ...) as query params even on a
+     * PUT/PATCH/DELETE, e.g. Pin/Update Pinned/Unpin Chat Message, Update
+     * User Chat Color. makeRequest() only ever sends query params for
+     * GET/DELETE - calling it for one of these would silently put the
+     * params in the JSON body instead, and Twitch would reject the request
+     * with a 400 ("required query parameter missing").
+     *
+     * A separate method rather than a new parameter on makeRequest(): PHP
+     * requires an overriding method's signature to be a superset of the
+     * parent's, so adding a parameter there would break every test double
+     * across the suite that overrides makeRequest() with its current
+     * 3-parameter signature - a hard fatal error at class-declaration time,
+     * not a soft/runtime one. Confirmed against Twitch's own docs
+     * (2026-08-27) for Pin/Update Pinned/Unpin Chat Message.
+     *
+     * @param array<string, mixed> $params
+     *
+     * @return array<string, mixed>
+     */
+    protected function makeQueryRequest(string $method, string $endpoint, array $params = []): array
+    {
+        $token = $this->accessToken ?? $this->getAppAccessToken();
+
+        $options = [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $token,
+                'Client-ID'     => $this->clientId,
+            ],
+        ];
+
+        if ([] !== $params) {
+            $options['query'] = $params;
+        }
+
+        try {
+            $response = $this->client->request($method, ltrim($endpoint, '/'), $options);
+
+            if (204 === $response->getStatusCode()) {
+                return [];
+            }
+
+            /** @var array<string, mixed> $result */
+            $result = json_decode((string) $response->getBody(), true);
+
+            return $result;
+        }
+        catch (RequestException $requestException) {
+            Log::error('Twitch API request failed', [
+                'method'   => $method,
+                'endpoint' => $endpoint,
+                'error'    => $requestException->getMessage(),
+            ]);
+
+            throw $requestException;
+        }
+    }
+
+    /**
      * Make an authenticated API request and return the raw response body as a string.
      * Use this for endpoints that return non-JSON content (e.g. iCalendar).
      *
@@ -248,10 +309,7 @@ class TwitchApiService
             ],
         ];
 
-        if ('GET' === $method && [] !== $params) {
-            $options['query'] = $params;
-        }
-        elseif ('DELETE' === $method && [] !== $params) {
+        if (('GET' === $method || 'DELETE' === $method) && [] !== $params) {
             $options['query'] = $params;
         }
         elseif ([] !== $params) {
