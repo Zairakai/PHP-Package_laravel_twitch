@@ -40,4 +40,9 @@ class ChannelPredictionLockEvent extends Data implements EventSubEvent
         #[WithCast(FlexibleDateTimeCast::class)]
         public Carbon $lockedAt,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

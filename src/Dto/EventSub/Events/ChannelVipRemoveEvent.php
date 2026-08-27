@@ -26,4 +26,9 @@ class ChannelVipRemoveEvent extends Data implements EventSubEvent
         public string $broadcasterUserLogin,
         public string $broadcasterUserName,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

@@ -33,4 +33,9 @@ class AutomodTermsUpdateEvent extends Data implements EventSubEvent
          */
         public array $terms,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

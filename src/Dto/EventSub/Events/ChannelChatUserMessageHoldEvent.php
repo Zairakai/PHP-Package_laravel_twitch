@@ -32,4 +32,9 @@ class ChannelChatUserMessageHoldEvent extends Data implements EventSubEvent
          */
         public array $message,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

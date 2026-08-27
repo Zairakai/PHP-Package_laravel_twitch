@@ -38,4 +38,9 @@ class ChannelBanEvent extends Data implements EventSubEvent
         public Carbon $endsAt,
         public bool $isPermanent,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

@@ -31,6 +31,39 @@ final class EventSubEventFactoryRealPayloadsTest extends TestCase
         }
     }
 
+    /**
+     * Charity campaign types using the non-standard `broadcaster_id` field
+     * (Twitch's own docs inconsistency) - `channel.charity_campaign.donate`
+     * is not one of them, it uses the standard `broadcaster_user_id`.
+     *
+     * @return list<string>
+     */
+    public static function typesWithBroadcasterIdField(): array
+    {
+        return [
+            'channel.charity_campaign.start',
+            'channel.charity_campaign.progress',
+            'channel.charity_campaign.stop',
+        ];
+    }
+
+    /**
+     * Types with no single channel owner - user-scoped or app-scoped
+     * notifications where getBroadcasterUserId() is expected to return null.
+     *
+     * @return list<string>
+     */
+    public static function typesWithNoBroadcaster(): array
+    {
+        return [
+            'conduit.shard.disabled',
+            'user.authorization.grant',
+            'user.authorization.revoke',
+            'user.update',
+            'user.whisper.message',
+        ];
+    }
+
     #[Test]
     #[DataProvider('mappedTypes')]
     public function it_constructs_the_mapped_dto_from_the_official_example_payload(string $type): void
@@ -65,5 +98,35 @@ final class EventSubEventFactoryRealPayloadsTest extends TestCase
         $eventSubEvent = EventSubEventFactory::make('channel.some_future_type', ['id' => '1']);
 
         $this->assertInstanceOf(GenericEventSubEvent::class, $eventSubEvent);
+    }
+
+    #[Test]
+    #[DataProvider('mappedTypes')]
+    public function it_resolves_the_expected_broadcaster_user_id_for_each_type(string $type): void
+    {
+        /** @var array<string, string> $fixtures */
+        $fixtures = require __DIR__ . '/../../../Fixtures/eventsub_examples.php';
+
+        $cleaned = preg_replace('/(?<=\s)\/\/[^\n]*/', '', $fixtures[$type]);
+        $cleaned = preg_replace('/,(\s*[}\]])/', '$1', (string) $cleaned);
+
+        /** @var array<string, mixed> $payload */
+        $payload = json_decode((string) $cleaned, true);
+
+        $event = EventSubEventFactory::make($type, $payload);
+
+        $expected = match (true) {
+            in_array($type, self::typesWithNoBroadcaster(), true)      => null,
+            'channel.raid' === $type                                   => $payload['to_broadcaster_user_id'],
+            in_array($type, self::typesWithBroadcasterIdField(), true) => $payload['broadcaster_id'],
+            'automod.settings.update' === $type                        => $payload['data'][0]['broadcaster_user_id'],
+            default                                                    => $payload['broadcaster_user_id'] ?? null,
+        };
+
+        $this->assertSame(
+            $expected,
+            $event->getBroadcasterUserId(),
+            "Unexpected getBroadcasterUserId() for {$type}.",
+        );
     }
 }

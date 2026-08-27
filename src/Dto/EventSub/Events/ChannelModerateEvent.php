@@ -82,4 +82,9 @@ class ChannelModerateEvent extends Data implements EventSubEvent
          */
         public ?ModerateDeleteAction $sharedChatDelete = null,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

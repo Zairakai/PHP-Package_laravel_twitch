@@ -29,4 +29,9 @@ class ChannelUnbanEvent extends Data implements EventSubEvent
         public string $moderatorUserLogin,
         public string $moderatorUserName,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

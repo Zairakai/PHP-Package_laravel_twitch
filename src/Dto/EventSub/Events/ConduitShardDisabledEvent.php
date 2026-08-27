@@ -28,4 +28,9 @@ class ConduitShardDisabledEvent extends Data implements EventSubEvent
          */
         public array $transport,
     ) {}
+
+    public function getBroadcasterUserId(): ?string
+    {
+        return null;
+    }
 }

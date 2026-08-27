@@ -30,4 +30,9 @@ class ChannelCharityCampaignProgressEvent extends Data implements EventSubEvent
         public CharityAmount $currentAmount,
         public CharityAmount $targetAmount,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterId;
+    }
 }

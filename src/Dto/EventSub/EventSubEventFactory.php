@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Dto\EventSub;
 
+use Zairakai\LaravelTwitch\Dto\EventSub\Events\AutomodMessageHoldEvent;
 use Zairakai\LaravelTwitch\Dto\EventSub\Events\AutomodMessageUpdateEvent;
 use Zairakai\LaravelTwitch\Dto\EventSub\Events\AutomodSettingsUpdateEvent;
 use Zairakai\LaravelTwitch\Dto\EventSub\Events\AutomodTermsUpdateEvent;
 use Zairakai\LaravelTwitch\Dto\EventSub\Events\ChannelAdBreakBeginEvent;
 use Zairakai\LaravelTwitch\Dto\EventSub\Events\ChannelBanEvent;
+use Zairakai\LaravelTwitch\Dto\EventSub\Events\ChannelBitsUseEvent;
 use Zairakai\LaravelTwitch\Dto\EventSub\Events\ChannelChannelPointsAutomaticRewardRedemptionAddEvent;
 use Zairakai\LaravelTwitch\Dto\EventSub\Events\ChannelChannelPointsCustomRewardAddEvent;
 use Zairakai\LaravelTwitch\Dto\EventSub\Events\ChannelChannelPointsCustomRewardRemoveEvent;
@@ -85,8 +87,11 @@ use Zairakai\LaravelTwitch\Dto\EventSub\Events\UserWhisperMessageEvent;
 /**
  * Resolves a raw EventSub notification into its typed DTO.
  *
- * Covers the full EventSub subscription type catalog (76 types, verified
- * against the official example payloads on 2026-08-09). Any future type
+ * Covers the full EventSub subscription type catalog (77 types, verified
+ * against the official example payloads on 2026-08-09, `channel.bits.use`
+ * added 2026-08-13 - `drop.entitlement.grant` deliberately left out: it is
+ * organization/campaign-scoped, not broadcaster-scoped, and its exact
+ * payload shape is not fully published in the official docs). Any future type
  * Twitch adds before this factory is updated still falls back to
  * GenericEventSubEvent - no notification is ever silently dropped or left
  * untyped at the object level.
@@ -99,11 +104,13 @@ final class EventSubEventFactory
      * @var array<string, class-string<EventSubEvent>>
      */
     private const array TYPE_MAP = [
+        'automod.message.hold'                                   => AutomodMessageHoldEvent::class,
         'automod.message.update'                                 => AutomodMessageUpdateEvent::class,
         'automod.settings.update'                                => AutomodSettingsUpdateEvent::class,
         'automod.terms.update'                                   => AutomodTermsUpdateEvent::class,
         'channel.ad_break.begin'                                 => ChannelAdBreakBeginEvent::class,
         'channel.ban'                                            => ChannelBanEvent::class,
+        'channel.bits.use'                                       => ChannelBitsUseEvent::class,
         'channel.channel_points_automatic_reward_redemption.add' => ChannelChannelPointsAutomaticRewardRedemptionAddEvent::class,
         'channel.channel_points_custom_reward.add'               => ChannelChannelPointsCustomRewardAddEvent::class,
         'channel.channel_points_custom_reward.remove'            => ChannelChannelPointsCustomRewardRemoveEvent::class,

@@ -34,4 +34,9 @@ class ChannelChatSettingsUpdateEvent extends Data implements EventSubEvent
          */
         public ?int $followerModeDurationMinutes = null,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

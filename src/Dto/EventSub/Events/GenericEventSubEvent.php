@@ -28,4 +28,11 @@ class GenericEventSubEvent extends Data implements EventSubEvent
          */
         public array $payload,
     ) {}
+
+    public function getBroadcasterUserId(): ?string
+    {
+        $broadcasterUserId = $this->payload['broadcaster_user_id'] ?? null;
+
+        return is_string($broadcasterUserId) ? $broadcasterUserId : null;
+    }
 }

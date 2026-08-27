@@ -27,4 +27,9 @@ class ChannelSharedChatEndEvent extends Data implements EventSubEvent
         public string $hostBroadcasterUserLogin,
         public string $hostBroadcasterUserName,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

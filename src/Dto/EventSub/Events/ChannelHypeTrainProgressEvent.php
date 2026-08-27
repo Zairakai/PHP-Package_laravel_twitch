@@ -51,4 +51,9 @@ class ChannelHypeTrainProgressEvent extends Data implements EventSubEvent
         #[DataCollectionOf(HypeTrainContribution::class)]
         public ?DataCollection $sharedTrainParticipants = null,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

@@ -45,4 +45,9 @@ class ChannelSubscriptionGiftEvent extends Data implements EventSubEvent
          */
         public ?int $cumulativeTotal = null,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

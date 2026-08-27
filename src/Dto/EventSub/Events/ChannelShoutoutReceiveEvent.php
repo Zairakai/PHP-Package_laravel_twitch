@@ -32,4 +32,9 @@ class ChannelShoutoutReceiveEvent extends Data implements EventSubEvent
         #[WithCast(FlexibleDateTimeCast::class)]
         public Carbon $startedAt,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

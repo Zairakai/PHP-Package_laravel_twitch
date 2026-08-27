@@ -33,4 +33,9 @@ class ExtensionBitsTransactionCreateEvent extends Data implements EventSubEvent
          */
         public array $product,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

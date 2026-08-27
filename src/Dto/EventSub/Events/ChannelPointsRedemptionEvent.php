@@ -43,4 +43,9 @@ class ChannelPointsRedemptionEvent extends Data implements EventSubEvent
          */
         public ?string $userInput = null,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

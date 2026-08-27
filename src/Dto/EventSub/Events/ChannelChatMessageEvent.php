@@ -71,4 +71,9 @@ class ChannelChatMessageEvent extends Data implements EventSubEvent
         public ?DataCollection $sourceBadges = null,
         public ?bool $isSourceOnly = null,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

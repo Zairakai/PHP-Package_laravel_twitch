@@ -27,4 +27,9 @@ class ChannelGuestStarSettingsUpdateEvent extends Data implements EventSubEvent
         public bool $isBrowserSourceAudioEnabled,
         public string $groupLayout,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

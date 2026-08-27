@@ -23,4 +23,9 @@ class ChannelChatClearEvent extends Data implements EventSubEvent
         public string $broadcasterUserName,
         public string $broadcasterUserLogin,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

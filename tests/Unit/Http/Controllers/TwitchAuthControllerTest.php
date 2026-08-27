@@ -390,7 +390,7 @@ final class TwitchAuthControllerTest extends TestCase
     // ── Webhook: challenge verification ──────────────────────────────────────
 
     #[Test]
-    public function it_responds_to_webhook_challenge_with_the_challenge_value(): void
+    public function it_responds_to_webhook_challenge_with_the_raw_challenge_as_plain_text(): void
     {
         $secret    = 'my-secret';
         $body      = '{"challenge":"verify-me-123","subscription":{"type":"channel.follow"}}';
@@ -409,11 +409,14 @@ final class TwitchAuthControllerTest extends TestCase
             'CONTENT_TYPE'                           => 'application/json',
         ], $body);
 
-        $jsonResponse = $this->twitchAuthController->webhook($request);
+        $response = $this->twitchAuthController->webhook($request);
 
-        $this->assertSame(200, $jsonResponse->getStatusCode());
-        $data = json_decode((string) $jsonResponse->getContent(), true);
-        $this->assertSame('verify-me-123', $data['challenge']);
+        // Twitch requires the raw challenge string as a plain-text body, not
+        // JSON-wrapped, or the subscription is marked
+        // webhook_callback_verification_failed.
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame('verify-me-123', $response->getContent());
+        $this->assertStringContainsString('text/plain', (string) $response->headers->get('Content-Type'));
     }
 
     #[Test]

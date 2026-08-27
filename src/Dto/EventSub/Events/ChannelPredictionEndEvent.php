@@ -50,4 +50,9 @@ class ChannelPredictionEndEvent extends Data implements EventSubEvent
          */
         public ?string $winningOutcomeId = null,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

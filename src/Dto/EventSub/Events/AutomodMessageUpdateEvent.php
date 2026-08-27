@@ -44,4 +44,9 @@ class AutomodMessageUpdateEvent extends Data implements EventSubEvent
          */
         public array $fragments,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }

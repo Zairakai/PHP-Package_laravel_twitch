@@ -52,4 +52,9 @@ class ChannelSubscriptionMessageEvent extends Data implements EventSubEvent
          */
         public ?int $streakMonths = null,
     ) {}
+
+    public function getBroadcasterUserId(): string
+    {
+        return $this->broadcasterUserId;
+    }
 }
