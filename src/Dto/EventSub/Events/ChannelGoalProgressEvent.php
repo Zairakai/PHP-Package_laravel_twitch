@@ -27,7 +27,11 @@ class ChannelGoalProgressEvent extends Data implements EventSubEvent
         public string $broadcasterUserName,
         public string $broadcasterUserLogin,
         public string $type,
-        public string $description,
+        /**
+         * @var string|null Goal description shown to viewers - null when the
+         *                  goal has no description configured
+         */
+        public ?string $description,
         public int $currentAmount,
         public int $targetAmount,
         #[WithCast(FlexibleDateTimeCast::class)]
