@@ -140,6 +140,41 @@ final class EventSubEventFactoryRealPayloadsTest extends TestCase
         $this->assertNull($eventSubEvent->image);
     }
 
+    /**
+     * Regression test for a real production crash (2026-08-28, caught live
+     * by the #18 resilience catch - dropped this one event instead of
+     * crashing the webhook, which is how it surfaced at all): a guest state
+     * change that is not the direct result of a moderator API call sends
+     * `moderator_user_id`/`moderator_user_name`/`moderator_user_login` as
+     * `null`.
+     */
+    #[Test]
+    public function it_accepts_a_null_moderator_on_guest_star_guest_update(): void
+    {
+        $payload = [
+            'broadcaster_user_id'    => '1337',
+            'broadcaster_user_name'  => 'Cool_User',
+            'broadcaster_user_login' => 'cool_user',
+            'session_id'             => '2KFRQbFtpmfyD3IevNRnCzOPRJI',
+            'moderator_user_id'      => null,
+            'moderator_user_name'    => null,
+            'moderator_user_login'   => null,
+            'guest_user_id'          => '1234',
+            'guest_user_name'        => 'Cool_Guest',
+            'guest_user_login'       => 'cool_guest',
+            'slot_id'                => '1',
+            'state'                  => 'live',
+            'host_video_enabled'     => true,
+            'host_audio_enabled'     => true,
+            'host_volume'            => 100,
+        ];
+
+        $eventSubEvent = EventSubEventFactory::make('channel.guest_star_guest.update', $payload);
+
+        $this->assertNotInstanceOf(GenericEventSubEvent::class, $eventSubEvent);
+        $this->assertNull($eventSubEvent->moderatorUserId);
+    }
+
     #[Test]
     public function it_accepts_a_null_prompt_on_a_redeemed_reward(): void
     {
