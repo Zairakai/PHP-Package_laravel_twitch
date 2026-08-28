@@ -29,7 +29,18 @@ class ChannelUnbanRequestResolveEvent extends Data implements EventSubEvent
         public string $userId,
         public string $userLogin,
         public string $userName,
-        public string $resolutionText,
+
+        /**
+         * @var string|null Message from the resolver - genuinely optional,
+         *                  not just unverified: the Helix "Resolve Unban
+         *                  Requests" endpoint marks its equivalent
+         *                  `resolution_text` request param "Required? No",
+         *                  and the "Get Unban Requests" example response
+         *                  shows a real `"resolution_text": null` for an
+         *                  unresolved request - confirmed nullable by
+         *                  Twitch's own docs, not inferred from a crash.
+         */
+        public ?string $resolutionText,
         public string $status,
     ) {}
 

@@ -213,6 +213,40 @@ final class EventSubEventFactoryRealPayloadsTest extends TestCase
     }
 
     /**
+     * Not a crash found live - confirmed nullable directly from Twitch's own
+     * Helix docs (2026-08-28, prompted by Monsieur pointing at the local API
+     * reference doc after a "is that really everything" push): the "Resolve
+     * Unban Requests" endpoint marks its `resolution_text` request param
+     * "Required? No", and the "Get Unban Requests" example response shows a
+     * real `"resolution_text": null` for an unresolved request. Fixed
+     * proactively rather than waiting for a real EventSub payload to crash
+     * on it.
+     */
+    #[Test]
+    public function it_accepts_a_null_resolution_text_on_an_unban_request_resolve(): void
+    {
+        $payload = [
+            'id'                     => '60',
+            'broadcaster_user_id'    => '1337',
+            'broadcaster_user_login' => 'cool_user',
+            'broadcaster_user_name'  => 'Cool_User',
+            'moderator_user_id'      => '1337',
+            'moderator_user_login'   => 'cool_user',
+            'moderator_user_name'    => 'Cool_User',
+            'user_id'                => '1339',
+            'user_login'             => 'not_cool_user',
+            'user_name'              => 'Not_Cool_User',
+            'resolution_text'        => null,
+            'status'                 => 'approved',
+        ];
+
+        $eventSubEvent = EventSubEventFactory::make('channel.unban_request.resolve', $payload);
+
+        $this->assertNotInstanceOf(GenericEventSubEvent::class, $eventSubEvent);
+        $this->assertNull($eventSubEvent->resolutionText);
+    }
+
+    /**
      * Regression test for a real production crash (2026-08-27, live stream,
      * caught but not fixed until 2026-08-28): `channel.chat.notification`
      * with `notice_type: watch_streak` carries an empty `message.text` (no
