@@ -65,6 +65,37 @@ final class EventSubEventFactoryRealPayloadsTest extends TestCase
     }
 
     /**
+     * Regression test for a real production crash (2026-08-26, live stream,
+     * never previously logged/tracked - found by inspection while auditing
+     * the other DTOs above for the same non-nullable-string crash class):
+     * a channel goal configured with no description sends
+     * `"description": null`, but `$description` on
+     * ChannelGoal{Begin,Progress,End}Event is typed non-nullable `string` -
+     * crashed every notification for that goal with a TypeError, 500ing the
+     * webhook and losing the event.
+     */
+    #[Test]
+    public function it_accepts_a_null_description_on_a_channel_goal(): void
+    {
+        $payload = [
+            'id'                     => '12345-cool-event',
+            'broadcaster_user_id'    => '1337',
+            'broadcaster_user_name'  => 'Cool_User',
+            'broadcaster_user_login' => 'cool_user',
+            'type'                   => 'subscription',
+            'description'            => null,
+            'current_amount'         => 100,
+            'target_amount'          => 220,
+            'started_at'             => '2026-08-26T18:00:00Z',
+        ];
+
+        $eventSubEvent = EventSubEventFactory::make('channel.goal.progress', $payload);
+
+        $this->assertNotInstanceOf(GenericEventSubEvent::class, $eventSubEvent);
+        $this->assertNull($eventSubEvent->description);
+    }
+
+    /**
      * Regression test for a real production crash (2026-08-27, live stream,
      * caught alongside the null-prompt one above but not fixed until
      * 2026-08-28): a reward with no custom image configured sends
