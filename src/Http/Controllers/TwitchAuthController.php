@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Throwable;
 use Zairakai\LaravelTwitch\Dto\EventSub\EventSubEventFactory;
 use Zairakai\LaravelTwitch\Dto\Users\User;
 use Zairakai\LaravelTwitch\Models\TwitchUser;
@@ -166,6 +167,26 @@ class TwitchAuthController
      * subscription type - types without a dedicated DTO yet still get a typed
      * GenericEventSubEvent fallback, so no notification is ever silently dropped.
      *
+     * Most dedicated DTOs are generated from Twitch's own documentation
+     * examples rather than independently verified against real traffic
+     * (flagged as such in each DTO's docblock) - Twitch's docs do not
+     * reliably state which fields can be empty/null, so a wrong assumption
+     * only surfaces once a real payload hits an edge case the example never
+     * showed. Five such crashes were found and fixed this way
+     * (laravel-twitch#13/#14/#15/#16/#17) by replaying real captured
+     * traffic, and more of the ~70 still-unverified DTOs likely carry the
+     * same latent bug, just not yet triggered by a real payload.
+     *
+     * DTO construction is therefore never allowed to crash the whole
+     * webhook delivery: a `TypeError`/`ArgumentCountError` (the failure
+     * mode of every bug found so far - these are `Throwable`, not
+     * `Exception`, so a plain `catch (Exception)` would miss them) drops
+     * only this one event and is logged loudly for triage, instead of
+     * 500ing the callback - which Twitch retries and, after enough
+     * failures, silently revokes the subscription entirely
+     * (`notification_failures_exceeded`), killing every future event of
+     * that type with no further signal.
+     *
      * @param array<string, mixed> $payload
      *
      * @see EventSubEventFactory
@@ -182,7 +203,19 @@ class TwitchAuthController
         /** @var array<string, mixed> $eventData */
         $eventData = is_array($payload['event'] ?? null) ? $payload['event'] : [];
 
-        $eventSubEvent = EventSubEventFactory::make($eventType, $eventData);
+        try {
+            $eventSubEvent = EventSubEventFactory::make($eventType, $eventData);
+        }
+        catch (Throwable $throwable) {
+            Log::error('Twitch EventSub notification dropped: DTO construction failed.', [
+                'type'  => $eventType,
+                'error' => $throwable->getMessage(),
+            ]);
+
+            event('twitch.eventsub.dto_construction_failed', [$eventType, $eventData, $throwable]);
+
+            return;
+        }
 
         event("twitch.{$eventType}", [$eventSubEvent]);
     }
