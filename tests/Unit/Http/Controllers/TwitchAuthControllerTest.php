@@ -12,6 +12,7 @@ use Illuminate\Session\Store as SessionStore;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
 use PHPUnit\Framework\Attributes\Test;
+use Throwable;
 use Zairakai\LaravelTwitch\Dto\EventSub\Events\ChannelSubscribeEvent;
 use Zairakai\LaravelTwitch\Dto\EventSub\Events\GenericEventSubEvent;
 use Zairakai\LaravelTwitch\Dto\Users\User as TwitchUserDto;
@@ -164,6 +165,46 @@ final class TwitchAuthControllerTest extends TestCase
         ]);
 
         $this->assertSame(200, $jsonResponse->getStatusCode());
+    }
+
+    // ── Webhook: handleEventSubNotification DTO construction failure ──────────
+
+    /**
+     * Regression test for the failure mode behind laravel-twitch#13/#14/#15/
+     * #16/#17 (2026-08-27/28): a mapped type whose real payload does not
+     * match its DTO's assumed shape used to throw a TypeError/
+     * ArgumentCountError straight out of the controller, 500ing the whole
+     * webhook delivery - which Twitch retries and, after enough failures,
+     * silently revokes the subscription. Now the one malformed event is
+     * dropped (logged + a `dto_construction_failed` event dispatched for any
+     * consumer that wants to react) and the webhook still acks 200.
+     */
+    #[Test]
+    public function it_logs_and_recovers_when_dto_construction_fails_on_notification(): void
+    {
+        Event::fake();
+        Log::spy();
+
+        // channel.subscribe requires several fields - an empty event payload
+        // throws an ArgumentCountError (a Throwable, not an Exception -
+        // exactly why the catch below must be catch (Throwable)).
+        $jsonResponse = $this->makeNotificationResponse('channel.subscribe', []);
+
+        $this->assertSame(200, $jsonResponse->getStatusCode());
+        $data = json_decode((string) $jsonResponse->getContent(), true);
+        $this->assertSame('ok', $data['status']);
+
+        Event::assertNotDispatched('twitch.channel.subscribe');
+        Event::assertDispatched(
+            'twitch.eventsub.dto_construction_failed',
+            /** @param array{0: string, 1: array<string, mixed>, 2: Throwable} $payload */
+            fn (string $name, array $payload): bool => 'channel.subscribe' === $payload[0],
+        );
+
+        Log::shouldHaveReceived('error')
+            ->once()
+            ->withArgs(fn (string $message, array $context): bool => 'Twitch EventSub notification dropped: DTO construction failed.' === $message
+                && 'channel.subscribe'                                                                                                === $context['type']);
     }
 
     #[Test]
