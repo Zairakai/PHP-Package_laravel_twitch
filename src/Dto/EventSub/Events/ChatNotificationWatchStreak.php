@@ -11,14 +11,25 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 /**
  * `channel.chat.notification` payload when `notice_type` is `watch_streak`.
  *
- * Shape inferred from Twitch's documented EventSub schema, not
- * independently re-verified against a fetched example - double check
- * before relying on it in production.
+ * Corrected against a real notification captured during Monsieur's
+ * 2026-08-27 stream - the original fields (`watch_streak_months`) were
+ * inferred from documentation and never independently verified; the real
+ * wire payload carries `streak_count`/`channel_points_awarded` instead,
+ * which crashed every watch-streak notification (`ArgumentCountError`,
+ * 0 args passed) until fixed.
  */
 #[MapInputName(SnakeCaseMapper::class)]
 class ChatNotificationWatchStreak extends Data
 {
     public function __construct(
-        public int $watchStreakMonths,
+        /**
+         * @var int Number of consecutive streams watched
+         */
+        public int $streakCount,
+
+        /**
+         * @var int Channel points awarded for the streak
+         */
+        public int $channelPointsAwarded,
     ) {}
 }
