@@ -64,6 +64,51 @@ final class EventSubEventFactoryRealPayloadsTest extends TestCase
         ];
     }
 
+    /**
+     * Regression test for a real production crash (2026-08-27, live stream,
+     * caught alongside the null-prompt one above but not fixed until
+     * 2026-08-28): a reward with no custom image configured sends
+     * `"image": null`, falling back to `default_image`. `$image` used to be
+     * typed non-nullable `array`, crashing add/update/remove notifications
+     * (and any redemption, via the embedded reward) the same way the
+     * null-prompt bug did.
+     */
+    #[Test]
+    public function it_accepts_a_null_image_on_channel_points_custom_reward_update(): void
+    {
+        $payload = [
+            'id'                                        => '9001',
+            'broadcaster_user_id'                       => '1337',
+            'broadcaster_user_login'                    => 'cool_user',
+            'broadcaster_user_name'                     => 'Cool_User',
+            'is_enabled'                                => true,
+            'is_paused'                                 => false,
+            'is_in_stock'                               => true,
+            'title'                                     => 'Reward with no custom image',
+            'cost'                                      => 150,
+            'prompt'                                    => 'Random',
+            'is_user_input_required'                    => false,
+            'should_redemptions_skip_request_queue'     => true,
+            'cooldown_expires_at'                       => null,
+            'redemptions_redeemed_current_stream'       => null,
+            'max_per_stream'                            => ['is_enabled' => false, 'value' => 0],
+            'max_per_user_per_stream'                   => ['is_enabled' => false, 'value' => 0],
+            'global_cooldown'                           => ['is_enabled' => true, 'seconds' => 300],
+            'background_color'                          => '#F9D793',
+            'image'                                     => null,
+            'default_image'                             => [
+                'url_1x' => 'https://static-cdn.jtvnw.net/custom-reward-images/default-1.png',
+                'url_2x' => 'https://static-cdn.jtvnw.net/custom-reward-images/default-2.png',
+                'url_4x' => 'https://static-cdn.jtvnw.net/custom-reward-images/default-4.png',
+            ],
+        ];
+
+        $eventSubEvent = EventSubEventFactory::make('channel.channel_points_custom_reward.update', $payload);
+
+        $this->assertNotInstanceOf(GenericEventSubEvent::class, $eventSubEvent);
+        $this->assertNull($eventSubEvent->image);
+    }
+
     #[Test]
     public function it_accepts_a_null_prompt_on_a_redeemed_reward(): void
     {
@@ -134,6 +179,89 @@ final class EventSubEventFactoryRealPayloadsTest extends TestCase
 
         $this->assertNotInstanceOf(GenericEventSubEvent::class, $eventSubEvent);
         $this->assertNull($eventSubEvent->prompt);
+    }
+
+    /**
+     * Regression test for a real production crash (2026-08-27, live stream,
+     * caught but not fixed until 2026-08-28): `channel.chat.notification`
+     * with `notice_type: watch_streak` carries an empty `message.text` (no
+     * user-typed comment alongside the system notice) and a `watch_streak`
+     * object shaped `{streak_count, channel_points_awarded}` - not the
+     * `{watch_streak_months}` this package's DTO invented from documentation
+     * without ever independently verifying it. Both crashed: `Message::$text`
+     * was non-nullable `string`, and `ChatNotificationWatchStreak` expected a
+     * constructor argument that was never actually sent.
+     */
+    #[Test]
+    public function it_accepts_a_watch_streak_chat_notification(): void
+    {
+        $payload = [
+            'broadcaster_user_id'    => '1337',
+            'broadcaster_user_login' => 'cool_user',
+            'broadcaster_user_name'  => 'Cool_User',
+            'chatter_user_id'        => '9001',
+            'chatter_user_login'     => 'cooler_user',
+            'chatter_user_name'      => 'Cooler_User',
+            'chatter_is_anonymous'   => false,
+            'color'                  => '#FF69B4',
+            'badges'                 => [],
+            'system_message'         => 'cooler_user watched 10 consecutive streams and sparked a watch streak!',
+            'message_id'             => 'watch-streak-message-id',
+            'message'                => ['text' => null, 'fragments' => []],
+            'notice_type'            => 'watch_streak',
+            'watch_streak'           => ['streak_count' => 10, 'channel_points_awarded' => 450],
+        ];
+
+        $eventSubEvent = EventSubEventFactory::make('channel.chat.notification', $payload);
+
+        $this->assertNotInstanceOf(GenericEventSubEvent::class, $eventSubEvent);
+        $this->assertNull($eventSubEvent->message->text);
+        $this->assertNotNull($eventSubEvent->watchStreak);
+        $this->assertSame(10, $eventSubEvent->watchStreak->streakCount);
+        $this->assertSame(450, $eventSubEvent->watchStreak->channelPointsAwarded);
+    }
+
+    /**
+     * Regression test for a real production crash (2026-08-27, live stream,
+     * caught but not fixed until 2026-08-28): `automod.message.update` used
+     * a flat message/level/category/fragments shape generated from Twitch's
+     * docs example and never independently verified - the real payload uses
+     * the same v2 shape as `automod.message.hold` (message.{text,fragments},
+     * reason/automod/blocked_term discriminator) plus moderator identity and
+     * a resolution `status`.
+     */
+    #[Test]
+    public function it_accepts_the_real_shape_of_automod_message_update(): void
+    {
+        $payload = [
+            'broadcaster_user_id'    => '1337',
+            'broadcaster_user_login' => 'cool_user',
+            'broadcaster_user_name'  => 'Cool_User',
+            'user_id'                => '9001',
+            'user_login'             => 'bad_user',
+            'user_name'              => 'Bad_User',
+            'moderator_user_id'      => '5678',
+            'moderator_user_login'   => 'the_mod',
+            'moderator_user_name'    => 'The_Mod',
+            'message_id'             => 'bad-message-id',
+            'message'                => [
+                'text'      => 'held message text',
+                'fragments' => [],
+            ],
+            'reason'       => 'automod',
+            'status'       => 'approved',
+            'automod'      => ['category' => 'namecalling', 'level' => 2, 'boundaries' => []],
+            'blocked_term' => null,
+            'held_at'      => '2026-08-27T18:00:00Z',
+        ];
+
+        $eventSubEvent = EventSubEventFactory::make('automod.message.update', $payload);
+
+        $this->assertNotInstanceOf(GenericEventSubEvent::class, $eventSubEvent);
+        $this->assertSame('held message text', $eventSubEvent->message->text);
+        $this->assertSame('approved', $eventSubEvent->status);
+        $this->assertSame('namecalling', $eventSubEvent->automod['category']);
+        $this->assertNull($eventSubEvent->blockedTerm);
     }
 
     #[Test]

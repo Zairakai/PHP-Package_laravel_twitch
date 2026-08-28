@@ -38,9 +38,11 @@ class Message extends Data
 {
     public function __construct(
         /**
-         * @var string Full plain-text content of the message
+         * @var string|null Full plain-text content of the message - null on
+         *                  a system chat notification (e.g. watch_streak)
+         *                  that carries no user-typed comment alongside it
          */
-        public string $text,
+        public ?string $text,
 
         /**
          * @var DataCollection<int, MessageFragment> Typed fragments composing the message

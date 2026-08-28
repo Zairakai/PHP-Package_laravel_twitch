@@ -45,9 +45,11 @@ class ChannelChannelPointsCustomRewardUpdateEvent extends Data implements EventS
         public string $backgroundColor,
 
         /**
-         * @var array<string, mixed>
+         * @var array<string, mixed>|null Custom image - null when the reward
+         *                                has no custom image configured, falls
+         *                                back to $defaultImage in that case
          */
-        public array $image,
+        public ?array $image,
 
         /**
          * @var array<string, mixed>
