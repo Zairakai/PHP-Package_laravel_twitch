@@ -189,6 +189,11 @@ after running it.
 **Made with ❤️ by [Zairakai][ecosystem]**
 
 <!-- Reference Links -->
+
+## Statistics
+
+![Statistics of laravel-twitch][stats-card]
+
 [pipeline-main-badge]: https://gitlab.com/zairakai/php-packages/laravel-twitch/badges/main/pipeline.svg?ignore_skipped=true&key_text=Main
 [pipeline-main-link]: https://gitlab.com/zairakai/php-packages/laravel-twitch/commits/main
 [pipeline-develop-badge]: https://gitlab.com/zairakai/php-packages/laravel-twitch/badges/develop/pipeline.svg?ignore_skipped=true&key_text=Develop
@@ -217,3 +222,4 @@ after running it.
 [ecosystem]: https://gitlab.com/zairakai
 [docs]: https://laravel-twitch-8a8c1e.gitlab.io
 [docs-badge]: https://img.shields.io/badge/docs-online-blue
+[stats-card]: https://gitlab.com/zairakai/gitlab-profile/-/raw/main/assets/projects/laravel-twitch.svg
