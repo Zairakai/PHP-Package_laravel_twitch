@@ -23,9 +23,18 @@ class ChannelGuestStarGuestUpdateEvent extends Data implements EventSubEvent
         public string $broadcasterUserName,
         public string $broadcasterUserLogin,
         public string $sessionId,
-        public string $moderatorUserId,
-        public string $moderatorUserName,
-        public string $moderatorUserLogin,
+
+        /**
+         * @var string|null Caught live (2026-08-28) via the #18 resilience
+         *                  catch, which dropped this one event instead of
+         *                  crashing the webhook - a guest state change that
+         *                  is not the direct result of a moderator API call
+         *                  (e.g. the guest's own slot updating) sends
+         *                  `moderator_user_id: null`.
+         */
+        public ?string $moderatorUserId,
+        public ?string $moderatorUserName,
+        public ?string $moderatorUserLogin,
         public string $guestUserId,
         public string $guestUserName,
         public string $guestUserLogin,
