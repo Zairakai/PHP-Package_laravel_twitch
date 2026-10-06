@@ -6,6 +6,7 @@
 
 [![GitLab Release][gitlab-release-badge]][gitlab-release]
 [![Packagist][packagist-badge]][packagist]
+[![Docs][docs-badge]][docs]
 [![Downloads][downloads-badge]][packagist]
 [![License][license-badge]][license]
 
@@ -15,6 +16,8 @@
 [![Code Style][pint-badge]][pint]
 
 Complete Twitch API integration for Laravel: OAuth, Helix API, EventSub webhooks, and a badges system.
+
+**Documentation: [laravel-twitch-8a8c1e.gitlab.io][docs]**
 
 ---
 
@@ -212,3 +215,5 @@ after running it.
 [pint-badge]: https://img.shields.io/badge/code%20style-pint-22C55E.svg
 [pint]: https://laravel.com/docs/pint
 [ecosystem]: https://gitlab.com/zairakai
+[docs]: https://laravel-twitch-8a8c1e.gitlab.io
+[docs-badge]: https://img.shields.io/badge/docs-online-blue
