@@ -40,15 +40,15 @@
     "require": {
         "php": "^8.4",
         "guzzlehttp/guzzle": "^7.16.1",
-        "laravel/framework": "^12.0 || ^13.38",
+        "laravel/framework": "^12.0 || ^13.39",
         "spatie/laravel-data": "^4.23.1"
     },
     "require-dev": {
         "ergebnis/composer-normalize": "^2.54",
         "mockery/mockery": "^1.6.15",
         "orchestra/testbench": "^10.0 || ^11.3",
-        "phpunit/phpunit": "^12.5.40",
-        "zairakai/laravel-dev-tools": "^4.9.0"
+        "phpunit/phpunit": "^12.5.42",
+        "zairakai/laravel-dev-tools": "^4.9.1"
     },
     "suggest": {
         "ergebnis/composer-normalize": "Automated composer.json normalization"
