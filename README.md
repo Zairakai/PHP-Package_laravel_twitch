@@ -1,4 +1,8 @@
-# zairakai/laravel-twitch
+<p align="center">
+  <img src="https://gitlab.com/zairakai/php-packages/laravel-twitch/-/raw/main/assets/icon.png" alt="Laravel Twitch" width="160">
+</p>
+
+# Laravel Twitch
 
 [![Main][pipeline-main-badge]][pipeline-main-link]
 [![Develop][pipeline-develop-badge]][pipeline-develop-link]
@@ -15,7 +19,7 @@
 [![Static Analysis][phpstan-badge]][phpstan]
 [![Code Style][pint-badge]][pint]
 
-Complete Twitch API integration for Laravel: OAuth, Helix API, EventSub webhooks, and a badges system.
+Twitch integration for Laravel: the Helix API with typed responses, OAuth, and EventSub (webhook, WebSocket and conduit) with a typed event for each notification.
 
 **Documentation: [laravel-twitch-8a8c1e.gitlab.io][docs]**
 
@@ -23,162 +27,167 @@ Complete Twitch API integration for Laravel: OAuth, Helix API, EventSub webhooks
 
 ## Features
 
-- **Helix API** — games, streams, users, clips, channels, search, and more via `Twitch` facade
-- **OAuth 2.0** — authorization code flow, token refresh, and PKCE support via `TwitchOAuth` facade
-- **EventSub** — subscribe to and handle Twitch webhook events with signature verification
-- **Badges system** — fetch, cache, and display global and channel emote/badge sets
-- **Event-driven** — Laravel events dispatched for every received EventSub notification
-- **Token management** — automatic token refresh and storage
+- **Helix API**: the 147 routes of the reference, through the `Twitch` facade. Every answer is a typed DTO: Twitch sends flags as `"1"` or `"false"` and numbers as strings, the DTOs give `bool`, `int` and `Carbon`.
+- **OAuth 2.0**: authorization code flow, refresh, validation and revocation, through the `TwitchOAuth` facade, with the routes and the controller to connect a user.
+- **EventSub**: subscriptions over webhook, WebSocket or conduit, signature check, replay and duplicate protection, and one typed event for each of the 79 subscription types.
+- **Reliable requests**: a 401 renews the token once, a 429 waits for `Ratelimit-Reset`, and a rate limiter keeps the calls under the limit of Twitch.
+- **Token storage**: `TwitchUser` model, tokens encrypted with `APP_KEY`, and a command that validates them every hour.
 
----
+## Requirements
+
+PHP 8.4 or higher and Laravel 12 or 13.
 
 ## Install
 
 ```bash
 composer require zairakai/laravel-twitch
-```
-
-Publish the config:
-
-```bash
 php artisan vendor:publish --tag=config
+php artisan migrate
 ```
 
-Add your credentials to `.env`:
+`.env`:
 
 ```env
 TWITCH_CLIENT_ID=your_client_id
 TWITCH_CLIENT_SECRET=your_client_secret
-TWITCH_REDIRECT_URI=https://your-app.com/auth/twitch/callback
+TWITCH_REDIRECT_URI=https://your-app.com/twitch/auth/callback
 TWITCH_WEBHOOK_SECRET=your_webhook_secret
 ```
 
----
+The migration creates the `twitch_users` table of the `TwitchUser` model: the user, identified by its Twitch ID (the login can change and be taken by someone else, so it is only indexed), and its tokens. Without the OAuth connection and the stored tokens, the table is not used. To keep the tokens in another database, set `twitch.database.connection` (and `table_prefix`). To own the migration, publish it (`--tag=twitch-migrations`) and set `TWITCH_LOAD_MIGRATIONS=false`.
 
 ## Usage
-
-### Helix API
 
 ```php
 use Zairakai\LaravelTwitch\Facades\Twitch;
 
-// Get top games
-$games = Twitch::getTopGames();
-
-// Get streams by user ID(s)
+$games   = Twitch::getTopGames();
+$users   = Twitch::getUsers(logins: 'username');
 $streams = Twitch::getStreams(userIds: ['12345', '67890']);
-
-// Get users by login(s) or ID(s)
-$users = Twitch::getUsers(logins: 'username');
-
-// Get the currently authenticated user (after setAccessToken)
-$me = Twitch::getAuthenticatedUser();
-
-// Search channels
 $results = Twitch::searchChannels('gaming');
 ```
 
-### OAuth
+A call that needs a user token uses the one given with `Twitch::setAccessToken($token)`; the others use the app token, which the package gets and renews by itself.
+
+<details>
+<summary>Connect a user (OAuth)</summary>
+
+The package registers three routes: `GET /twitch/auth` (redirect to Twitch), `GET /twitch/auth/callback` and `POST /twitch/webhook`. The first two use the `web` middleware group. The callback creates or updates the `TwitchUser`, stores its id in the session under `twitch_user_id` and goes to `twitch.oauth.redirect_to`: a route name (`home` by default) or a URL (a value that starts with `/` or `http`). The redirect URI to register in the Twitch console is the one of the callback.
 
 ```php
 use Zairakai\LaravelTwitch\Facades\TwitchOAuth;
 
-// Redirect to Twitch authorization
-$authUrl = TwitchOAuth::getAuthorizationUrl(['user:read:email', 'channel:read:subscriptions']);
-return redirect($authUrl);
-
-// Exchange code for token (in callback controller)
-$token = TwitchOAuth::getAccessToken(request('code'));
-
-// Refresh token
-$newToken = TwitchOAuth::refreshToken($refreshToken);
+// Your own flow, without the routes of the package
+$url   = TwitchOAuth::getAuthorizationUrl(['user:read:email', 'channel:read:subscriptions'], $state);
+$token = TwitchOAuth::getAccessToken($code, $state);
+$new   = TwitchOAuth::refreshToken($refreshToken);
 ```
 
-### EventSub
+To get a new user token when Twitch answers 401, give the service a refresher:
 
 ```php
-// Subscribe to events (webhook transport)
+Twitch::setTokenRefresher(fn (): ?string => $this->renewAndReturnTheAccessToken());
+```
+
+</details>
+
+<details>
+<summary>EventSub</summary>
+
+```php
 Twitch::createEventSubSubscription(
     type: 'stream.online',
     condition: ['broadcaster_user_id' => $broadcasterId],
     callbackUrl: route('twitch.webhook'),
     secret: config('twitch.eventsub.webhook_secret'),
 );
+```
 
-// Handle webhooks — in routes/web.php
-Route::post('/twitch/webhook', [TwitchAuthController::class, 'webhook']);
+The version of the type is the latest one unless you give `version:`. Over WebSocket or a conduit, use `createEventSubWebSocketSubscription()` and `createEventSubConduitSubscription()`.
 
-// Listen to dispatched Laravel events (string-based, one event per subscription type)
-// Every notification is typed: mapped types get a dedicated DTO, everything else
-// gets GenericEventSubEvent - no notification is ever silently dropped or untyped.
-Event::listen('twitch.channel.follow', function (string $name, array $payload) {
-    /** @var \Zairakai\LaravelTwitch\Dto\EventSub\Events\ChannelFollowEvent $event */
-    $event = $payload[0];
-    // handle the typed follow event
-});
+Each notification dispatches the Laravel event `twitch.{type}` with the typed DTO, then the version of the subscription:
 
-// Hypothetical type Twitch hasn't invented yet, to illustrate the fallback -
-// every type Twitch currently documents (76) already has a dedicated DTO.
-Event::listen('twitch.channel.some_future_type', function (string $name, array $payload) {
-    /** @var \Zairakai\LaravelTwitch\Dto\EventSub\Events\GenericEventSubEvent $event */
-    $event = $payload[0]; // no dedicated DTO yet - raw payload via ->payload
+```php
+Event::listen('twitch.channel.follow', function (ChannelFollowEvent $event, ?string $version): void {
+    // $event->userLogin, $event->followedAt (Carbon)...
 });
 ```
 
-All 76 EventSub subscription types Twitch documents are mapped to a dedicated DTO
-(`Dto/EventSub/Events/*`), each verified field-by-field against the official example payload.
-Any subscription type Twitch adds after this map was generated still dispatches a typed
-`GenericEventSubEvent` (`type` + raw `payload`) until it earns its own DTO - add a new DTO class
-and register it in `EventSubEventFactory::TYPE_MAP` to give it structure.
+A type that Twitch adds before the package knows it gives a `GenericEventSubEvent` (`type` and the raw `payload`): nothing is dropped. The webhook refuses a wrong signature (400), a message older than `eventsub.max_message_age` seconds, and a message ID already seen during `eventsub.dedupe_ttl` seconds. A revocation dispatches `twitch.eventsub.revoked`.
 
-Nested structures follow the same rule as the top-level DTOs - one class per shape, reused
-wherever the exact same shape repeats (e.g. `EventSubUserReference`, `ChatBadge`,
-`RewardLimitSetting`, `CharityAmount`), a dedicated class where it doesn't (e.g. `ModerateBanAction`
-vs `ModerateTimeoutAction`). A handful of fields whose shape isn't confirmed by any fetched
-example (`channel.chat.notification`'s `unraid`/`charity_donation`/`modiversary`, automod message
-fragments) are kept as documented `array` rather than guessed.
+</details>
 
-A few types deserve a note:
+<details>
+<summary>Errors</summary>
 
-- `channel.moderate` and `channel.chat.notification` are discriminated-union events - Twitch
-  populates exactly one of several optional fields depending on a discriminator field
-  (`action` / `notice_type`), the rest are always `null`.
-- `channel.channel_points_custom_reward_redemption.add` and `.update` share one DTO
-  (`ChannelPointsRedemptionEvent`) - identical shape, only `status` differs.
-- `channel.follow` requires subscribing at version `2` (not the package default `1`).
+A failed call throws a `TwitchApiException` (the Guzzle exception is its `getPrevious()`). Whatever the endpoint, `$e->error` is a `TwitchError`: the HTTP `status`, a stable `code`, the English `message` of Twitch and a `context`.
 
----
+```php
+try {
+    Twitch::getStreamKey($broadcasterId);
+}
+catch (TwitchApiException $e) {
+    $e->errorCode();                 // 'missing_scope'
+    $e->error->translationKey();     // 'twitch::errors.missing_scope'
+    $e->error->translated();         // "Il manque une autorisation (scope) au jeton d'accès Twitch : channel:read:stream_key or channel_read."
+}
+```
 
-## Configuration
+Codes: `token_invalid`, `missing_scope`, `app_token_required`, `user_mismatch`, `client_mismatch`, `no_organization`, `multiple_filters`, `malformed_parameter`, `bad_identifiers`, `invalid_code`, `invalid_refresh_token`, then by status: `bad_request`, `unauthorized`, `forbidden`, `not_found`, `conflict`, `gone`, `unprocessable`, `rate_limited`, `server_error`, and `network` when Twitch cannot be reached. The translations are in the 129 languages of [laravel-lang](https://laravel-lang.com) (`lang/<locale>/errors.php`, namespace `twitch`): the package loads them all, nothing to deploy. To change a text, publish the languages you need with `php artisan twitch:lang fr de` (`--all`, `--list` and `--force` exist), or all of them with `--tag=twitch-translations`. English, French and the other major languages were translated with care; the rarer ones (for example `ak`, `bm`, `ln`, `lg`, `mni_Mtei`, `qu`, `rw`) were not reviewed by a native speaker: corrections are welcome. A language that is missing a key falls back to English.
 
-Key options in `config/twitch.php`:
+An absence is not an error: a channel with no schedule gives a `Schedule` with no segment, not an exception.
+
+</details>
+
+<details>
+<summary>Stored tokens</summary>
+
+`access_token` and `refresh_token` of `TwitchUser` are encrypted with `APP_KEY`. Two commands:
+
+| Command | What it does |
+| --- | --- |
+| `twitch:encrypt-tokens` | encrypts the tokens stored before the encryption existed |
+| `twitch:validate-tokens` | validates every token, refreshes the invalid ones, and dispatches `twitch.token.invalid` for the ones that cannot be refreshed |
+
+Twitch asks an app that keeps tokens to validate them every hour:
+
+```php
+Schedule::command('twitch:validate-tokens')->hourly();
+```
+
+</details>
+
+<details>
+<summary>Configuration</summary>
+
+Key options of `config/twitch.php`:
 
 | Key | Description |
 | --- | --- |
-| `client_id` | Twitch application client ID |
-| `client_secret` | Twitch application client secret |
-| `redirect_uri` | OAuth callback URL |
-| `webhook_secret` | Secret for EventSub signature verification |
-| `cache_ttl` | TTL in seconds for API response caching |
+| `client_id`, `client_secret` | credentials of the Twitch application |
+| `redirect_uri` | OAuth callback URL (default: the route of the package, `/twitch/auth/callback`) |
+| `oauth.redirect_to` | where the callback goes next: a route name or a URL |
+| `scopes` | scopes asked by default |
+| `api.timeout` | timeout of a request, in seconds |
+| `api.retry.times`, `api.retry.sleep` | number of retries after a 429 and the wait, in milliseconds, when Twitch gives no reset time |
+| `eventsub.webhook_secret`, `eventsub.webhook_callback_url` | secret of the signature check, and the callback used when `createEventSubSubscription()` is not given one |
+| `eventsub.max_message_age` | oldest accepted message, in seconds (0 turns the check off) |
+| `eventsub.dedupe_ttl` | how long a message ID is remembered, in seconds |
+| `cache.enabled`, `cache.ttl.*` | cache of the public answers (user, stream, game, channel, top games, cheermotes, badges, emotes), in seconds |
+| `rate_limit.enabled`, `rate_limit.requests_per_minute`, `rate_limit.burst_limit` | token bucket shared through the cache: `burst_limit` calls at once, refilled at `requests_per_minute` per minute |
+| `database.connection`, `database.table_prefix`, `database.load_migrations` | where the tokens are stored, and whether the package loads its migration |
 
----
+`badges` is not used yet. Which events to subscribe to is up to the application: it calls `createEventSubSubscription()` for the ones it wants.
+
+</details>
 
 ## Development
 
 ```bash
-make quality        # pint + phpstan + rector + insights + markdownlint + shellcheck
-make quality-fast   # pint + phpstan + markdownlint
-make test           # phpunit / pest
-make docs           # generate browsable API docs (phpDocumentor) into build/docs, alias: make doc
+make ci        # quality, tests and Bats
+make test      # PHPUnit
+make quality   # Pint, PHPStan, Rector, PHPInsights, Markdownlint, ShellCheck
 ```
-
-`make docs` (or `make doc`) downloads phpDocumentor (pinned version, cached in `build/`,
-gitignored) and generates a full class reference from the source itself - including every
-EventSub DTO and how they nest - so it can never drift from the code the way a hand-maintained
-type catalog would. Nothing is committed or published - open `build/docs/index.html` locally
-after running it.
-
----
 
 ## Getting Help
 
@@ -187,8 +196,6 @@ after running it.
 [![Issues][issues-badge]][issues]
 
 **Made with ❤️ by [Zairakai][ecosystem]**
-
-<!-- Reference Links -->
 
 ## Statistics
 
