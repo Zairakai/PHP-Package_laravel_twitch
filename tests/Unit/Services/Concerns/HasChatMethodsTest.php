@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Tests\Unit\Services\Concerns;
 
 use PHPUnit\Framework\Attributes\Test;
-use Zairakai\LaravelTwitch\Dto\Chat\ChatSettings;
 use Zairakai\LaravelTwitch\Dto\Chat\PinnedChatMessage;
-use Zairakai\LaravelTwitch\Dto\Chat\SentMessage;
 use Zairakai\LaravelTwitch\Services\TwitchApiService;
 use Zairakai\LaravelTwitch\Tests\TestCase;
 
@@ -33,19 +31,40 @@ final class HasChatMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
-                return ['data' => [['message_id' => 'msg-1', 'is_sent' => true, 'drop_reason' => null]]];
+                return [
+                    'data' => [
+                        [
+                            'message_id'  => 'msg-1',
+                            'is_sent'     => true,
+                            'drop_reason' => null,
+                        ],
+                    ],
+                ];
             }
         };
 
-        $service->sendMessage('1', '2', 'Hello world!');
+        $service->sendMessage(
+            '1',
+            '2',
+            'Hello world!',
+        );
 
-        $this->assertSame('POST', $capturedParams['method']);
-        $this->assertSame('/chat/messages', $capturedParams['endpoint']);
-        $this->assertArrayNotHasKey('pin', $capturedParams['params']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('POST', $capturedParams['method']);
+        self::assertSame('/chat/messages', $capturedParams['endpoint']);
+        self::assertIsArray($capturedParams['params']);
+        self::assertArrayNotHasKey('pin', $capturedParams['params']);
     }
 
     // ── getChatSettings ───────────────────────────────────────────────────────
@@ -68,9 +87,16 @@ final class HasChatMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
                 return [
                     'data' => [
@@ -89,8 +115,9 @@ final class HasChatMethodsTest extends TestCase
 
         $service->getChatSettings('1');
 
-        $this->assertSame('GET', $capturedParams['method']);
-        $this->assertSame('/chat/settings', $capturedParams['endpoint']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('GET', $capturedParams['method']);
+        self::assertSame('/chat/settings', $capturedParams['endpoint']);
     }
 
     // ── pinMessage / updatePinnedMessage / unpinMessage / getPinnedMessage ──────
@@ -113,19 +140,33 @@ final class HasChatMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeQueryRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeQueryRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
                 return [];
             }
         };
 
-        $service->pinMessage('1', '2', 'msg-1', 300);
+        $service->pinMessage(
+            '1',
+            '2',
+            'msg-1',
+            300,
+        );
 
-        $this->assertSame('PUT', $capturedParams['method']);
-        $this->assertSame('/chat/pins', $capturedParams['endpoint']);
-        $this->assertSame(300, $capturedParams['params']['duration_seconds']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('PUT', $capturedParams['method']);
+        self::assertSame('/chat/pins', $capturedParams['endpoint']);
+        self::assertIsArray($capturedParams['params']);
+        self::assertSame(300, $capturedParams['params']['duration_seconds']);
     }
 
     #[Test]
@@ -146,19 +187,32 @@ final class HasChatMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
                 return [];
             }
         };
 
-        $service->unpinMessage('1', '2', 'msg-1');
+        $service->unpinMessage(
+            '1',
+            '2',
+            'msg-1',
+        );
 
-        $this->assertSame('DELETE', $capturedParams['method']);
-        $this->assertSame('/chat/pins', $capturedParams['endpoint']);
-        $this->assertSame('msg-1', $capturedParams['params']['message_id']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('DELETE', $capturedParams['method']);
+        self::assertSame('/chat/pins', $capturedParams['endpoint']);
+        self::assertIsArray($capturedParams['params']);
+        self::assertSame('msg-1', $capturedParams['params']['message_id']);
     }
 
     #[Test]
@@ -179,19 +233,33 @@ final class HasChatMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeQueryRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeQueryRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
                 return [];
             }
         };
 
-        $service->updatePinnedMessage('1', '2', 'msg-1', 600);
+        $service->updatePinnedMessage(
+            '1',
+            '2',
+            'msg-1',
+            600,
+        );
 
-        $this->assertSame('PATCH', $capturedParams['method']);
-        $this->assertSame('/chat/pins', $capturedParams['endpoint']);
-        $this->assertSame(600, $capturedParams['params']['duration_seconds']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('PATCH', $capturedParams['method']);
+        self::assertSame('/chat/pins', $capturedParams['endpoint']);
+        self::assertIsArray($capturedParams['params']);
+        self::assertSame(600, $capturedParams['params']['duration_seconds']);
     }
 
     #[Test]
@@ -207,8 +275,11 @@ final class HasChatMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
                 $this->calls[] = [
                     'method'   => $method,
                     'endpoint' => $endpoint,
@@ -217,46 +288,83 @@ final class HasChatMethodsTest extends TestCase
 
                 return match ($endpoint) {
                     '/shared_chat/session' => [
-                        'data' => [[
-                            'session_id'             => 'session-1',
-                            'host_broadcaster_id'    => 'b-1',
-                            'host_broadcaster_login' => 'host',
-                            'host_broadcaster_name'  => 'Host',
-                            'participants'           => [],
-                        ]],
+                        'data' => [
+                            [
+                                'session_id'             => 'session-1',
+                                'host_broadcaster_id'    => 'b-1',
+                                'host_broadcaster_login' => 'host',
+                                'host_broadcaster_name'  => 'Host',
+                                'participants'           => [],
+                            ],
+                        ],
                     ],
-                    default => ['data' => [], 'pagination' => []],
+                    default => [
+                        'data'       => [],
+                        'pagination' => [],
+                    ],
                 };
             }
 
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeQueryRequest(string $method, string $endpoint, array $params = []): array
-            {
-                return $this->makeRequest($method, $endpoint, $params);
+            protected function makeQueryRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                return $this->makeRequest(
+                    $method,
+                    $endpoint,
+                    $params,
+                );
             }
         };
 
         $service->clearChat('b-1', 'm-1');
-        $service->deleteMessage('b-1', 'm-1', 'msg-1');
+        $service->deleteMessage(
+            'b-1',
+            'm-1',
+            'msg-1',
+        );
         $service->getChannelBadges('b-1');
         $service->getChannelEmotes('b-1');
-        $service->getChatters('b-1', 'm-1', 5, 'cur-1');
-        $service->getEmoteSets(['set-1']);
+        $service->getChatters(
+            'b-1',
+            'm-1',
+            5,
+            'cur-1',
+        );
+        $service->getEmoteSets([
+            'set-1',
+        ]);
         $service->getGlobalBadges();
         $service->getGlobalEmotes();
         $service->getSharedChatSession('b-1');
-        $service->getUserChatColor(['u-1']);
-        $service->getUserEmotes('u-1', 'b-1', 'cur-2');
-        $service->sendAnnouncement('b-1', 'm-1', 'hello');
-        $service->sendShoutout('b-1', 'm-1', 'to-1');
+        $service->getUserChatColor([
+            'u-1',
+        ]);
+        $service->getUserEmotes(
+            'u-1',
+            'b-1',
+            'cur-2',
+        );
+        $service->sendAnnouncement(
+            'b-1',
+            'm-1',
+            'hello',
+        );
+        $service->sendShoutout(
+            'b-1',
+            'm-1',
+            'to-1',
+        );
         $service->updateUserChatColor('u-1', 'blue');
 
-        $this->assertCount(14, $service->calls);
-        $this->assertSame('/moderation/chat', $service->calls[0]['endpoint']);
-        $this->assertSame('/shared_chat/session', $service->calls[8]['endpoint']);
-        $this->assertSame('/chat/color', $service->calls[13]['endpoint']);
+        self::assertCount(14, $service->calls);
+        self::assertSame('/moderation/chat', $service->calls[0]['endpoint']);
+        self::assertSame('/shared_chat/session', $service->calls[8]['endpoint']);
+        self::assertSame('/chat/color', $service->calls[13]['endpoint']);
     }
 
     #[Test]
@@ -277,17 +385,30 @@ final class HasChatMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeQueryRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeQueryRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
                 return [];
             }
         };
 
-        $service->pinMessage('1', '2', 'msg-1');
+        $service->pinMessage(
+            '1',
+            '2',
+            'msg-1',
+        );
 
-        $this->assertArrayNotHasKey('duration_seconds', $capturedParams['params']);
+        self::assertIsArray($capturedParams);
+        self::assertIsArray($capturedParams['params']);
+        self::assertArrayNotHasKey('duration_seconds', $capturedParams['params']);
     }
 
     #[Test]
@@ -298,8 +419,11 @@ final class HasChatMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
                 return [
                     'data' => [
                         [
@@ -317,10 +441,9 @@ final class HasChatMethodsTest extends TestCase
 
         $chatSettings = $service->getChatSettings('1');
 
-        $this->assertInstanceOf(ChatSettings::class, $chatSettings);
-        $this->assertSame('1', $chatSettings->broadcasterId);
-        $this->assertFalse($chatSettings->emoteMode);
-        $this->assertFalse($chatSettings->followerMode);
+        self::assertSame('1', $chatSettings->broadcasterId);
+        self::assertFalse($chatSettings->emoteMode);
+        self::assertFalse($chatSettings->followerMode);
     }
 
     #[Test]
@@ -331,17 +454,31 @@ final class HasChatMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                return ['data' => [['message_id' => 'msg-1', 'is_sent' => true, 'drop_reason' => null]]];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                return [
+                    'data' => [
+                        [
+                            'message_id'  => 'msg-1',
+                            'is_sent'     => true,
+                            'drop_reason' => null,
+                        ],
+                    ],
+                ];
             }
         };
 
-        $sentMessage = $service->sendMessage('1', '2', 'Hello world!');
+        $sentMessage = $service->sendMessage(
+            '1',
+            '2',
+            'Hello world!',
+        );
 
-        $this->assertInstanceOf(SentMessage::class, $sentMessage);
-        $this->assertSame('msg-1', $sentMessage->messageId);
-        $this->assertTrue($sentMessage->isSent);
+        self::assertSame('msg-1', $sentMessage->messageId);
+        self::assertTrue($sentMessage->isSent);
     }
 
     #[Test]
@@ -352,13 +489,18 @@ final class HasChatMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                return ['data' => []];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                return [
+                    'data' => [],
+                ];
             }
         };
 
-        $this->assertNull($service->getPinnedMessage('1', '2'));
+        self::assertNull($service->getPinnedMessage('1', '2'));
     }
 
     #[Test]
@@ -369,8 +511,11 @@ final class HasChatMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
                 return [
                     'data' => [
                         [
@@ -385,7 +530,13 @@ final class HasChatMethodsTest extends TestCase
                             'message'              => [
                                 'text'      => 'Welcome!',
                                 'fragments' => [
-                                    ['type' => 'text', 'text' => 'Welcome!', 'cheermote' => null, 'emote' => null, 'mention' => null],
+                                    [
+                                        'type'      => 'text',
+                                        'text'      => 'Welcome!',
+                                        'cheermote' => null,
+                                        'emote'     => null,
+                                        'mention'   => null,
+                                    ],
                                 ],
                             ],
                             'starts_at'  => '2026-05-06T12:30:00Z',
@@ -399,9 +550,10 @@ final class HasChatMethodsTest extends TestCase
 
         $pinnedChatMessage = $service->getPinnedMessage('197886470', '141981764');
 
-        $this->assertInstanceOf(PinnedChatMessage::class, $pinnedChatMessage);
-        $this->assertSame('abc-def-123-456', $pinnedChatMessage->messageId);
-        $this->assertSame('Welcome!', $pinnedChatMessage->message->text);
+        self::assertInstanceOf(PinnedChatMessage::class, $pinnedChatMessage);
+        self::assertSame('abc-def-123-456', $pinnedChatMessage->messageId);
+        self::assertNotNull($pinnedChatMessage->message);
+        self::assertSame('Welcome!', $pinnedChatMessage->message->text);
     }
 
     #[Test]
@@ -422,16 +574,38 @@ final class HasChatMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
-                return ['data' => [['message_id' => 'msg-1', 'is_sent' => true, 'drop_reason' => null]]];
+                return [
+                    'data' => [
+                        [
+                            'message_id'  => 'msg-1',
+                            'is_sent'     => true,
+                            'drop_reason' => null,
+                        ],
+                    ],
+                ];
             }
         };
 
-        $service->sendMessage('1', '2', 'Hello world!', pin: true);
+        $service->sendMessage(
+            '1',
+            '2',
+            'Hello world!',
+            pin: true,
+        );
 
-        $this->assertTrue($capturedParams['params']['pin']);
+        self::assertIsArray($capturedParams);
+        self::assertIsArray($capturedParams['params']);
+        self::assertTrue($capturedParams['params']['pin']);
     }
 }

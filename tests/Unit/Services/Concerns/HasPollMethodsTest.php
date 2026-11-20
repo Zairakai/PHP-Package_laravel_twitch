@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Tests\Unit\Services\Concerns;
 
 use PHPUnit\Framework\Attributes\Test;
-use Zairakai\LaravelTwitch\Dto\PaginatedResult;
-use Zairakai\LaravelTwitch\Dto\Polls\Poll;
 use Zairakai\LaravelTwitch\Services\TwitchApiService;
 use Zairakai\LaravelTwitch\Tests\TestCase;
 
@@ -32,18 +30,31 @@ final class HasPollMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
-                return ['data' => [], 'pagination' => ['cursor' => '']];
+                return [
+                    'data'       => [],
+                    'pagination' => [
+                        'cursor' => '',
+                    ],
+                ];
             }
         };
 
         $service->getPolls('1');
 
-        $this->assertSame('GET', $capturedParams['method']);
-        $this->assertSame('/polls', $capturedParams['endpoint']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('GET', $capturedParams['method']);
+        self::assertSame('/polls', $capturedParams['endpoint']);
     }
 
     #[Test]
@@ -67,22 +78,27 @@ final class HasPollMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
                 return [
-                    'data'       => [$this->pollData],
-                    'pagination' => ['cursor' => 'abc123'],
+                    'data'       => [
+                        $this->pollData,
+                    ],
+                    'pagination' => [
+                        'cursor' => 'abc123',
+                    ],
                 ];
             }
         };
 
         $paginatedResult = $service->getPolls('1');
 
-        $this->assertInstanceOf(PaginatedResult::class, $paginatedResult);
-        $this->assertCount(1, $paginatedResult->items);
-        $this->assertInstanceOf(Poll::class, $paginatedResult->items[0]);
-        $this->assertSame('poll-1', $paginatedResult->items[0]->id);
-        $this->assertSame('Best game?', $paginatedResult->items[0]->title);
+        self::assertCount(1, $paginatedResult->items);
+        self::assertSame('poll-1', $paginatedResult->items[0]->id);
+        self::assertSame('Best game?', $paginatedResult->items[0]->title);
     }
 
     /**

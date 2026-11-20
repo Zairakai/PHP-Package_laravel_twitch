@@ -26,6 +26,8 @@ abstract class TestCase extends Orchestra
 
     protected function defineEnvironment($app): void
     {
+        // The tokens are stored encrypted: an application always has a key.
+        $app['config']->set('app.key', 'base64:' . base64_encode(str_repeat('k', 32)));
         $app['config']->set('twitch.client_id', 'test-client-id');
         $app['config']->set('twitch.client_secret', 'test-client-secret');
         $app['config']->set('twitch.redirect_uri', 'http://localhost/auth/twitch/callback');

@@ -69,13 +69,21 @@ trait HasRaidMethods
      *
      * Rate limits: 40 unique recipients/day, 3/second, 100/minute.
      */
-    public function sendWhisper(string $fromUserId, string $toUserId, string $message): void
-    {
+    public function sendWhisper(
+        string $fromUserId,
+        string $toUserId,
+        string $message,
+    ): void {
         $this->makeQueryAndBodyRequest(
             'POST',
             '/whispers',
-            ['from_user_id' => $fromUserId, 'to_user_id' => $toUserId],
-            ['message'      => $message],
+            [
+                'from_user_id' => $fromUserId,
+                'to_user_id'   => $toUserId,
+            ],
+            [
+                'message'      => $message,
+            ],
         );
     }
 

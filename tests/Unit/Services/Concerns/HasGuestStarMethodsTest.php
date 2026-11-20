@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Tests\Unit\Services\Concerns;
 
 use PHPUnit\Framework\Attributes\Test;
-use Zairakai\LaravelTwitch\Dto\GuestStar\GuestStarSession;
-use Zairakai\LaravelTwitch\Dto\GuestStar\GuestStarSettings;
 use Zairakai\LaravelTwitch\Services\TwitchApiService;
 use Zairakai\LaravelTwitch\Tests\TestCase;
 
@@ -32,9 +30,16 @@ final class HasGuestStarMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
                 return [
                     'data' => [
@@ -52,8 +57,9 @@ final class HasGuestStarMethodsTest extends TestCase
 
         $service->getChannelGuestStarSettings('1', '2');
 
-        $this->assertSame('GET', $capturedParams['method']);
-        $this->assertSame('/guest_star/channel_settings', $capturedParams['endpoint']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('GET', $capturedParams['method']);
+        self::assertSame('/guest_star/channel_settings', $capturedParams['endpoint']);
     }
 
     // ── getGuestStarSession ───────────────────────────────────────────────────
@@ -76,18 +82,33 @@ final class HasGuestStarMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
-                return ['data' => [['id' => 'sess-1', 'guests' => []]]];
+                return [
+                    'data' => [
+                        [
+                            'id'     => 'sess-1',
+                            'guests' => [],
+                        ],
+                    ],
+                ];
             }
         };
 
         $service->getGuestStarSession('1', '2');
 
-        $this->assertSame('GET', $capturedParams['method']);
-        $this->assertSame('/guest_star/session', $capturedParams['endpoint']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('GET', $capturedParams['method']);
+        self::assertSame('/guest_star/session', $capturedParams['endpoint']);
     }
 
     #[Test]
@@ -98,17 +119,27 @@ final class HasGuestStarMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                return ['data' => [['id' => 'sess-1', 'guests' => []]]];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                return [
+                    'data' => [
+                        [
+                            'id'     => 'sess-1',
+                            'guests' => [],
+                        ],
+                    ],
+                ];
             }
         };
 
         $guestStarSession = $service->getGuestStarSession('1', '2');
 
-        $this->assertInstanceOf(GuestStarSession::class, $guestStarSession);
-        $this->assertSame('sess-1', $guestStarSession->id);
-        $this->assertSame([], $guestStarSession->guests);
+        self::assertNotNull($guestStarSession);
+        self::assertSame('sess-1', $guestStarSession->id);
+        self::assertSame([], $guestStarSession->guests);
     }
 
     #[Test]
@@ -119,8 +150,11 @@ final class HasGuestStarMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
                 return [
                     'data' => [
                         [
@@ -137,9 +171,8 @@ final class HasGuestStarMethodsTest extends TestCase
 
         $guestStarSettings = $service->getChannelGuestStarSettings('1', '2');
 
-        $this->assertInstanceOf(GuestStarSettings::class, $guestStarSettings);
-        $this->assertSame('1', $guestStarSettings->broadcasterId);
-        $this->assertSame(5, $guestStarSettings->slotCount);
-        $this->assertSame('TILED_LAYOUT', $guestStarSettings->groupLayout);
+        self::assertSame('1', $guestStarSettings->broadcasterId);
+        self::assertSame(5, $guestStarSettings->slotCount);
+        self::assertSame('TILED_LAYOUT', $guestStarSettings->groupLayout);
     }
 }

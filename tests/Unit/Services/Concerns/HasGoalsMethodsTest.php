@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Tests\Unit\Services\Concerns;
 
 use PHPUnit\Framework\Attributes\Test;
-use Spatie\LaravelData\DataCollection;
 use Zairakai\LaravelTwitch\Dto\Goals\Goal;
 use Zairakai\LaravelTwitch\Services\TwitchApiService;
 use Zairakai\LaravelTwitch\Tests\TestCase;
@@ -32,19 +31,31 @@ final class HasGoalsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
-                return ['data' => []];
+                return [
+                    'data' => [],
+                ];
             }
         };
 
         $service->getCreatorGoals('1');
 
-        $this->assertSame('GET', $capturedParams['method']);
-        $this->assertSame('/goals', $capturedParams['endpoint']);
-        $this->assertSame(['broadcaster_id' => '1'], $capturedParams['params']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('GET', $capturedParams['method']);
+        self::assertSame('/goals', $capturedParams['endpoint']);
+        self::assertSame([
+            'broadcaster_id' => '1',
+        ], $capturedParams['params']);
     }
 
     #[Test]
@@ -55,8 +66,11 @@ final class HasGoalsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
                 return [
                     'data' => [
                         [
@@ -77,10 +91,9 @@ final class HasGoalsMethodsTest extends TestCase
 
         $dataCollection = $service->getCreatorGoals('1');
 
-        $this->assertInstanceOf(DataCollection::class, $dataCollection);
-        $this->assertInstanceOf(Goal::class, $dataCollection->first());
-        $this->assertSame('goal-1', $dataCollection->first()->id);
-        $this->assertSame(500, $dataCollection->first()->currentAmount);
-        $this->assertSame(1000, $dataCollection->first()->targetAmount);
+        self::assertInstanceOf(Goal::class, $dataCollection->first());
+        self::assertSame('goal-1', $dataCollection->first()->id);
+        self::assertSame(500, $dataCollection->first()->currentAmount);
+        self::assertSame(1000, $dataCollection->first()->targetAmount);
     }
 }

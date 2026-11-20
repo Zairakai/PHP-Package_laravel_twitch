@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Tests\Unit\Services\Concerns;
 
 use PHPUnit\Framework\Attributes\Test;
-use Spatie\LaravelData\DataCollection;
 use Zairakai\LaravelTwitch\Dto\ContentLabels\ContentClassificationLabel;
 use Zairakai\LaravelTwitch\Services\TwitchApiService;
 use Zairakai\LaravelTwitch\Tests\TestCase;
@@ -32,18 +31,28 @@ final class HasContentLabelsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
-                return ['data' => []];
+                return [
+                    'data' => [],
+                ];
             }
         };
 
         $service->getContentClassificationLabels();
 
-        $this->assertSame('GET', $capturedParams['method']);
-        $this->assertSame('/content_classification_labels', $capturedParams['endpoint']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('GET', $capturedParams['method']);
+        self::assertSame('/content_classification_labels', $capturedParams['endpoint']);
     }
 
     #[Test]
@@ -54,8 +63,11 @@ final class HasContentLabelsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
                 return [
                     'data' => [
                         [
@@ -70,9 +82,8 @@ final class HasContentLabelsMethodsTest extends TestCase
 
         $dataCollection = $service->getContentClassificationLabels();
 
-        $this->assertInstanceOf(DataCollection::class, $dataCollection);
-        $this->assertInstanceOf(ContentClassificationLabel::class, $dataCollection->first());
-        $this->assertSame('DrugsIntoxication', $dataCollection->first()->id);
-        $this->assertSame('Drug use', $dataCollection->first()->description);
+        self::assertInstanceOf(ContentClassificationLabel::class, $dataCollection->first());
+        self::assertSame('DrugsIntoxication', $dataCollection->first()->id);
+        self::assertSame('Drug use', $dataCollection->first()->description);
     }
 }

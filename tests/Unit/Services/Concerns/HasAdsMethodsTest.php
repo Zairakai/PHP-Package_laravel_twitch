@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Tests\Unit\Services\Concerns;
 
 use PHPUnit\Framework\Attributes\Test;
-use Zairakai\LaravelTwitch\Dto\Ads\AdSchedule;
-use Zairakai\LaravelTwitch\Dto\Ads\AdSnooze;
-use Zairakai\LaravelTwitch\Dto\Ads\CommercialResult;
 use Zairakai\LaravelTwitch\Services\TwitchApiService;
 use Zairakai\LaravelTwitch\Tests\TestCase;
 
@@ -33,19 +30,37 @@ final class HasAdsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
-                return ['data' => [['duration' => 30, 'snooze_count' => 0, 'preroll_free_time' => 0]]];
+                return [
+                    'data' => [
+                        [
+                            'duration'          => 30,
+                            'snooze_count'      => 0,
+                            'preroll_free_time' => 0,
+                        ],
+                    ],
+                ];
             }
         };
 
         $service->getAdSchedule('123');
 
-        $this->assertSame('GET', $capturedParams['method']);
-        $this->assertSame('/channels/ads', $capturedParams['endpoint']);
-        $this->assertSame(['broadcaster_id' => '123'], $capturedParams['params']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('GET', $capturedParams['method']);
+        self::assertSame('/channels/ads', $capturedParams['endpoint']);
+        self::assertSame([
+            'broadcaster_id' => '123',
+        ], $capturedParams['params']);
     }
 
     // ── snoozeNextAd ──────────────────────────────────────────────────────────
@@ -68,18 +83,33 @@ final class HasAdsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
-                return ['data' => [['broadcaster_id' => '123', 'snooze_count' => 1]]];
+                return [
+                    'data' => [
+                        [
+                            'broadcaster_id' => '123',
+                            'snooze_count'   => 1,
+                        ],
+                    ],
+                ];
             }
         };
 
         $service->snoozeNextAd('123');
 
-        $this->assertSame('POST', $capturedParams['method']);
-        $this->assertSame('/channels/ads/schedule/snooze', $capturedParams['endpoint']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('POST', $capturedParams['method']);
+        self::assertSame('/channels/ads/schedule/snooze', $capturedParams['endpoint']);
     }
 
     // ── startCommercial ───────────────────────────────────────────────────────
@@ -102,18 +132,34 @@ final class HasAdsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
-                return ['data' => [['length' => 30, 'message' => '', 'retry_after' => 480]]];
+                return [
+                    'data' => [
+                        [
+                            'length'      => 30,
+                            'message'     => '',
+                            'retry_after' => 480,
+                        ],
+                    ],
+                ];
             }
         };
 
         $service->startCommercial('123', 30);
 
-        $this->assertSame('POST', $capturedParams['method']);
-        $this->assertSame('/channels/commercial', $capturedParams['endpoint']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('POST', $capturedParams['method']);
+        self::assertSame('/channels/commercial', $capturedParams['endpoint']);
     }
 
     #[Test]
@@ -124,17 +170,27 @@ final class HasAdsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                return ['data' => [['length' => 30, 'message' => '', 'retry_after' => 480]]];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                return [
+                    'data' => [
+                        [
+                            'length'      => 30,
+                            'message'     => '',
+                            'retry_after' => 480,
+                        ],
+                    ],
+                ];
             }
         };
 
         $commercialResult = $service->startCommercial('123', 30);
 
-        $this->assertInstanceOf(CommercialResult::class, $commercialResult);
-        $this->assertSame(30, $commercialResult->length);
-        $this->assertSame(480, $commercialResult->retryAfter);
+        self::assertSame(30, $commercialResult->length);
+        self::assertSame(480, $commercialResult->retryAfter);
     }
 
     #[Test]
@@ -145,17 +201,27 @@ final class HasAdsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                return ['data' => [['duration' => 30, 'snooze_count' => 0, 'preroll_free_time' => 0]]];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                return [
+                    'data' => [
+                        [
+                            'duration'          => 30,
+                            'snooze_count'      => 0,
+                            'preroll_free_time' => 0,
+                        ],
+                    ],
+                ];
             }
         };
 
         $adSchedule = $service->getAdSchedule('123');
 
-        $this->assertInstanceOf(AdSchedule::class, $adSchedule);
-        $this->assertSame(30, $adSchedule->duration);
-        $this->assertSame(0, $adSchedule->snoozeCount);
+        self::assertSame(30, $adSchedule->duration);
+        self::assertSame(0, $adSchedule->snoozeCount);
     }
 
     #[Test]
@@ -166,16 +232,25 @@ final class HasAdsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                return ['data' => [['broadcaster_id' => '123', 'snooze_count' => 1]]];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                return [
+                    'data' => [
+                        [
+                            'broadcaster_id' => '123',
+                            'snooze_count'   => 1,
+                        ],
+                    ],
+                ];
             }
         };
 
         $adSnooze = $service->snoozeNextAd('123');
 
-        $this->assertInstanceOf(AdSnooze::class, $adSnooze);
-        $this->assertSame('123', $adSnooze->broadcasterId);
-        $this->assertSame(1, $adSnooze->snoozeCount);
+        self::assertSame('123', $adSnooze->broadcasterId);
+        self::assertSame(1, $adSnooze->snoozeCount);
     }
 }

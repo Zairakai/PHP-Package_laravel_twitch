@@ -29,19 +29,29 @@ final class HasUserMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
-                return ['data' => []];
+                return [
+                    'data' => [],
+                ];
             }
         };
 
         $service->getAuthenticatedUser();
 
-        $this->assertSame('GET', $capturedParams['method']);
-        $this->assertSame('/users', $capturedParams['endpoint']);
-        $this->assertSame([], $capturedParams['params']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('GET', $capturedParams['method']);
+        self::assertSame('/users', $capturedParams['endpoint']);
+        self::assertSame([], $capturedParams['params']);
     }
 
     #[Test]
@@ -57,8 +67,11 @@ final class HasUserMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
                 $this->calls[] = [
                     'method'   => $method,
                     'endpoint' => $endpoint,
@@ -67,29 +80,44 @@ final class HasUserMethodsTest extends TestCase
 
                 return match ($endpoint) {
                     '/subscriptions/user' => [
-                        'data' => [[
-                            'broadcaster_id'    => '12345',
-                            'broadcaster_login' => 'twitchdev',
-                            'broadcaster_name'  => 'TwitchDev',
-                            'tier'              => '1000',
-                            'is_gift'           => false,
-                        ]],
+                        'data' => [
+                            [
+                                'broadcaster_id'    => '12345',
+                                'broadcaster_login' => 'twitchdev',
+                                'broadcaster_name'  => 'TwitchDev',
+                                'tier'              => '1000',
+                                'is_gift'           => false,
+                            ],
+                        ],
                     ],
                     '/users' => 'PUT' === $method
-                        ? ['data' => [[
-                            'id'                => '12345',
-                            'login'             => 'zairakai',
-                            'display_name'      => 'Zairakai',
-                            'type'              => '',
-                            'broadcaster_type'  => 'affiliate',
-                            'description'       => 'updated',
-                            'profile_image_url' => 'https://example.com/avatar.jpg',
-                            'offline_image_url' => '',
-                            'view_count'        => 1,
-                        ]]]
-                        : ['data' => []],
-                    '/users/extensions', '/users/extensions/list'  => ['data' => ['panel' => []]],
-                    default                                        => ['data' => [], 'pagination' => []],
+                        ? [
+                            'data' => [
+                                [
+                                    'id'                => '12345',
+                                    'login'             => 'zairakai',
+                                    'display_name'      => 'Zairakai',
+                                    'type'              => '',
+                                    'broadcaster_type'  => 'affiliate',
+                                    'description'       => 'updated',
+                                    'profile_image_url' => 'https://example.com/avatar.jpg',
+                                    'offline_image_url' => '',
+                                    'view_count'        => 1,
+                                ],
+                            ],
+                        ]
+                        : [
+                            'data' => [],
+                        ],
+                    '/users/extensions', '/users/extensions/list'  => [
+                        'data' => [
+                            'panel' => [],
+                        ],
+                    ],
+                    default                                        => [
+                        'data'       => [],
+                        'pagination' => [],
+                    ],
                 };
             }
         };
@@ -97,23 +125,50 @@ final class HasUserMethodsTest extends TestCase
         $service->blockUser('u-1', 'spam');
         $service->checkUserSubscription('b-1', 'u-1');
         $service->getAuthorizationByUser('u-1');
-        $service->getChannelFollowers('b-1', 'u-1', 5, 'cur-1');
-        $service->getFollowedChannels('u-1', 'b-1', 5, 'cur-2');
-        $service->getSubscriptions('b-1', 'u-1', 5, 'cur-3');
+        $service->getChannelFollowers(
+            'b-1',
+            'u-1',
+            5,
+            'cur-1',
+        );
+        $service->getFollowedChannels(
+            'u-1',
+            'b-1',
+            5,
+            'cur-2',
+        );
+        $service->getSubscriptions(
+            'b-1',
+            'u-1',
+            5,
+            'cur-3',
+        );
         $service->getUserActiveExtensions('u-1');
-        $service->getUserBlocks('b-1', 5, 'cur-4');
+        $service->getUserBlocks(
+            'b-1',
+            5,
+            'cur-4',
+        );
         $service->getUserExtensions();
-        $service->getUsers(['1', '2'], ['a', 'b']);
+        $service->getUsers([
+            '1',
+            '2',
+        ], [
+            'a',
+            'b',
+        ]);
         $service->unblockUser('u-1');
         $service->updateUser('new bio');
-        $service->updateUserExtensions(['panel' => []]);
+        $service->updateUserExtensions([
+            'panel' => [],
+        ]);
 
-        $this->assertCount(13, $service->calls);
-        $this->assertSame('/users/blocks', $service->calls[0]['endpoint']);
-        $this->assertSame('/subscriptions/user', $service->calls[1]['endpoint']);
-        $this->assertSame('/users/extensions', $service->calls[6]['endpoint']);
-        $this->assertSame('/users', $service->calls[11]['endpoint']);
-        $this->assertSame('PUT', $service->calls[11]['method']);
+        self::assertCount(13, $service->calls);
+        self::assertSame('/users/blocks', $service->calls[0]['endpoint']);
+        self::assertSame('/subscriptions/user', $service->calls[1]['endpoint']);
+        self::assertSame('/users/extensions', $service->calls[6]['endpoint']);
+        self::assertSame('/users', $service->calls[11]['endpoint']);
+        self::assertSame('PUT', $service->calls[11]['method']);
     }
 
     // ── getAuthenticatedUser ──────────────────────────────────────────────────
@@ -126,8 +181,11 @@ final class HasUserMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
                 return [
                     'data' => [
                         [
@@ -149,10 +207,10 @@ final class HasUserMethodsTest extends TestCase
 
         $user = $service->getAuthenticatedUser();
 
-        $this->assertInstanceOf(User::class, $user);
-        $this->assertSame('12345', $user->id);
-        $this->assertSame('teststreamer', $user->login);
-        $this->assertSame('TestStreamer', $user->displayName);
+        self::assertInstanceOf(User::class, $user);
+        self::assertSame('12345', $user->id);
+        self::assertSame('teststreamer', $user->login);
+        self::assertSame('TestStreamer', $user->displayName);
     }
 
     #[Test]
@@ -163,12 +221,17 @@ final class HasUserMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                return ['data' => []];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                return [
+                    'data' => [],
+                ];
             }
         };
 
-        $this->assertNull($service->getAuthenticatedUser());
+        self::assertNull($service->getAuthenticatedUser());
     }
 }

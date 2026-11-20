@@ -54,7 +54,11 @@ trait HasTeamsMethods
             $params['id'] = $id;
         }
 
-        $raw = $this->makeRequest('GET', '/teams', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/teams',
+            $params,
+        );
 
         /** @var array<int, array<string, mixed>> $items */
         $items = $raw['data'];

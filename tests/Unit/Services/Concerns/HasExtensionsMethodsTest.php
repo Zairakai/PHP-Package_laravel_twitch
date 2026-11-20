@@ -30,18 +30,28 @@ final class HasExtensionsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
-                return ['data' => []];
+                return [
+                    'data' => [],
+                ];
             }
         };
 
         $service->getExtensionLiveChannels('ext-1');
 
-        $this->assertSame('GET', $capturedParams['method']);
-        $this->assertSame('/extensions/live', $capturedParams['endpoint']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('GET', $capturedParams['method']);
+        self::assertSame('/extensions/live', $capturedParams['endpoint']);
     }
 
     // ── getExtension ──────────────────────────────────────────────────────────
@@ -64,18 +74,28 @@ final class HasExtensionsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
-                return ['data' => []];
+                return [
+                    'data' => [],
+                ];
             }
         };
 
         $service->getExtension('ext-1');
 
-        $this->assertSame('GET', $capturedParams['method']);
-        $this->assertSame('/extensions', $capturedParams['endpoint']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('GET', $capturedParams['method']);
+        self::assertSame('/extensions', $capturedParams['endpoint']);
     }
 
     #[Test]
@@ -91,36 +111,70 @@ final class HasExtensionsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
                 $this->calls[] = [
                     'method'   => $method,
                     'endpoint' => $endpoint,
                     'params'   => $params,
                 ];
 
-                return ['data' => [], 'pagination' => []];
+                return [
+                    'data'       => [],
+                    'pagination' => [],
+                ];
             }
         };
 
         $service->createExtensionSecret('ext-1', 600);
         $service->getExtension('ext-1', '1.0.0');
         $service->getExtensionBitsProducts('ext-client', true);
-        $service->getExtensionConfigurationSegment('ext-1', 'broadcaster', '123');
-        $service->getExtensionLiveChannels('ext-1', 10, 'cursor-1');
+        $service->getExtensionConfigurationSegment(
+            'ext-1',
+            'broadcaster',
+            '123',
+        );
+        $service->getExtensionLiveChannels(
+            'ext-1',
+            10,
+            'cursor-1',
+        );
         $service->getExtensionSecrets('ext-1');
         $service->getReleasedExtension('ext-1', '1.0.0');
-        $service->sendExtensionChatMessage('123', 'ext-1', '1.0.0', 'hello');
-        $service->sendExtensionPubSubMessage('123', 'ext-1', 'payload', ['broadcast']);
-        $service->setExtensionConfigurationSegment('ext-1', 'global', '123', '{"enabled":true}', 'v2');
-        $service->setExtensionRequiredConfiguration('123', 'ext-1', '1.0.0', 'v2');
-        $service->updateExtensionBitsProduct('ext-client', ['sku' => 'item-1']);
+        $service->sendExtensionChatMessage(
+            '123',
+            'ext-1',
+            '1.0.0',
+            'hello',
+        );
+        $service->sendExtensionPubSubMessage('123', 'ext-1', 'payload', [
+            'broadcast',
+        ]);
+        $service->setExtensionConfigurationSegment(
+            'ext-1',
+            'global',
+            '123',
+            '{"enabled":true}',
+            'v2',
+        );
+        $service->setExtensionRequiredConfiguration(
+            '123',
+            'ext-1',
+            '1.0.0',
+            'v2',
+        );
+        $service->updateExtensionBitsProduct('ext-client', [
+            'sku' => 'item-1',
+        ]);
 
-        $this->assertCount(12, $service->calls);
-        $this->assertSame('/extensions/jwt/secrets', $service->calls[0]['endpoint']);
-        $this->assertSame('/bits/extensions', $service->calls[2]['endpoint']);
-        $this->assertSame('/extensions/configurations', $service->calls[9]['endpoint']);
-        $this->assertSame('/bits/extensions', $service->calls[11]['endpoint']);
+        self::assertCount(12, $service->calls);
+        self::assertSame('/extensions/jwt/secrets', $service->calls[0]['endpoint']);
+        self::assertSame('/bits/extensions', $service->calls[2]['endpoint']);
+        self::assertSame('/extensions/configurations', $service->calls[9]['endpoint']);
+        self::assertSame('/bits/extensions', $service->calls[11]['endpoint']);
     }
 
     #[Test]
@@ -131,15 +185,25 @@ final class HasExtensionsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                return ['data' => [['extension_id' => 'ext-1', 'name' => 'My Extension']]];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                return [
+                    'data' => [
+                        [
+                            'extension_id' => 'ext-1',
+                            'name'         => 'My Extension',
+                        ],
+                    ],
+                ];
             }
         };
 
         $result = $service->getExtension('ext-1');
 
-        $this->assertArrayHasKey('data', $result);
+        self::assertArrayHasKey('data', $result);
     }
 
     #[Test]
@@ -150,14 +214,19 @@ final class HasExtensionsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                return ['data' => []];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                return [
+                    'data' => [],
+                ];
             }
         };
 
         $result = $service->getExtensionLiveChannels('ext-1');
 
-        $this->assertArrayHasKey('data', $result);
+        self::assertArrayHasKey('data', $result);
     }
 }

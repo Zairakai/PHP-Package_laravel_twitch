@@ -76,7 +76,11 @@ trait HasChannelPointsMethods
             $params['id'] = $rewardIds;
         }
 
-        $raw = $this->makeRequest('GET', '/channel_points/custom_rewards', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/channel_points/custom_rewards',
+            $params,
+        );
 
         /** @var list<array<string, mixed>> $items */
         $items = $raw['data'] ?? [];
@@ -104,6 +108,7 @@ trait HasChannelPointsMethods
         string|array|null $redemptionIds = null,
         int $first = 20,
         ?string $after = null,
+        ?string $sort = null,
     ): PaginatedResult {
         $params = [
             'broadcaster_id' => $broadcasterId,
@@ -111,8 +116,13 @@ trait HasChannelPointsMethods
             'first'          => $first,
         ];
 
+        // Twitch is case-sensitive: CANCELED, FULFILLED or UNFULFILLED, and OLDEST or NEWEST.
         if (null !== $status) {
-            $params['status'] = $status;
+            $params['status'] = strtoupper($status);
+        }
+
+        if (null !== $sort) {
+            $params['sort'] = strtoupper($sort);
         }
 
         if (null !== $redemptionIds) {
@@ -123,7 +133,11 @@ trait HasChannelPointsMethods
             $params['after'] = $after;
         }
 
-        $raw = $this->makeRequest('GET', '/channel_points/custom_rewards/redemptions', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/channel_points/custom_rewards/redemptions',
+            $params,
+        );
 
         return PaginatedResult::fromRaw($raw, Redemption::class);
     }
@@ -173,7 +187,7 @@ trait HasChannelPointsMethods
             'broadcaster_id' => $broadcasterId,
             'reward_id'      => $rewardId,
             'id'             => $redemptionIds,
-            'status'         => $status,
+            'status'         => strtoupper($status),
         ]);
 
         /** @var list<array<string, mixed>> $items */

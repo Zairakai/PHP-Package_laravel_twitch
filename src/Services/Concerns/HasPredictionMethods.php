@@ -24,7 +24,11 @@ trait HasPredictionMethods
     {
         /** @var array<string, mixed> $requestData */
         $requestData = $createPredictionRequest->toArray();
-        $raw         = $this->makeRequest('POST', '/predictions', $requestData);
+        $raw         = $this->makeRequest(
+            'POST',
+            '/predictions',
+            $requestData,
+        );
 
         /** @var array<int, array<string, mixed>> $items */
         $items = $raw['data'];
@@ -49,14 +53,18 @@ trait HasPredictionMethods
         $body = [
             'broadcaster_id' => $broadcasterId,
             'id'             => $predictionId,
-            'status'         => $status,
+            'status'         => strtoupper($status),
         ];
 
         if (null !== $winningOutcomeId) {
             $body['winning_outcome_id'] = $winningOutcomeId;
         }
 
-        $raw = $this->makeRequest('PATCH', '/predictions', $body);
+        $raw = $this->makeRequest(
+            'PATCH',
+            '/predictions',
+            $body,
+        );
 
         /** @var array<int, array<string, mixed>> $items */
         $items = $raw['data'];
@@ -92,7 +100,11 @@ trait HasPredictionMethods
             $params['after'] = $after;
         }
 
-        $raw = $this->makeRequest('GET', '/predictions', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/predictions',
+            $params,
+        );
 
         return PaginatedResult::fromRaw($raw, Prediction::class);
     }
