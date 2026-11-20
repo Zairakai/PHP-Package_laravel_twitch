@@ -10,7 +10,7 @@ tests/bats/
 │   └── test_helper.bash        # Shared assertions and setup/teardown
 ├── unit/
 │   ├── package-structure.bats  # Package metadata and file structure (36 tests)
-│   └── twitch-watch.bats       # Twitch announcements watch job (11 tests)
+│   └── twitch-watch.bats       # Structure of the Twitch watch job (5 tests)
 ├── integration/
 │   └── composer-scripts.bats   # Composer scripts and dev-tools integration (9 tests)
 └── README.md
@@ -24,11 +24,11 @@ Validates package metadata, source files (services, facades, controller, model),
 language has every key), the migration, the service provider and the config,
 config/migrations, tests directory, and CI/tooling config files.
 
-### Unit — `twitch-watch.bats` (11 tests)
+### Unit — `twitch-watch.bats` (5 tests)
 
-Runs `.gitlab/scripts/twitch-watch.php` on feeds written on the fly (dry-run, then against a local fake GitLab):
-recent entries only, window, unreadable or invalid feed, missing token, no duplicate issue, refused token,
-plus the `twitch:watch` job and the archive exclusion.
+Structure only: the script `.gitlab/scripts/twitch-watch.php` and its syntax, the `twitch:watch` job, the exclusions
+of `deps:update` and `deps:audit`, and the export-ignore of `.gitlab`. What the script does is tested by PHPUnit
+(`tests/Feature/TwitchWatchScriptTest.php`).
 
 ### Integration — `composer-scripts.bats` (9 tests)
 
