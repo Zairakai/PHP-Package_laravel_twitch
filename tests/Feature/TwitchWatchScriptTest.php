@@ -212,9 +212,11 @@ final class TwitchWatchScriptTest extends TestCase
     private function gitlabEnvironment(string $api, string $token): array
     {
         return [
-            'FRESHNESS_TOKEN' => $token,
-            'CI_PROJECT_ID'   => '1',
-            'CI_API_V4_URL'   => $api,
+            'FRESHNESS_TOKEN'   => $token,
+            // The CI has the group variable ISSUE_ASSIGNEE_ID: the test wants the user of the token
+            'ISSUE_ASSIGNEE_ID' => '',
+            'CI_PROJECT_ID'     => '1',
+            'CI_API_V4_URL'     => $api,
         ];
     }
 
