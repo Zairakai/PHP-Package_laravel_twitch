@@ -72,10 +72,10 @@ teardown() {
     assert_dir_exists "${PROJECT_ROOT}/vendor/zairakai/laravel-dev-tools"
 }
 
-@test "phpunit.xml is a regular file (not symlink)" {
+@test "config/dev-tools/phpunit.xml is a regular file (not symlink)" {
     # phpunit.xml must be copied, not symlinked (XML relative paths issue)
-    [ -f "${PROJECT_ROOT}/phpunit.xml" ]
-    [ ! -L "${PROJECT_ROOT}/phpunit.xml" ]
+    [ -f "${PROJECT_ROOT}/config/dev-tools/phpunit.xml" ]
+    [ ! -L "${PROJECT_ROOT}/config/dev-tools/phpunit.xml" ]
 }
 
 # ============================================================================
