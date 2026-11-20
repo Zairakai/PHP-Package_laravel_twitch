@@ -1,0 +1,9 @@
+includes:
+  - ../../vendor/larastan/larastan/extension.neon
+  - ../../vendor/zairakai/laravel-dev-tools/config/library.neon
+  - baseline.neon
+
+parameters:
+  paths:
+    - ../../src
+    - ../../tests

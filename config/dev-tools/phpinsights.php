@@ -7,45 +7,11 @@ use NunoMaduro\PhpInsights\Domain\Insights\MethodCyclomaticComplexityIsHigh;
 use NunoMaduro\PhpInsights\Domain\Sniffs\ForbiddenSetterSniff;
 use PHP_CodeSniffer\Standards\Generic\Sniffs\Files\LineLengthSniff;
 use PhpCsFixer\Fixer\ReturnNotation\ReturnAssignmentFixer;
-use SlevomatCodingStandard\Sniffs\Commenting\DocCommentSpacingSniff;
 use SlevomatCodingStandard\Sniffs\Commenting\InlineDocCommentDeclarationSniff;
 
-/*
- * PHP Insights Configuration — zairakai/laravel-twitch
- * -----------------------------------------------------
- *
- * This file extends the base configuration from laravel-dev-tools.
- *
- * IMPORTANT: For arrays with numeric keys (remove, add, exclude),
- * use the spread operator [...] to merge. Do NOT use array_replace_recursive()
- * as it replaces by index instead of merging.
- */
-
-/* Load base configuration from package */
-$baseConfig = [];
-
-$currentFile   = __FILE__;
-$possiblePaths = [
-    /* Normal Laravel project */
-    dirname(__DIR__, 2) . '/vendor/zairakai/laravel-dev-tools/config/insights.base.php',
-
-    /* Testbench environment */
-    dirname(__DIR__, 6) . '/config/insights.base.php',
-
-    /* Local project config */
-    dirname(__DIR__, 2) . '/config/insights.base.php',
-];
-
-foreach ($possiblePaths as $path) {
-    if (
-        file_exists($path)
-        && realpath($path) !== realpath($currentFile)
-    ) {
-        $baseConfig = require $path;
-
-        break;
-    }
-}
+// Only what is specific to the project, and why: the base configuration is in vendor/zairakai/laravel-dev-tools.
+// For the lists (remove, add, exclude) use the spread operator: array_replace_recursive() replaces by index.
+$baseConfig = require dirname(__DIR__, 2) . '/vendor/zairakai/laravel-dev-tools/config/phpinsights.php';
 
 /*
  * ── Cyclomatic complexity ─────────────────────────────────────────────────────
@@ -119,22 +85,6 @@ $baseConfig['remove'] = [
 ];
 
 /*
- * ── DocCommentSpacingSniff — Pint conflict ────────────────────────────────────
- *
- * PHPInsights (Slevocat) requires 1 blank line between different annotation
- * types (@deprecated → @see). Pint's phpdoc_separation fixer removes that
- * blank line when the @deprecated has a continuation line. Since Pint is the
- * canonical formatter, we exclude the one affected file from this check.
- */
-$baseConfig['config'][DocCommentSpacingSniff::class] = [
-    ...($baseConfig['config'][DocCommentSpacingSniff::class] ?? []),
-    'exclude' => [
-        ...($baseConfig['config'][DocCommentSpacingSniff::class]['exclude'] ?? []),
-        'Services/Concerns/HasTagsMethods.php',
-    ],
-];
-
-/*
  * ── Line length — Rector conflict ────────────────────────────────────────────
  *
  * Rector's RenameParamToMatchTypeRector generates parameter names that match
@@ -142,12 +92,16 @@ $baseConfig['config'][DocCommentSpacingSniff::class] = [
  * static fn closure signature and return type, the resulting line exceeds
  * 120 characters. Shortening the parameter name would be reverted by Rector
  * on the next run. We exclude the affected file rather than fight the rule.
+ *
+ * EventSubEventFactory holds the table of the EventSub types: one line per type, aligned, and the longest class name
+ * makes one of them longer than 120 characters.
  */
 $baseConfig['config'][LineLengthSniff::class] = [
     ...($baseConfig['config'][LineLengthSniff::class] ?? []),
     'exclude' => [
         ...($baseConfig['config'][LineLengthSniff::class]['exclude'] ?? []),
         'Services/Concerns/HasConduitsMethods.php',
+        'Dto/EventSub/EventSubEventFactory.php',
     ],
 ];
 
