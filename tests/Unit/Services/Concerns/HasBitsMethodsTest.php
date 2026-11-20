@@ -5,12 +5,9 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Tests\Unit\Services\Concerns;
 
 use PHPUnit\Framework\Attributes\Test;
-use Spatie\LaravelData\DataCollection;
 use Zairakai\LaravelTwitch\Dto\Bits\BitsLeaderboardEntry;
 use Zairakai\LaravelTwitch\Dto\Bits\Cheermote;
 use Zairakai\LaravelTwitch\Dto\Bits\CustomPowerUp;
-use Zairakai\LaravelTwitch\Dto\Bits\ExtensionTransaction;
-use Zairakai\LaravelTwitch\Dto\PaginatedResult;
 use Zairakai\LaravelTwitch\Services\TwitchApiService;
 use Zairakai\LaravelTwitch\Tests\TestCase;
 
@@ -36,18 +33,28 @@ final class HasBitsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
-                return ['data' => []];
+                return [
+                    'data' => [],
+                ];
             }
         };
 
         $service->getBitsLeaderboard();
 
-        $this->assertSame('GET', $capturedParams['method']);
-        $this->assertSame('/bits/leaderboard', $capturedParams['endpoint']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('GET', $capturedParams['method']);
+        self::assertSame('/bits/leaderboard', $capturedParams['endpoint']);
     }
 
     // ── getCheermotes ─────────────────────────────────────────────────────────
@@ -70,18 +77,28 @@ final class HasBitsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
-                return ['data' => []];
+                return [
+                    'data' => [],
+                ];
             }
         };
 
         $service->getCheermotes();
 
-        $this->assertSame('GET', $capturedParams['method']);
-        $this->assertSame('/bits/cheermotes', $capturedParams['endpoint']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('GET', $capturedParams['method']);
+        self::assertSame('/bits/cheermotes', $capturedParams['endpoint']);
     }
 
     // ── getCustomPowerUps ─────────────────────────────────────────────────────
@@ -104,19 +121,30 @@ final class HasBitsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
-                return ['data' => []];
+                return [
+                    'data' => [],
+                ];
             }
         };
 
         $service->getCustomPowerUps('12345');
 
-        $this->assertSame('GET', $capturedParams['method']);
-        $this->assertSame('/bits/custom_power_ups', $capturedParams['endpoint']);
-        $this->assertSame('12345', $capturedParams['params']['broadcaster_id']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('GET', $capturedParams['method']);
+        self::assertSame('/bits/custom_power_ups', $capturedParams['endpoint']);
+        self::assertIsArray($capturedParams['params']);
+        self::assertSame('12345', $capturedParams['params']['broadcaster_id']);
     }
 
     // ── getExtensionTransactions ──────────────────────────────────────────────
@@ -139,18 +167,31 @@ final class HasBitsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
-                return ['data' => [], 'pagination' => ['cursor' => '']];
+                return [
+                    'data'       => [],
+                    'pagination' => [
+                        'cursor' => '',
+                    ],
+                ];
             }
         };
 
         $service->getExtensionTransactions('ext-1');
 
-        $this->assertSame('GET', $capturedParams['method']);
-        $this->assertSame('/extensions/transactions', $capturedParams['endpoint']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('GET', $capturedParams['method']);
+        self::assertSame('/extensions/transactions', $capturedParams['endpoint']);
     }
 
     #[Test]
@@ -161,8 +202,11 @@ final class HasBitsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
                 return [
                     'data' => [
                         [
@@ -179,10 +223,9 @@ final class HasBitsMethodsTest extends TestCase
 
         $dataCollection = $service->getBitsLeaderboard();
 
-        $this->assertInstanceOf(DataCollection::class, $dataCollection);
-        $this->assertInstanceOf(BitsLeaderboardEntry::class, $dataCollection->first());
-        $this->assertSame('1', $dataCollection->first()->userId);
-        $this->assertSame(100, $dataCollection->first()->score);
+        self::assertInstanceOf(BitsLeaderboardEntry::class, $dataCollection->first());
+        self::assertSame('1', $dataCollection->first()->userId);
+        self::assertSame(100, $dataCollection->first()->score);
     }
 
     #[Test]
@@ -193,8 +236,11 @@ final class HasBitsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
                 return [
                     'data' => [
                         [
@@ -212,9 +258,8 @@ final class HasBitsMethodsTest extends TestCase
 
         $dataCollection = $service->getCheermotes();
 
-        $this->assertInstanceOf(DataCollection::class, $dataCollection);
-        $this->assertInstanceOf(Cheermote::class, $dataCollection->first());
-        $this->assertSame('Cheer', $dataCollection->first()->prefix);
+        self::assertInstanceOf(Cheermote::class, $dataCollection->first());
+        self::assertSame('Cheer', $dataCollection->first()->prefix);
     }
 
     #[Test]
@@ -225,8 +270,11 @@ final class HasBitsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
                 return [
                     'data' => [
                         [
@@ -250,10 +298,9 @@ final class HasBitsMethodsTest extends TestCase
 
         $dataCollection = $service->getCustomPowerUps('12345');
 
-        $this->assertInstanceOf(DataCollection::class, $dataCollection);
-        $this->assertInstanceOf(CustomPowerUp::class, $dataCollection->first());
-        $this->assertSame('power-up-1', $dataCollection->first()->id);
-        $this->assertSame(500, $dataCollection->first()->bits);
+        self::assertInstanceOf(CustomPowerUp::class, $dataCollection->first());
+        self::assertSame('power-up-1', $dataCollection->first()->id);
+        self::assertSame(500, $dataCollection->first()->bits);
     }
 
     #[Test]
@@ -264,8 +311,11 @@ final class HasBitsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
                 return [
                     'data' => [
                         [
@@ -281,16 +331,16 @@ final class HasBitsMethodsTest extends TestCase
                             'product_data'      => [],
                         ],
                     ],
-                    'pagination' => ['cursor' => 'abc123'],
+                    'pagination' => [
+                        'cursor' => 'abc123',
+                    ],
                 ];
             }
         };
 
         $paginatedResult = $service->getExtensionTransactions('ext-1');
 
-        $this->assertInstanceOf(PaginatedResult::class, $paginatedResult);
-        $this->assertCount(1, $paginatedResult->items);
-        $this->assertInstanceOf(ExtensionTransaction::class, $paginatedResult->items[0]);
-        $this->assertSame('tx-1', $paginatedResult->items[0]->id);
+        self::assertCount(1, $paginatedResult->items);
+        self::assertSame('tx-1', $paginatedResult->items[0]->id);
     }
 }

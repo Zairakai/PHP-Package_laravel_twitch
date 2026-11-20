@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\Users;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents the result of checking whether a user subscribes to a channel.
@@ -14,7 +14,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#check-user-subscription
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class SubscriptionCheck extends Data
+class SubscriptionCheck extends TwitchData
 {
     public function __construct(
         /**
@@ -45,6 +45,7 @@ class SubscriptionCheck extends Data
         /**
          * @var string|null Gifter login (if gifted)
          */
+        public ?string $gifterId = null,
         public ?string $gifterLogin = null,
 
         /**

@@ -19,8 +19,8 @@ final class ModeratedChannelTest extends TestCase
             'broadcaster_name'  => 'TwitchDev',
         ]);
 
-        $this->assertSame('12345', $moderatedChannel->broadcasterId);
-        $this->assertSame('twitchdev', $moderatedChannel->broadcasterLogin);
-        $this->assertSame('TwitchDev', $moderatedChannel->broadcasterName);
+        self::assertSame('12345', $moderatedChannel->broadcasterId);
+        self::assertSame('twitchdev', $moderatedChannel->broadcasterLogin);
+        self::assertSame('TwitchDev', $moderatedChannel->broadcasterName);
     }
 }

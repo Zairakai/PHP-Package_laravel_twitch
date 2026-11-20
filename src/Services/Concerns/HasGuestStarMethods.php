@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Services\Concerns;
 
+use InvalidArgumentException;
 use Spatie\LaravelData\DataCollection;
 use Zairakai\LaravelTwitch\Dto\GuestStar\GuestStarInvite;
 use Zairakai\LaravelTwitch\Dto\GuestStar\GuestStarSession;
@@ -79,6 +80,8 @@ trait HasGuestStarMethods
      * Remove a user from their slot in the active Guest Star session.
      *
      * Requires: channel:manage:guest_star or moderator:manage:guest_star
+     *
+     * @param bool|null $shouldReinviteGuest Send the guest back to the invite queue instead of dropping them
      */
     public function deleteGuestStarSlot(
         string $broadcasterId,
@@ -86,6 +89,7 @@ trait HasGuestStarMethods
         string $sessionId,
         string $guestId,
         string $slotId,
+        ?bool $shouldReinviteGuest = null,
     ): void {
         $this->makeRequest('DELETE', '/guest_star/slot', [
             'broadcaster_id' => $broadcasterId,
@@ -93,6 +97,9 @@ trait HasGuestStarMethods
             'session_id'     => $sessionId,
             'guest_id'       => $guestId,
             'slot_id'        => $slotId,
+            ...(null === $shouldReinviteGuest ? [] : [
+                'should_reinvite_guest' => $shouldReinviteGuest ? 'true' : 'false',
+            ]),
         ]);
     }
 
@@ -131,7 +138,11 @@ trait HasGuestStarMethods
         /** @var array<int, array<string, mixed>> $items */
         $items = $raw['data'];
 
-        return GuestStarSettings::from($items[0]);
+        // Twitch does not send the broadcaster ID back.
+        return GuestStarSettings::from([
+            'broadcaster_id' => $broadcasterId,
+            ...$items[0],
+        ]);
     }
 
     /**
@@ -171,16 +182,19 @@ trait HasGuestStarMethods
     public function getGuestStarSession(
         string $broadcasterId,
         string $moderatorId,
-    ): GuestStarSession {
+    ): ?GuestStarSession {
         $raw = $this->makeRequest('GET', '/guest_star/session', [
             'broadcaster_id' => $broadcasterId,
             'moderator_id'   => $moderatorId,
         ]);
 
+        // Twitch answers an empty list when there is no active session (or the caller may not see it).
         /** @var array<int, array<string, mixed>> $items */
-        $items = $raw['data'];
+        $items = $raw['data'] ?? [];
 
-        return GuestStarSession::from($items[0]);
+        return isset($items[0])
+            ? GuestStarSession::from($items[0])
+            : null;
     }
 
     /**
@@ -218,9 +232,11 @@ trait HasGuestStarMethods
             static fn (mixed $v): bool => null !== $v,
         );
 
-        $this->makeRequest('PUT', '/guest_star/channel_settings', array_merge([
+        // Twitch documents this route with `broadcaster_id` only (the token user must be the broadcaster): no moderator.
+        unset($settingsData['broadcaster_audio_setting']);
+
+        $this->makeRequest('PATCH', '/guest_star/channel_settings', array_merge([
             'broadcaster_id' => $broadcasterId,
-            'moderator_id'   => $moderatorId,
         ], $settingsData));
     }
 
@@ -243,11 +259,19 @@ trait HasGuestStarMethods
             'source_slot_id'  => $sourceSlotId,
         ];
 
-        if (null !== $destinationSlotId) {
-            $params['destination_slot_id'] = $destinationSlotId;
+        if (null === $destinationSlotId) {
+            throw new InvalidArgumentException(
+                'updateGuestStarSlot() needs a destination slot ID (Twitch requires it).',
+            );
         }
 
-        $this->makeRequest('PATCH', '/guest_star/slot', $params);
+        $params['destination_slot_id'] = $destinationSlotId;
+
+        $this->makeRequest(
+            'PATCH',
+            '/guest_star/slot',
+            $params,
+        );
     }
 
     /**
@@ -267,6 +291,9 @@ trait HasGuestStarMethods
             $updateGuestStarSlotSettingsRequest->toArray(),
             static fn (mixed $v): bool => null !== $v,
         );
+
+        // Twitch dropped `volume` from the reference (2026-11-10: not supported): never sent.
+        unset($settingsData['volume']);
 
         $this->makeRequest('PATCH', '/guest_star/slot_settings', array_merge([
             'broadcaster_id' => $broadcasterId,

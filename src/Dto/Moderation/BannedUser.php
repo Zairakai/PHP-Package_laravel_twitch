@@ -6,8 +6,10 @@ namespace Zairakai\LaravelTwitch\Dto\Moderation;
 
 use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents a banned or timed-out user in a broadcaster's channel.
@@ -15,7 +17,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#get-banned-users
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class BannedUser extends Data
+class BannedUser extends TwitchData
 {
     public function __construct(
         /**
@@ -56,11 +58,13 @@ class BannedUser extends Data
         /**
          * @var Carbon|null When the ban was created
          */
+        #[WithCast(FlexibleDateTimeCast::class)]
         public ?Carbon $createdAt = null,
 
         /**
          * @var Carbon|null When the timeout expires (null = permanent ban)
          */
+        #[WithCast(FlexibleDateTimeCast::class)]
         public ?Carbon $expiresAt = null,
     ) {}
 }

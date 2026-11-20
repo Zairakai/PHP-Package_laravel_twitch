@@ -6,8 +6,8 @@ namespace Zairakai\LaravelTwitch\Dto\Conduits\Requests;
 
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Attributes\MapOutputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Request DTO for a single shard update within a conduit.
@@ -16,7 +16,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  */
 #[MapInputName(SnakeCaseMapper::class)]
 #[MapOutputName(SnakeCaseMapper::class)]
-class UpdateConduitShardRequest extends Data
+class UpdateConduitShardRequest extends TwitchData
 {
     public function __construct(
         /**

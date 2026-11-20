@@ -27,11 +27,11 @@ final class AutoModSettingsTest extends TestCase
             'swearing'                   => 0,
         ]);
 
-        $this->assertSame('12345', $autoModSettings->broadcasterId);
-        $this->assertSame('67890', $autoModSettings->moderatorId);
-        $this->assertSame(2, $autoModSettings->overallLevel);
-        $this->assertSame(2, $autoModSettings->aggression);
-        $this->assertSame(1, $autoModSettings->bullying);
+        self::assertSame('12345', $autoModSettings->broadcasterId);
+        self::assertSame('67890', $autoModSettings->moderatorId);
+        self::assertSame(2, $autoModSettings->overallLevel);
+        self::assertSame(2, $autoModSettings->aggression);
+        self::assertSame(1, $autoModSettings->bullying);
     }
 
     #[Test]
@@ -42,8 +42,8 @@ final class AutoModSettingsTest extends TestCase
             'moderator_id'   => '67890',
         ]);
 
-        $this->assertNull($autoModSettings->overallLevel);
-        $this->assertSame(0, $autoModSettings->aggression);
-        $this->assertSame(0, $autoModSettings->swearing);
+        self::assertNull($autoModSettings->overallLevel);
+        self::assertSame(0, $autoModSettings->aggression);
+        self::assertSame(0, $autoModSettings->swearing);
     }
 }

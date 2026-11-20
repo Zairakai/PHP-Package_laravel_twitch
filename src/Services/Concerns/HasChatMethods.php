@@ -57,7 +57,11 @@ trait HasChatMethods
             $params['message_id'] = $messageId;
         }
 
-        $this->makeRequest('DELETE', '/moderation/chat', $params);
+        $this->makeRequest(
+            'DELETE',
+            '/moderation/chat',
+            $params,
+        );
     }
 
     /**
@@ -69,7 +73,9 @@ trait HasChatMethods
      */
     public function getChannelBadges(string $broadcasterId): DataCollection
     {
-        $raw = $this->makeRequest('GET', '/chat/badges', ['broadcaster_id' => $broadcasterId]);
+        $raw = $this->makeCachedRequest('badges', '/chat/badges', [
+            'broadcaster_id' => $broadcasterId,
+        ]);
 
         /** @var list<array<string, mixed>> $items */
         $items = $raw['data'] ?? [];
@@ -89,7 +95,9 @@ trait HasChatMethods
      */
     public function getChannelEmotes(string $broadcasterId): DataCollection
     {
-        $raw = $this->makeRequest('GET', '/chat/emotes', ['broadcaster_id' => $broadcasterId]);
+        $raw = $this->makeCachedRequest('emotes', '/chat/emotes', [
+            'broadcaster_id' => $broadcasterId,
+        ]);
 
         /** @var list<array<string, mixed>> $items */
         $items = $raw['data'] ?? [];
@@ -107,13 +115,19 @@ trait HasChatMethods
      */
     public function getChatSettings(string $broadcasterId, ?string $moderatorId = null): ChatSettings
     {
-        $params = ['broadcaster_id' => $broadcasterId];
+        $params = [
+            'broadcaster_id' => $broadcasterId,
+        ];
 
         if (null !== $moderatorId) {
             $params['moderator_id'] = $moderatorId;
         }
 
-        $raw = $this->makeRequest('GET', '/chat/settings', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/chat/settings',
+            $params,
+        );
 
         /** @var array<int, array<string, mixed>> $items */
         $items = $raw['data'];
@@ -144,7 +158,11 @@ trait HasChatMethods
             $params['after'] = $after;
         }
 
-        $raw = $this->makeRequest('GET', '/chat/chatters', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/chat/chatters',
+            $params,
+        );
 
         return PaginatedResult::fromRaw($raw, Chatter::class);
     }
@@ -165,7 +183,7 @@ trait HasChatMethods
      */
     public function getEmoteSets(string|array $emoteSetIds): DataCollection
     {
-        $raw = $this->makeRequest('GET', '/chat/emotes/set', [
+        $raw = $this->makeCachedRequest('emotes', '/chat/emotes/set', [
             'emote_set_id' => $emoteSetIds,
         ]);
 
@@ -187,7 +205,11 @@ trait HasChatMethods
      */
     public function getGlobalBadges(): DataCollection
     {
-        $raw = $this->makeRequest('GET', '/chat/badges/global', []);
+        $raw = $this->makeCachedRequest(
+            'badges',
+            '/chat/badges/global',
+            [],
+        );
 
         /** @var list<array<string, mixed>> $items */
         $items = $raw['data'] ?? [];
@@ -207,7 +229,11 @@ trait HasChatMethods
      */
     public function getGlobalEmotes(): DataCollection
     {
-        $raw = $this->makeRequest('GET', '/chat/emotes/global', []);
+        $raw = $this->makeCachedRequest(
+            'global_emotes',
+            '/chat/emotes/global',
+            [],
+        );
 
         /** @var list<array<string, mixed>> $items */
         $items = $raw['data'] ?? [];
@@ -236,7 +262,9 @@ trait HasChatMethods
         /** @var list<array<string, mixed>> $items */
         $items = $raw['data'] ?? [];
 
-        return [] === $items ? null : PinnedChatMessage::from($items[0]);
+        return [] === $items
+            ? null
+            : PinnedChatMessage::from($items[0]);
     }
 
     /**
@@ -249,16 +277,19 @@ trait HasChatMethods
      * to call the non-existent /shared_chat/sessions (plural), which would
      * 404 on every call, broken since first written.
      */
-    public function getSharedChatSession(string $broadcasterId): SharedChatSession
+    public function getSharedChatSession(string $broadcasterId): ?SharedChatSession
     {
         $raw = $this->makeRequest('GET', '/shared_chat/session', [
             'broadcaster_id' => $broadcasterId,
         ]);
 
+        // Twitch answers an empty list when the broadcaster is not in an active shared chat session.
         /** @var array<int, array<string, mixed>> $items */
-        $items = $raw['data'];
+        $items = $raw['data'] ?? [];
 
-        return SharedChatSession::from($items[0]);
+        return isset($items[0])
+            ? SharedChatSession::from($items[0])
+            : null;
     }
 
     /**
@@ -302,7 +333,9 @@ trait HasChatMethods
         ?string $broadcasterId = null,
         ?string $after = null,
     ): PaginatedResult {
-        $params = ['user_id' => $userId];
+        $params = [
+            'user_id' => $userId,
+        ];
 
         if (null !== $broadcasterId) {
             $params['broadcaster_id'] = $broadcasterId;
@@ -312,7 +345,11 @@ trait HasChatMethods
             $params['after'] = $after;
         }
 
-        $raw = $this->makeRequest('GET', '/chat/emotes/user', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/chat/emotes/user',
+            $params,
+        );
 
         return PaginatedResult::fromRaw($raw, Emote::class);
     }
@@ -347,7 +384,11 @@ trait HasChatMethods
             $params['duration_seconds'] = $durationSeconds;
         }
 
-        $this->makeQueryRequest('PUT', '/chat/pins', $params);
+        $this->makeQueryRequest(
+            'PUT',
+            '/chat/pins',
+            $params,
+        );
     }
 
     /**
@@ -355,19 +396,26 @@ trait HasChatMethods
      *
      * Requires: moderator:manage:announcements
      *
-     * @param string $color BLUE, GREEN, ORANGE, PURPLE, or PRIMARY
+     * @param string    $color         blue, green, orange, purple or primary. Twitch only accepts lowercase: any case
+     *                                 is lowercased here.
+     * @param bool|null $forSourceOnly App access token only (a user token gets a 400): send to the source channel
+     *                                 only (Twitch's default for an app token) or to every shared-chat channel
      */
     public function sendAnnouncement(
         string $broadcasterId,
         string $moderatorId,
         string $message,
-        string $color = 'PRIMARY',
+        string $color = 'primary',
+        ?bool $forSourceOnly = null,
     ): void {
         $this->makeRequest('POST', '/chat/announcements', [
             'broadcaster_id' => $broadcasterId,
             'moderator_id'   => $moderatorId,
             'message'        => $message,
-            'color'          => $color,
+            'color'          => strtolower($color),
+            ...(null === $forSourceOnly ? [] : [
+                'for_source_only' => $forSourceOnly,
+            ]),
         ]);
     }
 
@@ -378,21 +426,13 @@ trait HasChatMethods
      * If bot is not moderator: also needs channel:bot from broadcaster.
      *
      * @param string|null $replyParentMessageId ID of message to reply to
-     * @param bool|null   $pin                  Send and pin in one call - requires
-     *                                          moderator:manage:chat_messages, sender must be the
-     *                                          broadcaster or a moderator, always pins for 20
-     *                                          minutes (not configurable via this endpoint). Added
-     *                                          2026-05-15 alongside the open-beta pin/unpin
-     *                                          endpoints (Pin Chat Message, Get/Update Pinned Chat
-     *                                          Message, Unpin Chat Message) - those four are NOT
-     *                                          implemented here, Twitch's own reference page never
-     *                                          rendered their exact request/response shape even
-     *                                          via three independent lookup attempts, and no
-     *                                          third-party Twitch API client had them either as of
-     *                                          2026-08-27. Confirmed only via the changelog entry
-     *                                          and Twitch's own dev forum, both of which describe
-     *                                          the parameter but not the pin/unpin bodies -
-     *                                          deliberately not guessing an unverified shape.
+     * @param bool|null   $pin                  Send and pin in one call: needs moderator:manage:chat_messages, the
+     *                                          sender must be the broadcaster or a moderator, the pin lasts 20
+     *                                          minutes. Cannot be used with $replyParentMessageId or $forSourceOnly.
+     *                                          See pinMessage() and the other pinned-message methods for the rest.
+     * @param bool|null   $forSourceOnly        App access token only (a user token gets a 400): send to the source
+     *                                          channel only (Twitch's default for an app token) or to every
+     *                                          shared-chat channel
      */
     public function sendMessage(
         string $broadcasterId,
@@ -400,6 +440,7 @@ trait HasChatMethods
         string $message,
         ?string $replyParentMessageId = null,
         ?bool $pin = null,
+        ?bool $forSourceOnly = null,
     ): SentMessage {
         $body = [
             'broadcaster_id' => $broadcasterId,
@@ -415,7 +456,15 @@ trait HasChatMethods
             $body['pin'] = $pin;
         }
 
-        $raw = $this->makeRequest('POST', '/chat/messages', $body);
+        if (null !== $forSourceOnly) {
+            $body['for_source_only'] = $forSourceOnly;
+        }
+
+        $raw = $this->makeRequest(
+            'POST',
+            '/chat/messages',
+            $body,
+        );
 
         /** @var array<int, array<string, mixed>> $items */
         $items = $raw['data'];
@@ -448,8 +497,11 @@ trait HasChatMethods
      * Confirmed verbatim against Twitch's own docs (2026-08-27) - DELETE
      * /helix/chat/pins, 204 No Content, no response body.
      */
-    public function unpinMessage(string $broadcasterId, string $moderatorId, string $messageId): void
-    {
+    public function unpinMessage(
+        string $broadcasterId,
+        string $moderatorId,
+        string $messageId,
+    ): void {
         $this->makeRequest('DELETE', '/chat/pins', [
             'broadcaster_id' => $broadcasterId,
             'moderator_id'   => $moderatorId,
@@ -510,7 +562,11 @@ trait HasChatMethods
             $params['duration_seconds'] = $durationSeconds;
         }
 
-        $this->makeQueryRequest('PATCH', '/chat/pins', $params);
+        $this->makeQueryRequest(
+            'PATCH',
+            '/chat/pins',
+            $params,
+        );
     }
 
     /**
@@ -529,7 +585,7 @@ trait HasChatMethods
         // JSON body.
         $this->makeQueryRequest('PUT', '/chat/color', [
             'user_id' => $userId,
-            'color'   => $color,
+            'color'   => strtolower($color),
         ]);
     }
 }

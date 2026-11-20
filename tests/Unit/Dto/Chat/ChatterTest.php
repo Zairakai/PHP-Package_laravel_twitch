@@ -19,8 +19,8 @@ final class ChatterTest extends TestCase
             'user_name'  => 'ChatUser',
         ]);
 
-        $this->assertSame('77777', $chatter->userId);
-        $this->assertSame('chatuser', $chatter->userLogin);
-        $this->assertSame('ChatUser', $chatter->userName);
+        self::assertSame('77777', $chatter->userId);
+        self::assertSame('chatuser', $chatter->userLogin);
+        self::assertSame('ChatUser', $chatter->userName);
     }
 }

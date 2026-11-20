@@ -21,9 +21,9 @@ final class SubscriptionCheckTest extends TestCase
             'is_gift'           => false,
         ]);
 
-        $this->assertSame('3000', $subscriptionCheck->tier);
-        $this->assertFalse($subscriptionCheck->isGift);
-        $this->assertNull($subscriptionCheck->gifterLogin);
-        $this->assertNull($subscriptionCheck->gifterName);
+        self::assertSame('3000', $subscriptionCheck->tier);
+        self::assertFalse($subscriptionCheck->isGift);
+        self::assertNull($subscriptionCheck->gifterLogin);
+        self::assertNull($subscriptionCheck->gifterName);
     }
 }

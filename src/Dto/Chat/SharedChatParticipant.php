@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\Chat;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents a participant in a shared chat session.
@@ -14,7 +14,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#get-shared-chat-session
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class SharedChatParticipant extends Data
+class SharedChatParticipant extends TwitchData
 {
     public function __construct(
         /**
@@ -25,11 +25,11 @@ class SharedChatParticipant extends Data
         /**
          * @var string Broadcaster login (lowercase)
          */
-        public string $broadcasterLogin,
+        public ?string $broadcasterLogin = null,
 
         /**
          * @var string Broadcaster display name
          */
-        public string $broadcasterName,
+        public ?string $broadcasterName = null,
     ) {}
 }

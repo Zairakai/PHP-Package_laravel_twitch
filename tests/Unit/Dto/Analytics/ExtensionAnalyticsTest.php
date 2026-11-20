@@ -23,10 +23,10 @@ final class ExtensionAnalyticsTest extends TestCase
             ],
         ]);
 
-        $this->assertSame('abcde', $extensionAnalytics->extensionId);
-        $this->assertSame('http://example.com/report.csv', $extensionAnalytics->url);
-        $this->assertSame('overview_v2', $extensionAnalytics->type);
-        $this->assertIsArray($extensionAnalytics->dateRange);
-        $this->assertSame('2021-01-01T00:00:00Z', $extensionAnalytics->dateRange['started_at']);
+        self::assertSame('abcde', $extensionAnalytics->extensionId);
+        self::assertSame('http://example.com/report.csv', $extensionAnalytics->url);
+        self::assertSame('overview_v2', $extensionAnalytics->type);
+        self::assertIsArray($extensionAnalytics->dateRange);
+        self::assertSame('2021-01-01T00:00:00Z', $extensionAnalytics->dateRange['started_at']);
     }
 }

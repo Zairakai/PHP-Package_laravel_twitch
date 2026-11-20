@@ -16,10 +16,21 @@ use Zairakai\LaravelTwitch\Http\Controllers\TwitchAuthController;
 */
 
 Route::prefix('twitch')->name('twitch.')->group(function (): void {
-    // OAuth routes
-    Route::get('/auth', [TwitchAuthController::class, 'redirect'])->name('auth');
-    Route::get('/auth/callback', [TwitchAuthController::class, 'callback'])->name('auth.callback');
+    // OAuth routes: they keep the state and the user in the session, so they need the web middleware group
+    Route::middleware('web')->group(function (): void {
+        Route::get('/auth', [
+            TwitchAuthController::class,
+            'redirect',
+        ])->name('auth');
+        Route::get('/auth/callback', [
+            TwitchAuthController::class,
+            'callback',
+        ])->name('auth.callback');
+    });
 
     // Webhook routes
-    Route::post('/webhook', [TwitchAuthController::class, 'webhook'])->name('webhook');
+    Route::post('/webhook', [
+        TwitchAuthController::class,
+        'webhook',
+    ])->name('webhook');
 });

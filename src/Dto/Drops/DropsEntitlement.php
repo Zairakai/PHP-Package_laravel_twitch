@@ -6,8 +6,10 @@ namespace Zairakai\LaravelTwitch\Dto\Drops;
 
 use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents a Drops entitlement granted to a user.
@@ -15,7 +17,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#get-drops-entitlements
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class DropsEntitlement extends Data
+class DropsEntitlement extends TwitchData
 {
     public function __construct(
         /**
@@ -46,11 +48,19 @@ class DropsEntitlement extends Data
         /**
          * @var Carbon|null When the entitlement was granted
          */
+        #[WithCast(FlexibleDateTimeCast::class)]
         public ?Carbon $timestamp = null,
 
         /**
          * @var Carbon|null When the fulfillment status was last updated
          */
+        #[WithCast(FlexibleDateTimeCast::class)]
         public ?Carbon $updatedAt = null,
+
+        /**
+         * @var Carbon|null When the entitlement was last updated (`last_updated`)
+         */
+        #[WithCast(FlexibleDateTimeCast::class)]
+        public ?Carbon $lastUpdated = null,
     ) {}
 }

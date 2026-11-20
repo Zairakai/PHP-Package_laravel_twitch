@@ -20,7 +20,7 @@ final class ChannelChatMessageEventTest extends TestCase
         // of those messages before they could be persisted.
         $channelChatMessageEvent = ChannelChatMessageEvent::from($this->minimalPayload(null));
 
-        $this->assertNull($channelChatMessageEvent->color);
+        self::assertNull($channelChatMessageEvent->color);
     }
 
     #[Test]
@@ -28,7 +28,7 @@ final class ChannelChatMessageEventTest extends TestCase
     {
         $channelChatMessageEvent = ChannelChatMessageEvent::from($this->minimalPayload('#00FF7F'));
 
-        $this->assertSame('#00FF7F', $channelChatMessageEvent->color);
+        self::assertSame('#00FF7F', $channelChatMessageEvent->color);
     }
 
     /**

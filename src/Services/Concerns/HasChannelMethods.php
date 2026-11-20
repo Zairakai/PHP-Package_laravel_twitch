@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Services\Concerns;
 
 use Spatie\LaravelData\DataCollection;
+use UnexpectedValueException;
 use Zairakai\LaravelTwitch\Dto\Channel\Channel;
 use Zairakai\LaravelTwitch\Dto\Channel\ChannelEditor;
 use Zairakai\LaravelTwitch\Dto\Channel\Requests\CreateScheduleSegmentRequest;
@@ -15,6 +16,7 @@ use Zairakai\LaravelTwitch\Dto\Channel\Schedule;
 use Zairakai\LaravelTwitch\Dto\Channel\ScheduleSegment;
 use Zairakai\LaravelTwitch\Dto\Channel\SearchChannel;
 use Zairakai\LaravelTwitch\Dto\PaginatedResult;
+use Zairakai\LaravelTwitch\Exceptions\TwitchApiException;
 
 /**
  * Twitch Channel API methods.
@@ -39,14 +41,13 @@ trait HasChannelMethods
         );
 
         $raw = $this->makeRequest('POST', '/schedule/segment', array_merge(
-            ['broadcaster_id' => $broadcasterId],
+            [
+                'broadcaster_id' => $broadcasterId,
+            ],
             $requestData,
         ));
 
-        /** @var array<int, array<string, mixed>> $items */
-        $items = $raw['data'];
-
-        return ScheduleSegment::from($items[0]);
+        return ScheduleSegment::from($this->firstScheduleSegment($raw));
     }
 
     /**
@@ -73,7 +74,7 @@ trait HasChannelMethods
      */
     public function getChannel(string|array $broadcasterIds): DataCollection
     {
-        $raw = $this->makeRequest('GET', '/channels', [
+        $raw = $this->makeCachedRequest('channel', '/channels', [
             'broadcaster_id' => $broadcasterIds,
         ]);
 
@@ -109,7 +110,7 @@ trait HasChannelMethods
     }
 
     /**
-     * Get the broadcaster's stream schedule.
+     * Get the broadcaster's stream schedule. A broadcaster who has planned nothing gives an empty schedule.
      *
      * Requires: no scope
      *
@@ -122,21 +123,31 @@ trait HasChannelMethods
         ?string $segmentId = null,
         int $first = 20,
         ?string $after = null,
+        ?string $startTime = null,
     ): Schedule {
-        $params = [
+        $params = array_filter([
             'broadcaster_id' => $broadcasterId,
             'first'          => $first,
-        ];
+            'id'             => $segmentId,
+            'after'          => $after,
+            'start_time'     => $startTime,
+        ], static fn (string|int|null $value): bool => null !== $value);
 
-        if (null !== $segmentId) {
-            $params['id'] = $segmentId;
+        try {
+            $raw = $this->makeRequest(
+                'GET',
+                '/schedule',
+                $params,
+            );
         }
+        catch (TwitchApiException $twitchApiException) {
+            // 404: the broadcaster has planned nothing (or the segment asked for does not exist). That is no error.
+            if (404 === $twitchApiException->status()) {
+                return Schedule::none($broadcasterId);
+            }
 
-        if (null !== $after) {
-            $params['after'] = $after;
+            throw $twitchApiException;
         }
-
-        $raw = $this->makeRequest('GET', '/schedule', $params);
 
         /** @var array<string, mixed> $data */
         $data = $raw['data'];
@@ -182,7 +193,11 @@ trait HasChannelMethods
             $params['after'] = $after;
         }
 
-        $raw = $this->makeRequest('GET', '/search/channels', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/search/channels',
+            $params,
+        );
 
         return PaginatedResult::fromRaw($raw, SearchChannel::class);
     }
@@ -198,7 +213,9 @@ trait HasChannelMethods
         $requestData = array_filter($updateChannelRequest->toArray(), static fn (mixed $v): bool => null !== $v);
 
         $this->makeRequest('PATCH', '/channels', array_merge(
-            ['broadcaster_id' => $broadcasterId],
+            [
+                'broadcaster_id' => $broadcasterId,
+            ],
             $requestData,
         ));
     }
@@ -220,14 +237,14 @@ trait HasChannelMethods
         );
 
         $raw = $this->makeRequest('PATCH', '/schedule/segment', array_merge(
-            ['broadcaster_id' => $broadcasterId, 'id' => $segmentId],
+            [
+                'broadcaster_id' => $broadcasterId,
+                'id'             => $segmentId,
+            ],
             $requestData,
         ));
 
-        /** @var array<int, array<string, mixed>> $items */
-        $items = $raw['data'];
-
-        return ScheduleSegment::from($items[0]);
+        return ScheduleSegment::from($this->firstScheduleSegment($raw));
     }
 
     /**
@@ -246,8 +263,36 @@ trait HasChannelMethods
         );
 
         $this->makeRequest('PATCH', '/schedule/settings', array_merge(
-            ['broadcaster_id' => $broadcasterId],
+            [
+                'broadcaster_id' => $broadcasterId,
+            ],
             $requestData,
         ));
+    }
+
+    /**
+     * The schedule endpoints answer `data: {segments: [...], broadcaster_id, ...}` (an object), not a list: the
+     * segment that was created or updated is the first of `segments`.
+     *
+     * @param array<string, mixed> $raw
+     *
+     * @return array<string, mixed>
+     */
+    private function firstScheduleSegment(array $raw): array
+    {
+        $data     = is_array($raw['data'] ?? null)
+            ? $raw['data']
+            : [];
+        $segments = is_array($data['segments'] ?? null)
+            ? $data['segments']
+            : [];
+        $segment  = $segments[0] ?? null;
+
+        if (! is_array($segment)) {
+            throw new UnexpectedValueException('Twitch answered without the schedule segment.');
+        }
+
+        /** @var array<string, mixed> $segment */
+        return $segment;
     }
 }

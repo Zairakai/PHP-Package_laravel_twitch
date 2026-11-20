@@ -17,13 +17,29 @@ final class MessageTest extends TestCase
         $message = Message::from([
             'text'      => 'Hello world Cheer100',
             'fragments' => [
-                ['type' => 'text', 'text' => 'Hello world ', 'cheermote' => null, 'emote' => null, 'mention' => null],
-                ['type' => 'cheermote', 'text' => 'Cheer100', 'cheermote' => ['prefix' => 'Cheer', 'bits' => 100, 'tier' => 1], 'emote' => null, 'mention' => null],
+                [
+                    'type'      => 'text',
+                    'text'      => 'Hello world ',
+                    'cheermote' => null,
+                    'emote'     => null,
+                    'mention'   => null,
+                ],
+                [
+                    'type'      => 'cheermote',
+                    'text'      => 'Cheer100',
+                    'cheermote' => [
+                        'prefix' => 'Cheer',
+                        'bits'   => 100,
+                        'tier'   => 1,
+                    ],
+                    'emote'   => null,
+                    'mention' => null,
+                ],
             ],
         ]);
 
-        $this->assertSame('Hello world Cheer100', $message->text);
-        $this->assertCount(2, $message->fragments);
-        $this->assertInstanceOf(MessageFragment::class, $message->fragments->first());
+        self::assertSame('Hello world Cheer100', $message->text);
+        self::assertCount(2, $message->fragments);
+        self::assertInstanceOf(MessageFragment::class, $message->fragments->first());
     }
 }

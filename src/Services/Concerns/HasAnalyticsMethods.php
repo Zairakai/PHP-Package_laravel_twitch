@@ -55,7 +55,11 @@ trait HasAnalyticsMethods
             $params['after'] = $after;
         }
 
-        $raw = $this->makeRequest('GET', '/analytics/extensions', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/analytics/extensions',
+            $params,
+        );
 
         return PaginatedResult::fromRaw($raw, ExtensionAnalytics::class);
     }
@@ -100,7 +104,11 @@ trait HasAnalyticsMethods
             $params['after'] = $after;
         }
 
-        $raw = $this->makeRequest('GET', '/analytics/games', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/analytics/games',
+            $params,
+        );
 
         return PaginatedResult::fromRaw($raw, GameAnalytics::class);
     }

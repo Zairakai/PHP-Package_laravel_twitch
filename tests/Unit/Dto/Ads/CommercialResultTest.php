@@ -19,8 +19,8 @@ final class CommercialResultTest extends TestCase
             'retry_after' => 480,
         ]);
 
-        $this->assertSame(60, $commercialResult->length);
-        $this->assertSame('', $commercialResult->message);
-        $this->assertSame(480, $commercialResult->retryAfter);
+        self::assertSame(60, $commercialResult->length);
+        self::assertSame('', $commercialResult->message);
+        self::assertSame(480, $commercialResult->retryAfter);
     }
 }

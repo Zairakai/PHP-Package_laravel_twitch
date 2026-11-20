@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * A single poll choice. Vote counts are absent (and default to null) on
@@ -16,7 +16,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * Distinct from `Dto\Polls\PollChoice` (the Helix "Get Polls" API shape).
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class EventSubPollChoice extends Data
+class EventSubPollChoice extends TwitchData
 {
     public function __construct(
         public string $id,

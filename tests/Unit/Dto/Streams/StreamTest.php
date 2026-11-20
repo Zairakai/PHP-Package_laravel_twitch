@@ -28,14 +28,18 @@ final class StreamTest extends TestCase
             'thumbnail_url' => 'https://example.com/thumb.jpg',
             'is_mature'     => false,
             'started_at'    => '2024-03-01T18:00:00Z',
-            'tags'          => ['FPS'],
+            'tags'          => [
+                'FPS',
+            ],
         ]);
 
-        $this->assertSame('stream-001', $stream->id);
-        $this->assertSame('live', $stream->type);
-        $this->assertSame(1250, $stream->viewerCount);
-        $this->assertFalse($stream->isMature);
-        $this->assertInstanceOf(Carbon::class, $stream->startedAt);
-        $this->assertSame(['FPS'], $stream->tags);
+        self::assertSame('stream-001', $stream->id);
+        self::assertSame('live', $stream->type);
+        self::assertSame(1250, $stream->viewerCount);
+        self::assertFalse($stream->isMature);
+        self::assertInstanceOf(Carbon::class, $stream->startedAt);
+        self::assertSame([
+            'FPS',
+        ], $stream->tags);
     }
 }

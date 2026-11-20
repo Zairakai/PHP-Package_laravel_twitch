@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Tests\Unit\Services\Concerns;
 
 use PHPUnit\Framework\Attributes\Test;
-use Zairakai\LaravelTwitch\Dto\Analytics\ExtensionAnalytics;
-use Zairakai\LaravelTwitch\Dto\Analytics\GameAnalytics;
-use Zairakai\LaravelTwitch\Dto\PaginatedResult;
 use Zairakai\LaravelTwitch\Services\TwitchApiService;
 use Zairakai\LaravelTwitch\Tests\TestCase;
 
@@ -33,18 +30,31 @@ final class HasAnalyticsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
-                return ['data' => [], 'pagination' => ['cursor' => '']];
+                return [
+                    'data'       => [],
+                    'pagination' => [
+                        'cursor' => '',
+                    ],
+                ];
             }
         };
 
         $service->getExtensionAnalytics();
 
-        $this->assertSame('GET', $capturedParams['method']);
-        $this->assertSame('/analytics/extensions', $capturedParams['endpoint']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('GET', $capturedParams['method']);
+        self::assertSame('/analytics/extensions', $capturedParams['endpoint']);
     }
 
     // ── getGameAnalytics ──────────────────────────────────────────────────────
@@ -67,18 +77,31 @@ final class HasAnalyticsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
-                return ['data' => [], 'pagination' => ['cursor' => '']];
+                return [
+                    'data'       => [],
+                    'pagination' => [
+                        'cursor' => '',
+                    ],
+                ];
             }
         };
 
         $service->getGameAnalytics();
 
-        $this->assertSame('GET', $capturedParams['method']);
-        $this->assertSame('/analytics/games', $capturedParams['endpoint']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('GET', $capturedParams['method']);
+        self::assertSame('/analytics/games', $capturedParams['endpoint']);
     }
 
     #[Test]
@@ -89,8 +112,11 @@ final class HasAnalyticsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
                 return [
                     'data' => [
                         [
@@ -99,17 +125,17 @@ final class HasAnalyticsMethodsTest extends TestCase
                             'type'         => 'overview_v2',
                         ],
                     ],
-                    'pagination' => ['cursor' => 'abc123'],
+                    'pagination' => [
+                        'cursor' => 'abc123',
+                    ],
                 ];
             }
         };
 
         $paginatedResult = $service->getExtensionAnalytics();
 
-        $this->assertInstanceOf(PaginatedResult::class, $paginatedResult);
-        $this->assertCount(1, $paginatedResult->items);
-        $this->assertInstanceOf(ExtensionAnalytics::class, $paginatedResult->items[0]);
-        $this->assertSame('ext-1', $paginatedResult->items[0]->extensionId);
+        self::assertCount(1, $paginatedResult->items);
+        self::assertSame('ext-1', $paginatedResult->items[0]->extensionId);
     }
 
     #[Test]
@@ -120,8 +146,11 @@ final class HasAnalyticsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
                 return [
                     'data' => [
                         [
@@ -130,16 +159,16 @@ final class HasAnalyticsMethodsTest extends TestCase
                             'type'    => 'overview_v2',
                         ],
                     ],
-                    'pagination' => ['cursor' => 'abc123'],
+                    'pagination' => [
+                        'cursor' => 'abc123',
+                    ],
                 ];
             }
         };
 
         $paginatedResult = $service->getGameAnalytics();
 
-        $this->assertInstanceOf(PaginatedResult::class, $paginatedResult);
-        $this->assertCount(1, $paginatedResult->items);
-        $this->assertInstanceOf(GameAnalytics::class, $paginatedResult->items[0]);
-        $this->assertSame('game-1', $paginatedResult->items[0]->gameId);
+        self::assertCount(1, $paginatedResult->items);
+        self::assertSame('game-1', $paginatedResult->items[0]->gameId);
     }
 }

@@ -24,19 +24,19 @@ trait HasBitsMethods
      * Requires: bits:read
      *
      * @param int    $count  Number of results to return (1-100)
-     * @param string $period DAY, WEEK, MONTH, YEAR, or ALL
+     * @param string $period day, week, month, year, or all (Twitch only accepts lowercase: any case is lowercased)
      *
      * @return DataCollection<int, BitsLeaderboardEntry>
      */
     public function getBitsLeaderboard(
         int $count = 10,
-        string $period = 'ALL',
+        string $period = 'all',
         ?string $userId = null,
         ?string $startedAt = null,
     ): DataCollection {
         $params = [
             'count'  => $count,
-            'period' => $period,
+            'period' => strtolower($period),
         ];
 
         if (null !== $userId) {
@@ -47,7 +47,11 @@ trait HasBitsMethods
             $params['started_at'] = $startedAt;
         }
 
-        $raw = $this->makeRequest('GET', '/bits/leaderboard', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/bits/leaderboard',
+            $params,
+        );
 
         /** @var list<array<string, mixed>> $items */
         $items = $raw['data'] ?? [];
@@ -73,7 +77,11 @@ trait HasBitsMethods
             $params['broadcaster_id'] = $broadcasterId;
         }
 
-        $raw = $this->makeRequest('GET', '/bits/cheermotes', $params);
+        $raw = $this->makeCachedRequest(
+            'cheermotes',
+            '/bits/cheermotes',
+            $params,
+        );
 
         /** @var list<array<string, mixed>> $items */
         $items = $raw['data'] ?? [];
@@ -97,13 +105,19 @@ trait HasBitsMethods
      */
     public function getCustomPowerUps(string $broadcasterId, string|array|null $powerUpIds = null): DataCollection
     {
-        $params = ['broadcaster_id' => $broadcasterId];
+        $params = [
+            'broadcaster_id' => $broadcasterId,
+        ];
 
         if (null !== $powerUpIds) {
             $params['id'] = $powerUpIds;
         }
 
-        $raw = $this->makeRequest('GET', '/bits/custom_power_ups', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/bits/custom_power_ups',
+            $params,
+        );
 
         /** @var list<array<string, mixed>> $items */
         $items = $raw['data'] ?? [];
@@ -142,7 +156,11 @@ trait HasBitsMethods
             $params['after'] = $after;
         }
 
-        $raw = $this->makeRequest('GET', '/extensions/transactions', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/extensions/transactions',
+            $params,
+        );
 
         return PaginatedResult::fromRaw($raw, ExtensionTransaction::class);
     }

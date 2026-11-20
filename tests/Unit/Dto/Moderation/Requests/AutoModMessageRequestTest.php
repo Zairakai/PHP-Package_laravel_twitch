@@ -20,7 +20,7 @@ final class AutoModMessageRequestTest extends TestCase
 
         $array = $autoModMessageRequest->toArray();
 
-        $this->assertSame('msg-001', $array['msg_id']);
-        $this->assertSame('Is this message okay?', $array['msg_text']);
+        self::assertSame('msg-001', $array['msg_id']);
+        self::assertSame('Is this message okay?', $array['msg_text']);
     }
 }

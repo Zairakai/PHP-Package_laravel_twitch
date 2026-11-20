@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\Predictions\Requests;
 
 use Spatie\LaravelData\Attributes\MapOutputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents a prediction outcome for CreatePredictionRequest.
@@ -14,7 +14,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#create-prediction
  */
 #[MapOutputName(SnakeCaseMapper::class)]
-class PredictionOutcomeRequest extends Data
+class PredictionOutcomeRequest extends TwitchData
 {
     public function __construct(
         /**

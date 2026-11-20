@@ -80,7 +80,7 @@ trait HasModerationMethods
             'broadcaster_id' => $broadcasterId,
             'moderator_id'   => $moderatorId,
             'user_id'        => $targetUserId,
-            'status'         => $status,
+            'status'         => strtoupper($status),
         ]);
 
         /** @var array<int, array<string, mixed>> $items */
@@ -113,7 +113,9 @@ trait HasModerationMethods
         string $userId,
         ?string $reason = null,
     ): BanResult {
-        $data = ['user_id' => $userId];
+        $data = [
+            'user_id' => $userId,
+        ];
 
         if (null !== $reason) {
             $data['reason'] = $reason;
@@ -203,7 +205,11 @@ trait HasModerationMethods
             $params['after'] = $after;
         }
 
-        $raw = $this->makeRequest('GET', '/moderation/banned', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/moderation/banned',
+            $params,
+        );
 
         return PaginatedResult::fromRaw($raw, BannedUser::class);
     }
@@ -231,7 +237,11 @@ trait HasModerationMethods
             $params['after'] = $after;
         }
 
-        $raw = $this->makeRequest('GET', '/moderation/blocked_terms', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/moderation/blocked_terms',
+            $params,
+        );
 
         return PaginatedResult::fromRaw($raw, BlockedTerm::class);
     }
@@ -257,7 +267,11 @@ trait HasModerationMethods
             $params['after'] = $after;
         }
 
-        $raw = $this->makeRequest('GET', '/moderation/channels', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/moderation/channels',
+            $params,
+        );
 
         return PaginatedResult::fromRaw($raw, ModeratedChannel::class);
     }
@@ -288,7 +302,11 @@ trait HasModerationMethods
             $params['after'] = $after;
         }
 
-        $raw = $this->makeRequest('GET', '/moderation/moderators', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/moderation/moderators',
+            $params,
+        );
 
         return PaginatedResult::fromRaw($raw, Moderator::class);
     }
@@ -331,7 +349,7 @@ trait HasModerationMethods
         $params = [
             'broadcaster_id' => $broadcasterId,
             'moderator_id'   => $moderatorId,
-            'status'         => $status,
+            'status'         => strtolower($status),
             'first'          => $first,
         ];
 
@@ -343,7 +361,11 @@ trait HasModerationMethods
             $params['after'] = $after;
         }
 
-        $raw = $this->makeRequest('GET', '/moderation/unban_requests', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/moderation/unban_requests',
+            $params,
+        );
 
         return PaginatedResult::fromRaw($raw, UnbanRequest::class);
     }
@@ -374,7 +396,11 @@ trait HasModerationMethods
             $params['after'] = $after;
         }
 
-        $raw = $this->makeRequest('GET', '/channels/vips', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/channels/vips',
+            $params,
+        );
 
         return PaginatedResult::fromRaw($raw, Vip::class);
     }
@@ -477,14 +503,18 @@ trait HasModerationMethods
             'broadcaster_id'   => $broadcasterId,
             'moderator_id'     => $moderatorId,
             'unban_request_id' => $unbanRequestId,
-            'status'           => $status,
+            'status'           => strtolower($status),
         ];
 
         if (null !== $resolution) {
             $params['resolution_text'] = $resolution;
         }
 
-        $raw = $this->makeRequest('PATCH', '/moderation/unban_requests', $params);
+        $raw = $this->makeRequest(
+            'PATCH',
+            '/moderation/unban_requests',
+            $params,
+        );
 
         /** @var array<int, array<string, mixed>> $items */
         $items = $raw['data'];
@@ -554,8 +584,11 @@ trait HasModerationMethods
      *
      * Requires: moderator:manage:banned_users
      */
-    public function unbanUser(string $broadcasterId, string $moderatorId, string $userId): void
-    {
+    public function unbanUser(
+        string $broadcasterId,
+        string $moderatorId,
+        string $userId,
+    ): void {
         $this->makeRequest('DELETE', '/moderation/bans', [
             'broadcaster_id' => $broadcasterId,
             'moderator_id'   => $moderatorId,
@@ -601,7 +634,9 @@ trait HasModerationMethods
         string $userId,
         ?string $reason = null,
     ): WarnedUser {
-        $data = ['user_id' => $userId];
+        $data = [
+            'user_id' => $userId,
+        ];
 
         if (null !== $reason) {
             $data['reason'] = $reason;

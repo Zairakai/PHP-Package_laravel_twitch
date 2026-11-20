@@ -28,9 +28,16 @@ final class HasChannelMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRawRequest(string $method, string $endpoint, array $params = []): string
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRawRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): string {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
                 return '';
             }
@@ -38,9 +45,12 @@ final class HasChannelMethodsTest extends TestCase
 
         $service->getScheduleCalendar('99999');
 
-        $this->assertSame('GET', $capturedParams['method']);
-        $this->assertSame('/schedule/icalendar', $capturedParams['endpoint']);
-        $this->assertSame(['broadcaster_id' => '99999'], $capturedParams['params']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('GET', $capturedParams['method']);
+        self::assertSame('/schedule/icalendar', $capturedParams['endpoint']);
+        self::assertSame([
+            'broadcaster_id' => '99999',
+        ], $capturedParams['params']);
     }
 
     #[Test]
@@ -56,8 +66,11 @@ final class HasChannelMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
                 $this->calls[] = [
                     'method'   => $method,
                     'endpoint' => $endpoint,
@@ -65,20 +78,28 @@ final class HasChannelMethodsTest extends TestCase
                 ];
 
                 return '/schedule' === $endpoint
-                    ? ['data' => [
-                        'broadcaster_id'    => '99999',
-                        'broadcaster_name'  => 'Zairakai',
-                        'broadcaster_login' => 'zairakai',
-                        'segments'          => [],
-                    ]]
-                    : ['data' => [], 'pagination' => []];
+                    ? [
+                        'data' => [
+                            'broadcaster_id'    => '99999',
+                            'broadcaster_name'  => 'Zairakai',
+                            'broadcaster_login' => 'zairakai',
+                            'segments'          => [],
+                        ],
+                    ]
+                    : [
+                        'data'       => [],
+                        'pagination' => [],
+                    ];
             }
 
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRawRequest(string $method, string $endpoint, array $params = []): string
-            {
+            protected function makeRawRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): string {
                 $this->calls[] = [
                     'method'   => $method,
                     'endpoint' => $endpoint,
@@ -90,16 +111,29 @@ final class HasChannelMethodsTest extends TestCase
         };
 
         $service->deleteScheduleSegment('b-1', 'seg-1');
-        $service->getChannel(['b-1', 'b-2']);
+        $service->getChannel([
+            'b-1',
+            'b-2',
+        ]);
         $service->getChannelEditors('b-1');
-        $service->getSchedule('b-1', null, 5, 'cur-1');
+        $service->getSchedule(
+            'b-1',
+            null,
+            5,
+            'cur-1',
+        );
         $service->getScheduleCalendar('b-1');
-        $service->searchChannels('zairakai', 5, 'cur-2', true);
+        $service->searchChannels(
+            'zairakai',
+            5,
+            'cur-2',
+            true,
+        );
 
-        $this->assertCount(6, $service->calls);
-        $this->assertSame('/schedule/segment', $service->calls[0]['endpoint']);
-        $this->assertSame('/schedule/icalendar', $service->calls[4]['endpoint']);
-        $this->assertSame('/search/channels', $service->calls[5]['endpoint']);
+        self::assertCount(6, $service->calls);
+        self::assertSame('/schedule/segment', $service->calls[0]['endpoint']);
+        self::assertSame('/schedule/icalendar', $service->calls[4]['endpoint']);
+        self::assertSame('/search/channels', $service->calls[5]['endpoint']);
     }
 
     // ── getScheduleCalendar ───────────────────────────────────────────────────
@@ -122,16 +156,19 @@ final class HasChannelMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRawRequest(string $method, string $endpoint, array $params = []): string
-            {
+            protected function makeRawRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): string {
                 return $this->ical;
             }
         };
 
         $result = $service->getScheduleCalendar('12345');
 
-        $this->assertIsString($result);
-        $this->assertStringContainsString('BEGIN:VCALENDAR', $result);
-        $this->assertStringContainsString('END:VCALENDAR', $result);
+        self::assertIsString($result);
+        self::assertStringContainsString('BEGIN:VCALENDAR', $result);
+        self::assertStringContainsString('END:VCALENDAR', $result);
     }
 }

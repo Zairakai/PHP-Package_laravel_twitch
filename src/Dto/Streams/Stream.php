@@ -6,8 +6,10 @@ namespace Zairakai\LaravelTwitch\Dto\Streams;
 
 use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents an active Twitch stream.
@@ -15,7 +17,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#get-streams
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class Stream extends Data
+class Stream extends TwitchData
 {
     public function __construct(
         /**
@@ -81,6 +83,7 @@ class Stream extends Data
         /**
          * @var Carbon|null When the stream started (RFC3339)
          */
+        #[WithCast(FlexibleDateTimeCast::class)]
         public ?Carbon $startedAt = null,
 
         /**

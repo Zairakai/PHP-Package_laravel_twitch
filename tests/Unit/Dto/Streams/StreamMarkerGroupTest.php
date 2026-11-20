@@ -26,10 +26,10 @@ final class StreamMarkerGroupTest extends TestCase
             ],
         ]);
 
-        $this->assertSame('12345', $streamMarkerGroup->userId);
-        $this->assertSame('zairakai', $streamMarkerGroup->userLogin);
-        $this->assertSame('Zairakai', $streamMarkerGroup->userName);
-        $this->assertCount(1, $streamMarkerGroup->videos);
-        $this->assertInstanceOf(StreamMarkerVideo::class, $streamMarkerGroup->videos->first());
+        self::assertSame('12345', $streamMarkerGroup->userId);
+        self::assertSame('zairakai', $streamMarkerGroup->userLogin);
+        self::assertSame('Zairakai', $streamMarkerGroup->userName);
+        self::assertCount(1, $streamMarkerGroup->videos);
+        self::assertInstanceOf(StreamMarkerVideo::class, $streamMarkerGroup->videos->first());
     }
 }

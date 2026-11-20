@@ -23,20 +23,30 @@ final class ChannelTest extends TestCase
             'title'                         => 'Playing ranked!',
             'delay'                         => 0,
             'is_branded_content'            => false,
-            'tags'                          => ['FPS', 'Competitive'],
-            'content_classification_labels' => ['MatureGame'],
+            'tags'                          => [
+                'FPS',
+                'Competitive',
+            ],
+            'content_classification_labels' => [
+                'MatureGame',
+            ],
         ]);
 
-        $this->assertSame('98765', $channel->broadcasterId);
-        $this->assertSame('twitchdev', $channel->broadcasterLogin);
-        $this->assertSame('en', $channel->broadcasterLanguage);
-        $this->assertSame('21779', $channel->gameId);
-        $this->assertSame('League of Legends', $channel->gameName);
-        $this->assertSame('Playing ranked!', $channel->title);
-        $this->assertSame(0, $channel->delay);
-        $this->assertFalse($channel->isBrandedContent);
-        $this->assertSame(['FPS', 'Competitive'], $channel->tags);
-        $this->assertSame(['MatureGame'], $channel->contentClassificationLabels);
+        self::assertSame('98765', $channel->broadcasterId);
+        self::assertSame('twitchdev', $channel->broadcasterLogin);
+        self::assertSame('en', $channel->broadcasterLanguage);
+        self::assertSame('21779', $channel->gameId);
+        self::assertSame('League of Legends', $channel->gameName);
+        self::assertSame('Playing ranked!', $channel->title);
+        self::assertSame(0, $channel->delay);
+        self::assertFalse($channel->isBrandedContent);
+        self::assertSame([
+            'FPS',
+            'Competitive',
+        ], $channel->tags);
+        self::assertSame([
+            'MatureGame',
+        ], $channel->contentClassificationLabels);
     }
 
     #[Test]
@@ -54,7 +64,7 @@ final class ChannelTest extends TestCase
             'is_branded_content'   => false,
         ]);
 
-        $this->assertSame([], $channel->tags);
-        $this->assertSame([], $channel->contentClassificationLabels);
+        self::assertSame([], $channel->tags);
+        self::assertSame([], $channel->contentClassificationLabels);
     }
 }

@@ -20,16 +20,19 @@ trait HasCharityMethods
      *
      * Requires: channel:read:charity
      */
-    public function getCharityCampaign(string $broadcasterId): CharityCampaign
+    public function getCharityCampaign(string $broadcasterId): ?CharityCampaign
     {
         $raw = $this->makeRequest('GET', '/charity/campaigns', [
             'broadcaster_id' => $broadcasterId,
         ]);
 
+        // Twitch answers an empty list when the channel has no active campaign.
         /** @var array<int, array<string, mixed>> $items */
-        $items = $raw['data'];
+        $items = $raw['data'] ?? [];
 
-        return CharityCampaign::from($items[0]);
+        return isset($items[0])
+            ? CharityCampaign::from($items[0])
+            : null;
     }
 
     /**
@@ -53,7 +56,11 @@ trait HasCharityMethods
             $params['after'] = $after;
         }
 
-        $raw = $this->makeRequest('GET', '/charity/donations', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/charity/donations',
+            $params,
+        );
 
         return PaginatedResult::fromRaw($raw, CharityDonation::class);
     }

@@ -7,9 +7,11 @@ namespace Zairakai\LaravelTwitch\Dto\Predictions;
 use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents a Twitch prediction.
@@ -17,7 +19,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#get-predictions
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class Prediction extends Data
+class Prediction extends TwitchData
 {
     public function __construct(
         /**
@@ -69,16 +71,19 @@ class Prediction extends Data
         /**
          * @var Carbon|null When the prediction was created
          */
+        #[WithCast(FlexibleDateTimeCast::class)]
         public ?Carbon $createdAt = null,
 
         /**
          * @var Carbon|null When the prediction was locked
          */
+        #[WithCast(FlexibleDateTimeCast::class)]
         public ?Carbon $lockedAt = null,
 
         /**
          * @var Carbon|null When the prediction ended
          */
+        #[WithCast(FlexibleDateTimeCast::class)]
         public ?Carbon $endedAt = null,
     ) {}
 }

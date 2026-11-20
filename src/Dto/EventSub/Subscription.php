@@ -7,9 +7,9 @@ namespace Zairakai\LaravelTwitch\Dto\EventSub;
 use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Attributes\WithCast;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents an EventSub subscription.
@@ -17,7 +17,7 @@ use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
  * @see https://dev.twitch.tv/docs/api/reference/#get-eventsub-subscriptions
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class Subscription extends Data
+class Subscription extends TwitchData
 {
     public function __construct(
         /**

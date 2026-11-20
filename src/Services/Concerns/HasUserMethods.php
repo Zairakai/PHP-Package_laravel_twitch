@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Services\Concerns;
 
+use InvalidArgumentException;
 use Spatie\LaravelData\DataCollection;
 use Zairakai\LaravelTwitch\Dto\PaginatedResult;
 use Zairakai\LaravelTwitch\Dto\Users\BlockedUser;
@@ -26,23 +27,39 @@ trait HasUserMethods
      *
      * Requires: user:manage:blocked_users
      *
-     * @param string|null $reason harassment, spam, or other
+     * @param string|null $reason        harassment, spam, or other
+     * @param string|null $sourceContext chat or whisper: where the block comes from
      */
-    public function blockUser(string $targetUserId, ?string $reason = null): void
-    {
-        $params = ['target_user_id' => $targetUserId];
+    public function blockUser(
+        string $targetUserId,
+        ?string $reason = null,
+        ?string $sourceContext = null,
+    ): void {
+        $params = [
+            'target_user_id' => $targetUserId,
+        ];
 
         if (null !== $reason) {
-            $params['reason'] = $reason;
+            $params['reason'] = strtolower($reason);
         }
 
-        $this->makeRequest('PUT', '/users/blocks', $params);
+        if (null !== $sourceContext) {
+            $params['source_context'] = strtolower($sourceContext);
+        }
+
+        $this->makeRequest(
+            'PUT',
+            '/users/blocks',
+            $params,
+        );
     }
 
     /**
      * Check whether a user subscribes to a broadcaster's channel.
      *
-     * Requires: channel:read:subscriptions
+     * Requires: user:read:subscriptions. With a user access token, $userId must be the user of the token (Twitch
+     * answers 401 otherwise); with an app access token, that user must have granted the scope to the app. To know
+     * whether a viewer subscribes to your own channel, use getSubscriptions() with $userId (channel:read:subscriptions).
      */
     public function checkUserSubscription(string $broadcasterId, string $userId): SubscriptionCheck
     {
@@ -65,12 +82,18 @@ trait HasUserMethods
      */
     public function getAuthenticatedUser(): ?User
     {
-        $raw = $this->makeRequest('GET', '/users', []);
+        $raw = $this->makeRequest(
+            'GET',
+            '/users',
+            [],
+        );
 
         /** @var list<array<string, mixed>> $items */
         $items = $raw['data'] ?? [];
 
-        return isset($items[0]) ? User::from($items[0]) : null;
+        return isset($items[0])
+            ? User::from($items[0])
+            : null;
     }
 
     /**
@@ -118,20 +141,18 @@ trait HasUserMethods
         int $first = 20,
         ?string $after = null,
     ): PaginatedResult {
-        $params = [
+        $params = array_filter([
             'broadcaster_id' => $broadcasterId,
             'first'          => $first,
-        ];
+            'user_id'        => $userId,
+            'after'          => $after,
+        ], static fn (mixed $value): bool => null !== $value);
 
-        if (null !== $userId) {
-            $params['user_id'] = $userId;
-        }
-
-        if (null !== $after) {
-            $params['after'] = $after;
-        }
-
-        $raw = $this->makeRequest('GET', '/channels/followers', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/channels/followers',
+            $params,
+        );
 
         return PaginatedResult::fromRaw($raw, Follower::class);
     }
@@ -149,20 +170,18 @@ trait HasUserMethods
         int $first = 20,
         ?string $after = null,
     ): PaginatedResult {
-        $params = [
-            'user_id' => $userId,
-            'first'   => $first,
-        ];
+        $params = array_filter([
+            'user_id'        => $userId,
+            'first'          => $first,
+            'broadcaster_id' => $broadcasterId,
+            'after'          => $after,
+        ], static fn (mixed $value): bool => null !== $value);
 
-        if (null !== $broadcasterId) {
-            $params['broadcaster_id'] = $broadcasterId;
-        }
-
-        if (null !== $after) {
-            $params['after'] = $after;
-        }
-
-        $raw = $this->makeRequest('GET', '/channels/followed', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/channels/followed',
+            $params,
+        );
 
         return PaginatedResult::fromRaw($raw, FollowedChannel::class);
     }
@@ -172,28 +191,40 @@ trait HasUserMethods
      *
      * Requires: channel:read:subscriptions
      *
+     * @param string|null $after  Cursor of the next page
+     * @param string|null $before Cursor of the previous page (not together with $after)
+     *
      * @return PaginatedResult<Subscription>
+     *
+     * @throws InvalidArgumentException when both cursors are given
      */
     public function getSubscriptions(
         string $broadcasterId,
         ?string $userId = null,
         int $first = 20,
         ?string $after = null,
+        ?string $before = null,
     ): PaginatedResult {
-        $params = [
+        if (
+            null    !== $after
+            && null !== $before
+        ) {
+            throw new InvalidArgumentException('getSubscriptions() takes a cursor after or before, not both.');
+        }
+
+        $params = array_filter([
             'broadcaster_id' => $broadcasterId,
             'first'          => $first,
-        ];
+            'user_id'        => $userId,
+            'after'          => $after,
+            'before'         => $before,
+        ], static fn (mixed $value): bool => null !== $value);
 
-        if (null !== $userId) {
-            $params['user_id'] = $userId;
-        }
-
-        if (null !== $after) {
-            $params['after'] = $after;
-        }
-
-        $raw = $this->makeRequest('GET', '/subscriptions', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/subscriptions',
+            $params,
+        );
 
         return PaginatedResult::fromRaw($raw, Subscription::class);
     }
@@ -223,7 +254,11 @@ trait HasUserMethods
             $params['user_id'] = $userId;
         }
 
-        return $this->makeRequest('GET', '/users/extensions', $params);
+        return $this->makeRequest(
+            'GET',
+            '/users/extensions',
+            $params,
+        );
     }
 
     /**
@@ -231,10 +266,17 @@ trait HasUserMethods
      *
      * Requires: user:read:blocked_users
      *
+     * @param string|array<string>|null $userIds Only these users (100 at most). Twitch then ignores $first and $after
+     *                                           and returns no cursor.
+     *
      * @return PaginatedResult<BlockedUser>
      */
-    public function getUserBlocks(string $broadcasterId, int $first = 20, ?string $after = null): PaginatedResult
-    {
+    public function getUserBlocks(
+        string $broadcasterId,
+        int $first = 20,
+        ?string $after = null,
+        string|array|null $userIds = null,
+    ): PaginatedResult {
         $params = [
             'broadcaster_id' => $broadcasterId,
             'first'          => $first,
@@ -244,7 +286,15 @@ trait HasUserMethods
             $params['after'] = $after;
         }
 
-        $raw = $this->makeRequest('GET', '/users/blocks', $params);
+        if (null !== $userIds) {
+            $params['user_id'] = $userIds;
+        }
+
+        $raw = $this->makeRequest(
+            'GET',
+            '/users/blocks',
+            $params,
+        );
 
         return PaginatedResult::fromRaw($raw, BlockedUser::class);
     }
@@ -272,7 +322,11 @@ trait HasUserMethods
      */
     public function getUserExtensions(): array
     {
-        return $this->makeRequest('GET', '/users/extensions/list', []);
+        return $this->makeRequest(
+            'GET',
+            '/users/extensions/list',
+            [],
+        );
     }
 
     /**
@@ -299,7 +353,11 @@ trait HasUserMethods
             $params['login'] = $logins;
         }
 
-        $raw = $this->makeRequest('GET', '/users', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/users',
+            $params,
+        );
 
         /** @var list<array<string, mixed>> $items */
         $items = $raw['data'] ?? [];
@@ -335,7 +393,11 @@ trait HasUserMethods
             $params['description'] = $description;
         }
 
-        $raw = $this->makeRequest('PUT', '/users', $params);
+        $raw = $this->makeRequest(
+            'PUT',
+            '/users',
+            $params,
+        );
 
         /** @var array<int, array<string, mixed>> $items */
         $items = $raw['data'];

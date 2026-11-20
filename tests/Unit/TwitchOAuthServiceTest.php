@@ -26,29 +26,45 @@ final class TwitchOAuthServiceTest extends TestCase
     #[Test]
     public function it_generates_authorization_url(): void
     {
-        $url = $this->twitchOAuthService->getAuthorizationUrl(['user:read:email'], 'test-state');
+        $url = $this->twitchOAuthService->getAuthorizationUrl([
+            'user:read:email',
+        ], 'test-state');
 
-        $this->assertStringContainsString('https://id.twitch.tv/oauth2/authorize', $url);
-        $this->assertStringContainsString('client_id=test-client-id', $url);
-        $this->assertStringContainsString('scope=user%3Aread%3Aemail', $url);
-        $this->assertStringContainsString('state=test-state', $url);
+        self::assertStringContainsString('https://id.twitch.tv/oauth2/authorize', $url);
+        self::assertStringContainsString('client_id=test-client-id', $url);
+        self::assertStringContainsString('scope=user%3Aread%3Aemail', $url);
+        self::assertStringContainsString('state=test-state', $url);
     }
 
     #[Test]
     public function it_generates_authorization_url_with_default_scopes(): void
     {
-        config(['twitch.scopes' => ['user:read:email', 'channel:read:subscriptions']]);
+        config([
+            'twitch.scopes' => [
+                'user:read:email',
+                'channel:read:subscriptions',
+            ],
+        ]);
 
         $url = $this->twitchOAuthService->getAuthorizationUrl();
 
-        $this->assertStringContainsString('scope=user%3Aread%3Aemail+channel%3Aread%3Asubscriptions', $url);
+        self::assertStringContainsString('scope=user%3Aread%3Aemail+channel%3Aread%3Asubscriptions', $url);
     }
 
     #[Test]
     public function it_has_required_constructor_parameters(): void
     {
-        $twitchOAuthService = new TwitchOAuthService('client-id', 'client-secret', 'redirect-uri');
+        $twitchOAuthService = new TwitchOAuthService(
+            'client-id',
+            'client-secret',
+            'redirect-uri',
+        );
 
-        $this->assertInstanceOf(TwitchOAuthService::class, $twitchOAuthService);
+        $url = $twitchOAuthService->getAuthorizationUrl([
+            'user:read:email',
+        ], 'test-state');
+
+        self::assertStringContainsString('client_id=client-id', $url);
+        self::assertStringContainsString('redirect_uri=redirect-uri', $url);
     }
 }

@@ -37,13 +37,12 @@ final class PaginatedResultTest extends TestCase
 
         $paginatedResult = PaginatedResult::fromRaw($raw, User::class);
 
-        $this->assertCount(1, $paginatedResult->items);
-        $this->assertInstanceOf(User::class, $paginatedResult->items[0]);
-        $this->assertSame('12345', $paginatedResult->items[0]->id);
-        $this->assertSame('cursor-123', $paginatedResult->cursor);
-        $this->assertTrue($paginatedResult->hasMore());
-        $this->assertSame(1, $paginatedResult->total);
-        $this->assertSame(1, $paginatedResult->count());
+        self::assertCount(1, $paginatedResult->items);
+        self::assertSame('12345', $paginatedResult->items[0]->id);
+        self::assertSame('cursor-123', $paginatedResult->cursor);
+        self::assertTrue($paginatedResult->hasMore());
+        self::assertSame(1, $paginatedResult->total);
+        self::assertSame(1, $paginatedResult->count());
     }
 
     #[Test]
@@ -53,11 +52,11 @@ final class PaginatedResultTest extends TestCase
 
         $paginatedResult = PaginatedResult::fromRaw($raw, User::class);
 
-        $this->assertEmpty($paginatedResult->items);
-        $this->assertNull($paginatedResult->cursor);
-        $this->assertFalse($paginatedResult->hasMore());
-        $this->assertNull($paginatedResult->total);
-        $this->assertSame(0, $paginatedResult->count());
+        self::assertEmpty($paginatedResult->items);
+        self::assertNull($paginatedResult->cursor);
+        self::assertFalse($paginatedResult->hasMore());
+        self::assertNull($paginatedResult->total);
+        self::assertSame(0, $paginatedResult->count());
     }
 
     #[Test]
@@ -82,8 +81,8 @@ final class PaginatedResultTest extends TestCase
 
         $paginatedResult = PaginatedResult::fromRaw($raw, User::class);
 
-        $this->assertCount(1, $paginatedResult->items);
-        $this->assertNull($paginatedResult->cursor);
-        $this->assertFalse($paginatedResult->hasMore());
+        self::assertCount(1, $paginatedResult->items);
+        self::assertNull($paginatedResult->cursor);
+        self::assertFalse($paginatedResult->hasMore());
     }
 }

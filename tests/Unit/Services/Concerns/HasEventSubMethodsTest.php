@@ -6,7 +6,6 @@ namespace Zairakai\LaravelTwitch\Tests\Unit\Services\Concerns;
 
 use PHPUnit\Framework\Attributes\Test;
 use Zairakai\LaravelTwitch\Dto\EventSub\Subscription;
-use Zairakai\LaravelTwitch\Dto\PaginatedResult;
 use Zairakai\LaravelTwitch\Services\TwitchApiService;
 use Zairakai\LaravelTwitch\Tests\TestCase;
 
@@ -32,18 +31,31 @@ final class HasEventSubMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
-                return ['data' => [], 'pagination' => ['cursor' => '']];
+                return [
+                    'data'       => [],
+                    'pagination' => [
+                        'cursor' => '',
+                    ],
+                ];
             }
         };
 
         $service->getEventSubSubscriptions();
 
-        $this->assertSame('GET', $capturedParams['method']);
-        $this->assertSame('/eventsub/subscriptions', $capturedParams['endpoint']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('GET', $capturedParams['method']);
+        self::assertSame('/eventsub/subscriptions', $capturedParams['endpoint']);
     }
 
     // ── createEventSubSubscription ────────────────────────────────────────────
@@ -71,24 +83,37 @@ final class HasEventSubMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
-                return ['data' => [$this->subscriptionData]];
+                return [
+                    'data' => [
+                        $this->subscriptionData,
+                    ],
+                ];
             }
         };
 
-        $subscription = $service->createEventSubSubscription(
+        $service->createEventSubSubscription(
             'channel.follow',
-            ['broadcaster_user_id' => '1'],
+            [
+                'broadcaster_user_id' => '1',
+            ],
             'https://example.com/webhook',
             'my-secret',
         );
 
-        $this->assertSame('POST', $capturedParams['method']);
-        $this->assertSame('/eventsub/subscriptions', $capturedParams['endpoint']);
-        $this->assertInstanceOf(Subscription::class, $subscription);
+        self::assertIsArray($capturedParams);
+        self::assertSame('POST', $capturedParams['method']);
+        self::assertSame('/eventsub/subscriptions', $capturedParams['endpoint']);
     }
 
     // ── getEventSubSubscriptionsByType ────────────────────────────────────────
@@ -111,11 +136,19 @@ final class HasEventSubMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
                 $this->captured = $params;
 
-                return ['data' => [], 'pagination' => ['cursor' => '']];
+                return [
+                    'data'       => [],
+                    'pagination' => [
+                        'cursor' => '',
+                    ],
+                ];
             }
         };
 
@@ -124,7 +157,11 @@ final class HasEventSubMethodsTest extends TestCase
         // Twitch's real API rejects type + status together with a 400
         // "cannot specify more than one filter" - status must never be sent
         // here alongside type.
-        $this->assertSame(['first' => 100, 'type' => 'channel.follow'], $capturedParams);
+        self::assertIsArray($capturedParams);
+        self::assertSame([
+            'first' => 100,
+            'type'  => 'channel.follow',
+        ], $capturedParams);
     }
 
     #[Test]
@@ -135,15 +172,20 @@ final class HasEventSubMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
                 return [
                     'data' => [
                         $this->subscriptionRow('sub-1', 'enabled'),
                         $this->subscriptionRow('sub-2', 'webhook_callback_verification_pending'),
                         $this->subscriptionRow('sub-3', 'enabled'),
                     ],
-                    'pagination' => ['cursor' => ''],
+                    'pagination' => [
+                        'cursor' => '',
+                    ],
                 ];
             }
 
@@ -157,9 +199,14 @@ final class HasEventSubMethodsTest extends TestCase
                     'status'     => $status,
                     'type'       => 'channel.follow',
                     'version'    => '1',
-                    'condition'  => ['broadcaster_user_id' => '1'],
+                    'condition'  => [
+                        'broadcaster_user_id' => '1',
+                    ],
                     'created_at' => '2024-01-01T00:00:00Z',
-                    'transport'  => ['method' => 'webhook', 'callback' => 'https://example.com/webhook'],
+                    'transport'  => [
+                        'method'   => 'webhook',
+                        'callback' => 'https://example.com/webhook',
+                    ],
                     'cost'       => 1,
                 ];
             }
@@ -167,8 +214,11 @@ final class HasEventSubMethodsTest extends TestCase
 
         $paginatedResult = $service->getEventSubSubscriptionsByType('channel.follow');
 
-        $this->assertCount(2, $paginatedResult->items);
-        $this->assertSame(['sub-1', 'sub-3'], array_map(
+        self::assertCount(2, $paginatedResult->items);
+        self::assertSame([
+            'sub-1',
+            'sub-3',
+        ], array_map(
             static fn (Subscription $subscription): string => $subscription->id,
             $paginatedResult->items,
         ));
@@ -195,22 +245,27 @@ final class HasEventSubMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
                 return [
-                    'data'       => [$this->subscriptionData],
-                    'pagination' => ['cursor' => 'abc123'],
+                    'data'       => [
+                        $this->subscriptionData,
+                    ],
+                    'pagination' => [
+                        'cursor' => 'abc123',
+                    ],
                 ];
             }
         };
 
         $paginatedResult = $service->getEventSubSubscriptions();
 
-        $this->assertInstanceOf(PaginatedResult::class, $paginatedResult);
-        $this->assertCount(1, $paginatedResult->items);
-        $this->assertInstanceOf(Subscription::class, $paginatedResult->items[0]);
-        $this->assertSame('sub-1', $paginatedResult->items[0]->id);
-        $this->assertSame('enabled', $paginatedResult->items[0]->status);
+        self::assertCount(1, $paginatedResult->items);
+        self::assertSame('sub-1', $paginatedResult->items[0]->id);
+        self::assertSame('enabled', $paginatedResult->items[0]->status);
     }
 
     /**
@@ -223,9 +278,14 @@ final class HasEventSubMethodsTest extends TestCase
             'status'     => 'enabled',
             'type'       => 'channel.follow',
             'version'    => '1',
-            'condition'  => ['broadcaster_user_id' => '1'],
+            'condition'  => [
+                'broadcaster_user_id' => '1',
+            ],
             'created_at' => '2024-01-01T00:00:00Z',
-            'transport'  => ['method' => 'webhook', 'callback' => 'https://example.com/webhook'],
+            'transport'  => [
+                'method'   => 'webhook',
+                'callback' => 'https://example.com/webhook',
+            ],
             'cost'       => 1,
         ];
     }

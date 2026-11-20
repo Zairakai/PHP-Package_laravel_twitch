@@ -19,13 +19,17 @@ final class SharedChatSessionTest extends TestCase
             'host_broadcaster_login'  => 'twitchdev',
             'host_broadcaster_name'   => 'TwitchDev',
             'participants'            => [
-                ['broadcaster_id' => '11111', 'broadcaster_login' => 'p1', 'broadcaster_name' => 'P1'],
+                [
+                    'broadcaster_id'    => '11111',
+                    'broadcaster_login' => 'p1',
+                    'broadcaster_name'  => 'P1',
+                ],
             ],
         ]);
 
-        $this->assertSame('session-abc', $sharedChatSession->sessionId);
-        $this->assertSame('12345', $sharedChatSession->hostBroadcasterId);
-        $this->assertCount(1, $sharedChatSession->participants);
+        self::assertSame('session-abc', $sharedChatSession->sessionId);
+        self::assertSame('12345', $sharedChatSession->hostBroadcasterId);
+        self::assertCount(1, $sharedChatSession->participants);
     }
 
     #[Test]
@@ -38,6 +42,6 @@ final class SharedChatSessionTest extends TestCase
             'host_broadcaster_name'  => 'TwitchDev',
         ]);
 
-        $this->assertSame([], $sharedChatSession->participants);
+        self::assertSame([], $sharedChatSession->participants);
     }
 }

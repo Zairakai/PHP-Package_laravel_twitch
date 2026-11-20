@@ -60,8 +60,12 @@ class PaginatedResult
 
         /** @var array{cursor?: string}|mixed $pagination */
         $pagination = $raw['pagination'] ?? [];
-        $cursor     = is_array($pagination) ? ($pagination['cursor'] ?? null) : null;
-        $total      = isset($raw['total']) && is_int($raw['total']) ? $raw['total'] : null;
+        $cursor     = is_array($pagination)
+            ? ($pagination['cursor'] ?? null)
+            : null;
+        $total      = isset($raw['total']) && is_int($raw['total'])
+            ? $raw['total']
+            : null;
 
         return new self(
             items: $items,

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\Moderation;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents a suspicious or restricted user in a broadcaster's channel.
@@ -14,7 +14,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#manage-held-automod-messages
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class SuspiciousUser extends Data
+class SuspiciousUser extends TwitchData
 {
     public function __construct(
         /**
@@ -33,22 +33,27 @@ class SuspiciousUser extends Data
         public string $userId,
 
         /**
-         * @var string User login (lowercase)
+         * @var string|null User login (lowercase). Not sent by Add Suspicious Status.
          */
-        public string $userLogin,
+        public ?string $userLogin = null,
 
         /**
-         * @var string User display name
+         * @var string|null User display name. Not sent by Add Suspicious Status.
          */
-        public string $userName,
+        public ?string $userName = null,
 
         /**
-         * @var string Status: active_monitoring or restricted
+         * @var string|null Status as the EventSub notifications give it: active_monitoring or restricted
          */
-        public string $lowTrustStatus,
+        public ?string $lowTrustStatus = null,
 
         /**
-         * @var array<string> Types: ban_evader_detector, manually_added
+         * @var string|null Status as Add / Remove Suspicious Status give it: ACTIVE_MONITORING, RESTRICTED or NO_TREATMENT
+         */
+        public ?string $status = null,
+
+        /**
+         * @var array<string> Types: MANUALLY_ADDED, DETECTED_BAN_EVADER, DETECTED_SUS_CHATTER, BANNED_IN_SHARED_CHANNEL, UNKNOWN_TYPE
          */
         public array $types = [],
 

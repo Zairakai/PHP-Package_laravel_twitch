@@ -22,9 +22,9 @@ final class CreateCustomRewardRequestTest extends TestCase
 
         $array = $createCustomRewardRequest->toArray();
 
-        $this->assertSame('Hydrate!', $array['title']);
-        $this->assertSame(500, $array['cost']);
-        $this->assertTrue($array['is_enabled']);
-        $this->assertFalse($array['is_user_input_required']);
+        self::assertSame('Hydrate!', $array['title']);
+        self::assertSame(500, $array['cost']);
+        self::assertTrue($array['is_enabled']);
+        self::assertFalse($array['is_user_input_required']);
     }
 }

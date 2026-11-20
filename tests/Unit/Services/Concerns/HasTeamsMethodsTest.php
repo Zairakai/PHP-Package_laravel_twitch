@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Tests\Unit\Services\Concerns;
 
 use PHPUnit\Framework\Attributes\Test;
-use Spatie\LaravelData\DataCollection;
 use Zairakai\LaravelTwitch\Dto\Teams\Team;
 use Zairakai\LaravelTwitch\Services\TwitchApiService;
 use Zairakai\LaravelTwitch\Tests\TestCase;
@@ -32,19 +31,31 @@ final class HasTeamsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
-                return ['data' => []];
+                return [
+                    'data' => [],
+                ];
             }
         };
 
         $service->getChannelTeams('1');
 
-        $this->assertSame('GET', $capturedParams['method']);
-        $this->assertSame('/teams/channel', $capturedParams['endpoint']);
-        $this->assertSame(['broadcaster_id' => '1'], $capturedParams['params']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('GET', $capturedParams['method']);
+        self::assertSame('/teams/channel', $capturedParams['endpoint']);
+        self::assertSame([
+            'broadcaster_id' => '1',
+        ], $capturedParams['params']);
     }
 
     // ── getTeams ──────────────────────────────────────────────────────────────
@@ -72,18 +83,30 @@ final class HasTeamsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
-                return ['data' => [$this->teamData]];
+                return [
+                    'data' => [
+                        $this->teamData,
+                    ],
+                ];
             }
         };
 
         $service->getTeams(name: 'awesome-team');
 
-        $this->assertSame('GET', $capturedParams['method']);
-        $this->assertSame('/teams', $capturedParams['endpoint']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('GET', $capturedParams['method']);
+        self::assertSame('/teams', $capturedParams['endpoint']);
     }
 
     #[Test]
@@ -107,18 +130,24 @@ final class HasTeamsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                return ['data' => [$this->teamData]];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                return [
+                    'data' => [
+                        $this->teamData,
+                    ],
+                ];
             }
         };
 
         $dataCollection = $service->getChannelTeams('1');
 
-        $this->assertInstanceOf(DataCollection::class, $dataCollection);
-        $this->assertInstanceOf(Team::class, $dataCollection->first());
-        $this->assertSame('team-1', $dataCollection->first()->id);
-        $this->assertSame('awesome-team', $dataCollection->first()->teamName);
+        self::assertInstanceOf(Team::class, $dataCollection->first());
+        self::assertSame('team-1', $dataCollection->first()->id);
+        self::assertSame('awesome-team', $dataCollection->first()->teamName);
     }
 
     #[Test]
@@ -142,17 +171,23 @@ final class HasTeamsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                return ['data' => [$this->teamData]];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                return [
+                    'data' => [
+                        $this->teamData,
+                    ],
+                ];
             }
         };
 
         $team = $service->getTeams(name: 'awesome-team');
 
-        $this->assertInstanceOf(Team::class, $team);
-        $this->assertSame('team-1', $team->id);
-        $this->assertSame('Awesome Team', $team->teamDisplayName);
+        self::assertSame('team-1', $team->id);
+        self::assertSame('Awesome Team', $team->teamDisplayName);
     }
 
     /**

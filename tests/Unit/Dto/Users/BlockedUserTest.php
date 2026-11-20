@@ -19,8 +19,8 @@ final class BlockedUserTest extends TestCase
             'display_name' => 'BlockedUser',
         ]);
 
-        $this->assertSame('55555', $blockedUser->userId);
-        $this->assertSame('blockeduser', $blockedUser->userLogin);
-        $this->assertSame('BlockedUser', $blockedUser->displayName);
+        self::assertSame('55555', $blockedUser->userId);
+        self::assertSame('blockeduser', $blockedUser->userLogin);
+        self::assertSame('BlockedUser', $blockedUser->displayName);
     }
 }

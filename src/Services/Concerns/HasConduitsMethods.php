@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Services\Concerns;
 
+use InvalidArgumentException;
 use Spatie\LaravelData\DataCollection;
 use Zairakai\LaravelTwitch\Dto\Conduits\Conduit;
 use Zairakai\LaravelTwitch\Dto\Conduits\ConduitShard;
 use Zairakai\LaravelTwitch\Dto\Conduits\Requests\UpdateConduitShardRequest;
 use Zairakai\LaravelTwitch\Dto\PaginatedResult;
+use Zairakai\LaravelTwitch\Exceptions\ConduitShardsUpdateFailed;
 
 /**
  * Twitch Conduits API methods.
@@ -28,6 +30,8 @@ trait HasConduitsMethods
      */
     public function createConduit(int $shardCount): Conduit
     {
+        $this->assertShardCount($shardCount);
+
         $raw = $this->makeRequest('POST', '/eventsub/conduits', [
             'shard_count' => $shardCount,
         ]);
@@ -60,7 +64,11 @@ trait HasConduitsMethods
      */
     public function getConduits(): DataCollection
     {
-        $raw = $this->makeRequest('GET', '/eventsub/conduits', []);
+        $raw = $this->makeRequest(
+            'GET',
+            '/eventsub/conduits',
+            [],
+        );
 
         /** @var list<array<string, mixed>> $items */
         $items = $raw['data'] ?? [];
@@ -85,7 +93,9 @@ trait HasConduitsMethods
         ?string $status = null,
         ?string $after = null,
     ): PaginatedResult {
-        $params = ['conduit_id' => $conduitId];
+        $params = [
+            'conduit_id' => $conduitId,
+        ];
 
         if (null !== $status) {
             $params['status'] = $status;
@@ -95,7 +105,11 @@ trait HasConduitsMethods
             $params['after'] = $after;
         }
 
-        $raw = $this->makeRequest('GET', '/eventsub/conduits/shards', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/eventsub/conduits/shards',
+            $params,
+        );
 
         return PaginatedResult::fromRaw($raw, ConduitShard::class);
     }
@@ -109,6 +123,8 @@ trait HasConduitsMethods
      */
     public function updateConduit(string $conduitId, int $shardCount): Conduit
     {
+        $this->assertShardCount($shardCount);
+
         $raw = $this->makeRequest('PATCH', '/eventsub/conduits', [
             'id'          => $conduitId,
             'shard_count' => $shardCount,
@@ -125,12 +141,22 @@ trait HasConduitsMethods
      *
      * Requires: app access token
      *
-     * @param list<UpdateConduitShardRequest> $shards Shards to update
+     * Twitch answers 202 even when it refuses some shards: those come back in `errors`, and a
+     * {@see ConduitShardsUpdateFailed} is thrown (the accepted shards are on the exception).
+     *
+     * @param list<UpdateConduitShardRequest> $shards 1 to 100 shards to update
      *
      * @return DataCollection<int, ConduitShard>
+     *
+     * @throws InvalidArgumentException  when there are no shards, or more than 100
+     * @throws ConduitShardsUpdateFailed when Twitch refuses at least one shard
      */
     public function updateConduitShards(string $conduitId, array $shards): DataCollection
     {
+        if ([] === $shards || count($shards) > 100) {
+            throw new InvalidArgumentException('updateConduitShards() takes 1 to 100 shards per request.');
+        }
+
         $raw = $this->makeRequest('PATCH', '/eventsub/conduits/shards', [
             'conduit_id' => $conduitId,
             'shards'     => array_map(
@@ -145,6 +171,23 @@ trait HasConduitsMethods
         /** @var DataCollection<int, ConduitShard> $dataCollection */
         $dataCollection = ConduitShard::collect($items, DataCollection::class);
 
+        // Twitch answers 202 even when some shards are refused: those are listed in `errors`, not in the status.
+        /** @var list<array<string, mixed>> $errors */
+        $errors = is_array($raw['errors'] ?? null)
+            ? $raw['errors']
+            : [];
+
+        if ([] !== $errors) {
+            throw new ConduitShardsUpdateFailed($errors, $dataCollection);
+        }
+
         return $dataCollection;
+    }
+
+    private function assertShardCount(int $shardCount): void
+    {
+        if (1 > $shardCount || 20000 < $shardCount) {
+            throw new InvalidArgumentException('A conduit has 1 to 20000 shards.');
+        }
     }
 }

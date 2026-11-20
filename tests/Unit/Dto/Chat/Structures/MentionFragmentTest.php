@@ -19,8 +19,8 @@ final class MentionFragmentTest extends TestCase
             'user_name'  => 'Zairakai',
         ]);
 
-        $this->assertSame('12345', $mentionFragment->userId);
-        $this->assertSame('zairakai', $mentionFragment->userLogin);
-        $this->assertSame('Zairakai', $mentionFragment->userName);
+        self::assertSame('12345', $mentionFragment->userId);
+        self::assertSame('zairakai', $mentionFragment->userLogin);
+        self::assertSame('Zairakai', $mentionFragment->userName);
     }
 }

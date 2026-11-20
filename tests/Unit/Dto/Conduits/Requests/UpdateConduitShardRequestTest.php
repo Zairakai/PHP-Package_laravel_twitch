@@ -24,8 +24,9 @@ final class UpdateConduitShardRequestTest extends TestCase
 
         $array = $updateConduitShardRequest->toArray();
 
-        $this->assertSame('shard-1', $array['id']);
-        $this->assertSame('webhook', $array['transport']['method']);
-        $this->assertSame('https://example.com/webhook', $array['transport']['callback']);
+        self::assertSame('shard-1', $array['id']);
+        self::assertIsArray($array['transport']);
+        self::assertSame('webhook', $array['transport']['method']);
+        self::assertSame('https://example.com/webhook', $array['transport']['callback']);
     }
 }

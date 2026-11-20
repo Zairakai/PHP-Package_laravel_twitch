@@ -6,8 +6,10 @@ namespace Zairakai\LaravelTwitch\Dto\Raids;
 
 use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents a Twitch raid.
@@ -15,12 +17,13 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#start-a-raid
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class Raid extends Data
+class Raid extends TwitchData
 {
     public function __construct(
         /**
          * @var Carbon|null When the raid was created
          */
+        #[WithCast(FlexibleDateTimeCast::class)]
         public ?Carbon $createdAt = null,
 
         /**

@@ -15,11 +15,19 @@ final class EntitlementStatusTest extends TestCase
     {
         $entitlementStatus = EntitlementStatus::from([
             'status' => 'CLAIMED',
-            'ids'    => ['ent-001', 'ent-002', 'ent-003'],
+            'ids'    => [
+                'ent-001',
+                'ent-002',
+                'ent-003',
+            ],
         ]);
 
-        $this->assertSame('CLAIMED', $entitlementStatus->status);
-        $this->assertSame(['ent-001', 'ent-002', 'ent-003'], $entitlementStatus->ids);
+        self::assertSame('CLAIMED', $entitlementStatus->status);
+        self::assertSame([
+            'ent-001',
+            'ent-002',
+            'ent-003',
+        ], $entitlementStatus->ids);
     }
 
     #[Test]
@@ -29,7 +37,7 @@ final class EntitlementStatusTest extends TestCase
             'status' => 'UNFULFILLED',
         ]);
 
-        $this->assertSame('UNFULFILLED', $entitlementStatus->status);
-        $this->assertSame([], $entitlementStatus->ids);
+        self::assertSame('UNFULFILLED', $entitlementStatus->status);
+        self::assertSame([], $entitlementStatus->ids);
     }
 }

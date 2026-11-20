@@ -11,7 +11,7 @@
 
 include:
   - project: 'zairakai/php-packages/laravel-dev-tools'
-    ref: 4.11.0
+    ref: 5.5.0
     file: '.gitlab/ci/pipeline-php-package.yml'
 
 variables:
@@ -21,3 +21,33 @@ variables:
   # Nom complet du package sur Packagist
   # Utilisé dans la release GitLab pour le lien vers Packagist
   PACKAGIST_PACKAGE: "zairakai/laravel-twitch"
+
+# Veille de l'API Twitch : un ticket par nouvelle entrée du changelog ou des annonces du forum des développeurs.
+# Une planification QUOTIDIENNE de develop (le changelog publie ~25 entrées par an, à des dates irrégulières, 47 jours
+# d'écart au maximum ; une entrée est datée du jour sans heure : un passage par jour la voit au plus tard le lendemain)
+# avec WATCH_TWITCH_API=true ET UPDATE_DEPENDENCIES=true :
+# UPDATE_DEPENDENCIES=true écarte tous les autres jobs du template (comme pour la mise à jour des dépendances) et les
+# deux jobs deps:* qu'il déclenche sont écartés plus bas par WATCH_TWITCH_API. Seul twitch:watch tourne.
+# Le jeton FRESHNESS_TOKEN du groupe (sinon GITLAB_TOKEN) ouvre les tickets (étiquette Automated, assigné à
+# ISSUE_ASSIGNEE_ID ou au propriétaire du jeton) ; WATCH_SINCE_DAYS (14 par défaut) borne la fenêtre.
+twitch:watch:
+  stage: install
+  image: ${PHP_UPDATE_IMAGE}
+  needs: []
+  script:
+    - php .gitlab/scripts/twitch-watch.php
+  rules:
+    - if: $WATCH_TWITCH_API == "true" && $UPDATE_DEPENDENCIES == "true" && $CI_PIPELINE_SOURCE == "schedule" && $CI_COMMIT_BRANCH == "develop"
+
+# Les règles du template sont reprises avec l'exclusion de la veille.
+deps:update:
+  rules:
+    - if: $WATCH_TWITCH_API == "true"
+      when: never
+    - if: $UPDATE_DEPENDENCIES == "true" && $AUDIT_DEPENDENCIES != "true" && $CI_COMMIT_BRANCH == "develop"
+
+deps:audit:
+  rules:
+    - if: $WATCH_TWITCH_API == "true"
+      when: never
+    - if: $UPDATE_DEPENDENCIES == "true" && $AUDIT_DEPENDENCIES == "true" && $CI_COMMIT_BRANCH == "develop"

@@ -19,8 +19,8 @@ final class RaidTest extends TestCase
             'is_mature'  => true,
         ]);
 
-        $this->assertInstanceOf(Carbon::class, $raid->createdAt);
-        $this->assertTrue($raid->isMature);
+        self::assertInstanceOf(Carbon::class, $raid->createdAt);
+        self::assertTrue($raid->isMature);
     }
 
     #[Test]
@@ -28,7 +28,7 @@ final class RaidTest extends TestCase
     {
         $raid = Raid::from([]);
 
-        $this->assertNull($raid->createdAt);
-        $this->assertFalse($raid->isMature);
+        self::assertNull($raid->createdAt);
+        self::assertFalse($raid->isMature);
     }
 }

@@ -15,8 +15,8 @@ final class UpdateScheduleSegmentRequestTest extends TestCase
     {
         $updateScheduleSegmentRequest = new UpdateScheduleSegmentRequest();
 
-        $this->assertNull($updateScheduleSegmentRequest->title);
-        $this->assertNull($updateScheduleSegmentRequest->isCanceled);
+        self::assertNull($updateScheduleSegmentRequest->title);
+        self::assertNull($updateScheduleSegmentRequest->isCanceled);
     }
 
     #[Test]
@@ -29,7 +29,7 @@ final class UpdateScheduleSegmentRequestTest extends TestCase
 
         $array = $updateScheduleSegmentRequest->toArray();
 
-        $this->assertSame('Updated title', $array['title']);
-        $this->assertFalse($array['is_canceled']);
+        self::assertSame('Updated title', $array['title']);
+        self::assertFalse($array['is_canceled']);
     }
 }

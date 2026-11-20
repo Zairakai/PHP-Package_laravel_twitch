@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\Chat;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents the chat settings for a broadcaster's channel.
@@ -14,7 +14,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#get-chat-settings
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class ChatSettings extends Data
+class ChatSettings extends TwitchData
 {
     public function __construct(
         /**
@@ -66,5 +66,10 @@ class ChatSettings extends Data
          * @var int|null Delay in seconds for non-moderator chat
          */
         public ?int $nonModeratorChatDelayDuration = null,
+
+        /**
+         * @var string|null Moderator ID (sent only with the non-moderator chat delay fields)
+         */
+        public ?string $moderatorId = null,
     ) {}
 }

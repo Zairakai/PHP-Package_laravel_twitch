@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\Chat\Structures;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents an emote fragment within a chat message.
@@ -17,7 +17,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/#channelchatmessage
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class EmoteFragment extends Data
+class EmoteFragment extends TwitchData
 {
     public function __construct(
         /**
@@ -31,13 +31,13 @@ class EmoteFragment extends Data
         public string $emoteSetId,
 
         /**
-         * @var string Owner channel ID (broadcaster who owns the emote)
+         * @var string|null Owner channel ID (broadcaster who owns the emote). Absent from the automod payloads.
          */
-        public string $ownerId,
+        public ?string $ownerId = null,
 
         /**
-         * @var array<string> Available formats: animated, static
+         * @var array<string> Available formats: animated, static. Absent from the automod payloads.
          */
-        public array $format,
+        public array $format = [],
     ) {}
 }

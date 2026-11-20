@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Tests\Unit\Services\Concerns;
 
 use PHPUnit\Framework\Attributes\Test;
-use Spatie\LaravelData\DataCollection;
 use Zairakai\LaravelTwitch\Dto\ChannelPoints\CustomReward;
 use Zairakai\LaravelTwitch\Services\TwitchApiService;
 use Zairakai\LaravelTwitch\Tests\TestCase;
@@ -32,18 +31,28 @@ final class HasChannelPointsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
-                return ['data' => []];
+                return [
+                    'data' => [],
+                ];
             }
         };
 
         $service->getCustomRewards('1');
 
-        $this->assertSame('GET', $capturedParams['method']);
-        $this->assertSame('/channel_points/custom_rewards', $capturedParams['endpoint']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('GET', $capturedParams['method']);
+        self::assertSame('/channel_points/custom_rewards', $capturedParams['endpoint']);
     }
 
     #[Test]
@@ -67,18 +76,24 @@ final class HasChannelPointsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                return ['data' => [$this->rewardData]];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                return [
+                    'data' => [
+                        $this->rewardData,
+                    ],
+                ];
             }
         };
 
         $dataCollection = $service->getCustomRewards('1');
 
-        $this->assertInstanceOf(DataCollection::class, $dataCollection);
-        $this->assertInstanceOf(CustomReward::class, $dataCollection->first());
-        $this->assertSame('reward-1', $dataCollection->first()->id);
-        $this->assertSame('Hydrate!', $dataCollection->first()->title);
+        self::assertInstanceOf(CustomReward::class, $dataCollection->first());
+        self::assertSame('reward-1', $dataCollection->first()->id);
+        self::assertSame('Hydrate!', $dataCollection->first()->title);
     }
 
     /**

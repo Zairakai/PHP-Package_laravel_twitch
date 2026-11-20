@@ -6,8 +6,10 @@ namespace Zairakai\LaravelTwitch\Dto\Teams;
 
 use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents a Twitch team.
@@ -15,7 +17,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#get-teams
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class Team extends Data
+class Team extends TwitchData
 {
     public function __construct(
         /**
@@ -39,19 +41,19 @@ class Team extends Data
         public string $info,
 
         /**
-         * @var string URL to team thumbnail
+         * @var string|null URL to team thumbnail (null when the team has none)
          */
-        public string $thumbnailUrl,
+        public ?string $thumbnailUrl,
 
         /**
-         * @var string URL to team background image
+         * @var string|null URL to team background image (null when the team has none)
          */
-        public string $backgroundImageUrl,
+        public ?string $backgroundImageUrl,
 
         /**
-         * @var string URL to team banner
+         * @var string|null URL to team banner (null when the team has none)
          */
-        public string $banner,
+        public ?string $banner,
 
         /**
          * @var list<array{user_id: string, user_name: string, user_login: string}> Team members
@@ -61,11 +63,28 @@ class Team extends Data
         /**
          * @var Carbon|null When the team was created
          */
+        #[WithCast(FlexibleDateTimeCast::class)]
         public ?Carbon $createdAt = null,
 
         /**
          * @var Carbon|null When the team was last updated
          */
+        #[WithCast(FlexibleDateTimeCast::class)]
         public ?Carbon $updatedAt = null,
+
+        /**
+         * @var string|null Broadcaster ID (Get Channel Teams only)
+         */
+        public ?string $broadcasterId = null,
+
+        /**
+         * @var string|null Broadcaster login (Get Channel Teams only)
+         */
+        public ?string $broadcasterLogin = null,
+
+        /**
+         * @var string|null Broadcaster display name (Get Channel Teams only)
+         */
+        public ?string $broadcasterName = null,
     ) {}
 }

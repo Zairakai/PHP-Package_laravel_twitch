@@ -15,9 +15,9 @@ final class UpdateChannelRequestTest extends TestCase
     {
         $updateChannelRequest = new UpdateChannelRequest();
 
-        $this->assertNull($updateChannelRequest->gameId);
-        $this->assertNull($updateChannelRequest->title);
-        $this->assertNull($updateChannelRequest->tags);
+        self::assertNull($updateChannelRequest->gameId);
+        self::assertNull($updateChannelRequest->title);
+        self::assertNull($updateChannelRequest->tags);
     }
 
     #[Test]
@@ -32,9 +32,9 @@ final class UpdateChannelRequestTest extends TestCase
 
         $array = $updateChannelRequest->toArray();
 
-        $this->assertSame('21779', $array['game_id']);
-        $this->assertSame('en', $array['broadcaster_language']);
-        $this->assertSame('Playing ranked!', $array['title']);
-        $this->assertFalse($array['is_branded_content']);
+        self::assertSame('21779', $array['game_id']);
+        self::assertSame('en', $array['broadcaster_language']);
+        self::assertSame('Playing ranked!', $array['title']);
+        self::assertFalse($array['is_branded_content']);
     }
 }

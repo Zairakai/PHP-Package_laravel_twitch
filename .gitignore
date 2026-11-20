@@ -1,13 +1,85 @@
-/vendor/
-/build/
-/.phpunit.result.cache
-.dev-tools-backup/
+# JetBrains (PhpStorm, WebStorm)
+# ----------------
+.idea/
+.idea_modules/
+*.iml
+*.ipr
+*.iws
 
-# Dev Tools - Generated temporary files
-.*.tmp.*
+# Visual Studio Code and derivatives
+# ----------------
+.vscode/
+.history/
 
-# Dev Tools - Published configs (optional, uncomment to ignore)
-# config/dev-tools/
+# Other editors
+# ----------------
+.fleet/
+.zed/
+.vs/
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+nbproject/
+*.swp
+*.swo
+*~
 
+# AI assistants
+# ----------------
+# Personal instruction files: not published (the KB repositories force them with exceptions)
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+*.local.md
+.claude/settings.local.json
+.aider*
+.cursor/
+.windsurf/
+.continue/
+.codex/
+.gemini/
+
+# Editor and IDE files of the project
+# ----------------
+.phpstorm.meta.php
+.phpactor.json
+
+# Dependencies
+# ----------------
+/vendor
+/node_modules
+
+# Build output
+# ----------------
+/build
+
+# Laravel runtime
+# ----------------
+/storage
 /public/
+
+# Tests and coverage
+# ----------------
+.phpunit.cache
+.phpunit.result.cache
+/coverage
+
+# Caches
+# ----------------
 .npm/
+
+# Logs
+# ----------------
+*.log
+
+# Operating system
+# ----------------
+.DS_Store
+Thumbs.db
+
+# Dev Tools temporary files
+# ----------------
+.*.tmp.*
+.dev-tools-backup/

@@ -21,9 +21,9 @@ final class UpdateGuestStarSlotSettingsRequestTest extends TestCase
 
         $array = $updateGuestStarSlotSettingsRequest->toArray();
 
-        $this->assertTrue($array['is_audio_enabled']);
-        $this->assertFalse($array['is_video_enabled']);
-        $this->assertSame(80, $array['volume']);
-        $this->assertNull($array['is_live']);
+        self::assertTrue($array['is_audio_enabled']);
+        self::assertFalse($array['is_video_enabled']);
+        self::assertSame(80, $array['volume']);
+        self::assertNull($array['is_live']);
     }
 }

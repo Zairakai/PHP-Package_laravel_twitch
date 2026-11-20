@@ -21,12 +21,12 @@ final class AdSnoozeTest extends TestCase
             'next_ad_at'        => '2021-01-01T01:00:00Z',
         ]);
 
-        $this->assertSame('12345', $adSnooze->broadcasterId);
-        $this->assertSame(3, $adSnooze->snoozeCount);
-        $this->assertInstanceOf(Carbon::class, $adSnooze->snoozeRefreshAt);
-        $this->assertSame('2021-01-01 00:00:00', $adSnooze->snoozeRefreshAt->toDateTimeString());
-        $this->assertInstanceOf(Carbon::class, $adSnooze->nextAdAt);
-        $this->assertSame('2021-01-01 01:00:00', $adSnooze->nextAdAt->toDateTimeString());
+        self::assertSame('12345', $adSnooze->broadcasterId);
+        self::assertSame(3, $adSnooze->snoozeCount);
+        self::assertInstanceOf(Carbon::class, $adSnooze->snoozeRefreshAt);
+        self::assertSame('2021-01-01 00:00:00', $adSnooze->snoozeRefreshAt->toDateTimeString());
+        self::assertInstanceOf(Carbon::class, $adSnooze->nextAdAt);
+        self::assertSame('2021-01-01 01:00:00', $adSnooze->nextAdAt->toDateTimeString());
     }
 
     #[Test]
@@ -39,9 +39,9 @@ final class AdSnoozeTest extends TestCase
             'next_ad_at'        => null,
         ]);
 
-        $this->assertSame('12345', $adSnooze->broadcasterId);
-        $this->assertSame(0, $adSnooze->snoozeCount);
-        $this->assertNull($adSnooze->snoozeRefreshAt);
-        $this->assertNull($adSnooze->nextAdAt);
+        self::assertSame('12345', $adSnooze->broadcasterId);
+        self::assertSame(0, $adSnooze->snoozeCount);
+        self::assertNull($adSnooze->snoozeRefreshAt);
+        self::assertNull($adSnooze->nextAdAt);
     }
 }

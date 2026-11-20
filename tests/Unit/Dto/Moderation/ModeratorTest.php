@@ -19,8 +19,8 @@ final class ModeratorTest extends TestCase
             'user_name'  => 'ModUser',
         ]);
 
-        $this->assertSame('67890', $moderator->userId);
-        $this->assertSame('moduser', $moderator->userLogin);
-        $this->assertSame('ModUser', $moderator->userName);
+        self::assertSame('67890', $moderator->userId);
+        self::assertSame('moduser', $moderator->userLogin);
+        self::assertSame('ModUser', $moderator->userName);
     }
 }

@@ -281,10 +281,6 @@ use Zairakai\LaravelTwitch\Services\TwitchApiService;
  * @method static array getExtensionBitsProducts(string $extensionClientId, bool $shouldIncludeAll = false)
  * @method static array updateExtensionBitsProduct(string $extensionClientId, array $data)
  *
- * ── Tags (HasTagsMethods) — DEPRECATED ────────────────────────────────────────
- * @method static array getAllStreamTags(string|null $tagId = null, int $first = 20, string|null $after = null)
- * @method static array getStreamTags(string $broadcasterId)
- *
  * ── Users, Follows & Subscriptions (HasUserMethods) ──────────────────────────
  * @method static User|null                      getAuthenticatedUser()
  * @method static DataCollection<int, User>      getUsers(string|array<string>|null $ids = null, string|array<string>|null $logins = null)

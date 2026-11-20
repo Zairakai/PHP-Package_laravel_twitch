@@ -19,8 +19,8 @@ final class VipTest extends TestCase
             'user_name'  => 'VipUser',
         ]);
 
-        $this->assertSame('33333', $vip->userId);
-        $this->assertSame('vipuser', $vip->userLogin);
-        $this->assertSame('VipUser', $vip->userName);
+        self::assertSame('33333', $vip->userId);
+        self::assertSame('vipuser', $vip->userLogin);
+        self::assertSame('VipUser', $vip->userName);
     }
 }

@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Tests\Unit\Services\Concerns;
 
 use PHPUnit\Framework\Attributes\Test;
-use Spatie\LaravelData\DataCollection;
 use Zairakai\LaravelTwitch\Dto\Games\Game;
-use Zairakai\LaravelTwitch\Dto\PaginatedResult;
 use Zairakai\LaravelTwitch\Services\TwitchApiService;
 use Zairakai\LaravelTwitch\Tests\TestCase;
 
@@ -33,18 +31,30 @@ final class HasGameMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
-                return ['data' => []];
+                return [
+                    'data' => [],
+                ];
             }
         };
 
-        $service->getGames(ids: ['game-1']);
+        $service->getGames(ids: [
+            'game-1',
+        ]);
 
-        $this->assertSame('GET', $capturedParams['method']);
-        $this->assertSame('/games', $capturedParams['endpoint']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('GET', $capturedParams['method']);
+        self::assertSame('/games', $capturedParams['endpoint']);
     }
 
     // ── getTopGames ───────────────────────────────────────────────────────────
@@ -67,18 +77,31 @@ final class HasGameMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
-                return ['data' => [], 'pagination' => ['cursor' => '']];
+                return [
+                    'data'       => [],
+                    'pagination' => [
+                        'cursor' => '',
+                    ],
+                ];
             }
         };
 
         $service->getTopGames();
 
-        $this->assertSame('GET', $capturedParams['method']);
-        $this->assertSame('/games/top', $capturedParams['endpoint']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('GET', $capturedParams['method']);
+        self::assertSame('/games/top', $capturedParams['endpoint']);
     }
 
     #[Test]
@@ -102,18 +125,26 @@ final class HasGameMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                return ['data' => [$this->gameData]];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                return [
+                    'data' => [
+                        $this->gameData,
+                    ],
+                ];
             }
         };
 
-        $dataCollection = $service->getGames(ids: ['game-1']);
+        $dataCollection = $service->getGames(ids: [
+            'game-1',
+        ]);
 
-        $this->assertInstanceOf(DataCollection::class, $dataCollection);
-        $this->assertInstanceOf(Game::class, $dataCollection->first());
-        $this->assertSame('game-1', $dataCollection->first()->id);
-        $this->assertSame('Fortnite', $dataCollection->first()->name);
+        self::assertInstanceOf(Game::class, $dataCollection->first());
+        self::assertSame('game-1', $dataCollection->first()->id);
+        self::assertSame('Fortnite', $dataCollection->first()->name);
     }
 
     #[Test]
@@ -137,21 +168,26 @@ final class HasGameMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
                 return [
-                    'data'       => [$this->gameData],
-                    'pagination' => ['cursor' => 'abc123'],
+                    'data'       => [
+                        $this->gameData,
+                    ],
+                    'pagination' => [
+                        'cursor' => 'abc123',
+                    ],
                 ];
             }
         };
 
         $paginatedResult = $service->getTopGames();
 
-        $this->assertInstanceOf(PaginatedResult::class, $paginatedResult);
-        $this->assertCount(1, $paginatedResult->items);
-        $this->assertInstanceOf(Game::class, $paginatedResult->items[0]);
-        $this->assertSame('Fortnite', $paginatedResult->items[0]->name);
+        self::assertCount(1, $paginatedResult->items);
+        self::assertSame('Fortnite', $paginatedResult->items[0]->name);
     }
 
     /**

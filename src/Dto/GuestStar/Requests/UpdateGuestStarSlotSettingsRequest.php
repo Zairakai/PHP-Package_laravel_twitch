@@ -6,8 +6,8 @@ namespace Zairakai\LaravelTwitch\Dto\GuestStar\Requests;
 
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Attributes\MapOutputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Request DTO for updating Guest Star slot settings.
@@ -18,7 +18,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  */
 #[MapInputName(SnakeCaseMapper::class)]
 #[MapOutputName(SnakeCaseMapper::class)]
-class UpdateGuestStarSlotSettingsRequest extends Data
+class UpdateGuestStarSlotSettingsRequest extends TwitchData
 {
     public function __construct(
         /**
@@ -37,7 +37,9 @@ class UpdateGuestStarSlotSettingsRequest extends Data
         public readonly ?bool $isLive = null,
 
         /**
-         * @var int|null Guest volume level (0–100)
+         * @var int|null Guest volume level (0-100). Not supported by Twitch any more: never sent.
+         *
+         * @deprecated Removed from the Twitch API reference
          */
         public readonly ?int $volume = null,
     ) {}

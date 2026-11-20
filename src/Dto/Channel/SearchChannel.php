@@ -6,8 +6,10 @@ namespace Zairakai\LaravelTwitch\Dto\Channel;
 
 use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents a channel returned by the search channels endpoint.
@@ -17,7 +19,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#search-channels
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class SearchChannel extends Data
+class SearchChannel extends TwitchData
 {
     public function __construct(
         /**
@@ -73,6 +75,7 @@ class SearchChannel extends Data
         /**
          * @var Carbon|null When the live stream started (null if offline)
          */
+        #[WithCast(FlexibleDateTimeCast::class)]
         public ?Carbon $startedAt = null,
     ) {}
 }

@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Zairakai\LaravelTwitch\Casts\EncryptedToken;
 
 /**
  * @property Carbon|null        $expires_at
@@ -59,11 +60,40 @@ class TwitchUser extends Model
     }
 
     /**
+     * @return array<string, string>
+     */
+    /**
+     * The connection of the tokens: `twitch.database.connection`, the default connection when null.
+     */
+    public function getConnectionName(): ?string
+    {
+        $connection = config('twitch.database.connection');
+
+        return is_string($connection) && '' !== $connection
+            ? $connection
+            : parent::getConnectionName();
+    }
+
+    /**
+     * `twitch.database.table_prefix` and `users` (`twitch_users` by default).
+     */
+    public function getTable(): string
+    {
+        $prefix = config('twitch.database.table_prefix');
+
+        return (is_string($prefix) ? $prefix : 'twitch_') . 'users';
+    }
+
+    /**
      * Check if user has specific scope.
      */
     public function hasScope(string $scope): bool
     {
-        return in_array($scope, $this->scopes ?? [], true);
+        return in_array(
+            $scope,
+            $this->scopes ?? [],
+            true,
+        );
     }
 
     /**
@@ -110,6 +140,8 @@ class TwitchUser extends Model
             'created_at_twitch' => 'datetime',
             'expires_at'        => 'datetime',
             'scopes'            => 'array',
+            'access_token'      => EncryptedToken::class,
+            'refresh_token'     => EncryptedToken::class,
         ];
     }
 }

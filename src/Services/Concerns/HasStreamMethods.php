@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Services\Concerns;
 
+use InvalidArgumentException;
 use Spatie\LaravelData\DataCollection;
 use Zairakai\LaravelTwitch\Dto\PaginatedResult;
 use Zairakai\LaravelTwitch\Dto\Streams\Clip;
@@ -36,9 +37,14 @@ trait HasStreamMethods
      *
      * @param float|null $duration Clip length in seconds, 5-60, precision 0.1. Defaults to 30.
      */
-    public function createClip(string $broadcasterId, ?string $title = null, ?float $duration = null): ClipEdit
-    {
-        $params = ['broadcaster_id' => $broadcasterId];
+    public function createClip(
+        string $broadcasterId,
+        ?string $title = null,
+        ?float $duration = null,
+    ): ClipEdit {
+        $params = [
+            'broadcaster_id' => $broadcasterId,
+        ];
 
         if (null !== $title) {
             $params['title'] = $title;
@@ -48,7 +54,11 @@ trait HasStreamMethods
             $params['duration'] = $duration;
         }
 
-        $raw = $this->makeRequest('POST', '/clips', $params);
+        $raw = $this->makeRequest(
+            'POST',
+            '/clips',
+            $params,
+        );
 
         /** @var array<int, array<string, mixed>> $items */
         $items = $raw['data'];
@@ -94,7 +104,11 @@ trait HasStreamMethods
             $params['duration'] = $duration;
         }
 
-        $raw = $this->makeRequest('POST', '/videos/clips', $params);
+        $raw = $this->makeRequest(
+            'POST',
+            '/videos/clips',
+            $params,
+        );
 
         /** @var array<int, array<string, mixed>> $items */
         $items = $raw['data'];
@@ -109,13 +123,19 @@ trait HasStreamMethods
      */
     public function createStreamMarker(string $userId, ?string $description = null): StreamMarker
     {
-        $body = ['user_id' => $userId];
+        $body = [
+            'user_id' => $userId,
+        ];
 
         if (null !== $description) {
             $body['description'] = $description;
         }
 
-        $raw = $this->makeRequest('POST', '/streams/markers', $body);
+        $raw = $this->makeRequest(
+            'POST',
+            '/streams/markers',
+            $body,
+        );
 
         /** @var array<int, array<string, mixed>> $items */
         $items = $raw['data'];
@@ -134,7 +154,9 @@ trait HasStreamMethods
      */
     public function deleteVideo(string|array $videoIds): array
     {
-        $raw = $this->makeRequest('DELETE', '/videos', ['id' => $videoIds]);
+        $raw = $this->makeRequest('DELETE', '/videos', [
+            'id' => $videoIds,
+        ]);
 
         /** @var array<string> $ids */
         $ids = $raw['data'] ?? [];
@@ -143,44 +165,88 @@ trait HasStreamMethods
     }
 
     /**
-     * Get clips from a broadcaster's channel.
+     * Get clips.
      *
      * Requires: no scope
      *
-     * @param string|array<string>|null $clipIds Filter by specific clip ID(s)
+     * Twitch needs exactly one of three filters: `broadcaster_id`, `game_id` or `id` (400 otherwise). When clip
+     * IDs are given they are the only filter sent, and the dates, `is_featured`, `first` and `after` are left out
+     * because Twitch ignores them in that case. A broadcaster passed together with clip IDs is therefore ignored.
+     *
+     * @param string|array<string>|null $clipIds    Clip ID(s), 100 at most
+     * @param string|null               $gameId     Clips of a game, instead of a broadcaster
+     * @param bool|null                 $isFeatured Only (or no) featured clips
      *
      * @return PaginatedResult<Clip>
+     *
+     * @throws InvalidArgumentException when no filter is given, or both a broadcaster and a game
      */
     public function getClips(
-        string $broadcasterId,
+        ?string $broadcasterId = null,
         string|array|null $clipIds = null,
         int $first = 20,
         ?string $after = null,
         ?string $startedAt = null,
         ?string $endedAt = null,
+        ?string $gameId = null,
+        ?bool $isFeatured = null,
     ): PaginatedResult {
-        $params = [
-            'broadcaster_id' => $broadcasterId,
-            'first'          => $first,
-        ];
-
         if (null !== $clipIds) {
-            $params['id'] = $clipIds;
+            $params = [
+                'id' => $clipIds,
+            ];
+        }
+        else {
+            if (
+                null    === $broadcasterId
+                && null === $gameId
+            ) {
+                throw new InvalidArgumentException('getClips() needs a broadcaster ID, a game ID or clip IDs.');
+            }
+
+            if (
+                null    !== $broadcasterId
+                && null !== $gameId
+            ) {
+                throw new InvalidArgumentException('getClips() takes a broadcaster ID or a game ID, not both.');
+            }
+
+            $params = [
+                'first' => $first,
+            ];
+
+            if (null !== $broadcasterId) {
+                $params['broadcaster_id'] = $broadcasterId;
+            }
+
+            if (null !== $gameId) {
+                $params['game_id'] = $gameId;
+            }
+
+            if (null !== $startedAt) {
+                $params['started_at'] = $startedAt;
+            }
+
+            if (null !== $endedAt) {
+                $params['ended_at'] = $endedAt;
+            }
+
+            if (null !== $isFeatured) {
+                $params['is_featured'] = $isFeatured
+                    ? 'true'
+                    : 'false';
+            }
+
+            if (null !== $after) {
+                $params['after'] = $after;
+            }
         }
 
-        if (null !== $startedAt) {
-            $params['started_at'] = $startedAt;
-        }
-
-        if (null !== $endedAt) {
-            $params['ended_at'] = $endedAt;
-        }
-
-        if (null !== $after) {
-            $params['after'] = $after;
-        }
-
-        $raw = $this->makeRequest('GET', '/clips', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/clips',
+            $params,
+        );
 
         return PaginatedResult::fromRaw($raw, Clip::class);
     }
@@ -197,8 +263,11 @@ trait HasStreamMethods
      *
      * @return DataCollection<int, ClipDownload>
      */
-    public function getClipsDownloads(string $editorId, string $broadcasterId, string|array $clipIds): DataCollection
-    {
+    public function getClipsDownloads(
+        string $editorId,
+        string $broadcasterId,
+        string|array $clipIds,
+    ): DataCollection {
         $raw = $this->makeRequest('GET', '/clips/downloads', [
             'editor_id'      => $editorId,
             'broadcaster_id' => $broadcasterId,
@@ -221,8 +290,11 @@ trait HasStreamMethods
      *
      * @return PaginatedResult<Stream>
      */
-    public function getFollowedStreams(string $userId, int $first = 20, ?string $after = null): PaginatedResult
-    {
+    public function getFollowedStreams(
+        string $userId,
+        int $first = 20,
+        ?string $after = null,
+    ): PaginatedResult {
         $params = [
             'user_id' => $userId,
             'first'   => $first,
@@ -232,7 +304,11 @@ trait HasStreamMethods
             $params['after'] = $after;
         }
 
-        $raw = $this->makeRequest('GET', '/streams/followed', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/streams/followed',
+            $params,
+        );
 
         return PaginatedResult::fromRaw($raw, Stream::class);
     }
@@ -251,7 +327,11 @@ trait HasStreamMethods
         /** @var array<int, array<string, mixed>> $items */
         $items = $raw['data'];
 
-        return StreamKey::from($items[0]);
+        // Twitch does not send the broadcaster ID back.
+        return StreamKey::from([
+            'broadcaster_id' => $broadcasterId,
+            ...$items[0],
+        ]);
     }
 
     /**
@@ -280,7 +360,11 @@ trait HasStreamMethods
             $params['after'] = $after;
         }
 
-        $raw = $this->makeRequest('GET', '/streams/markers', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/streams/markers',
+            $params,
+        );
 
         return PaginatedResult::fromRaw($raw, StreamMarkerGroup::class);
     }
@@ -290,11 +374,16 @@ trait HasStreamMethods
      *
      * Requires: no scope
      *
-     * @param string|array<string>|null $userIds   Filter by user ID(s)
-     * @param string|array<string>|null $gameIds   Filter by game ID(s)
-     * @param string|array<string>|null $languages Filter by language(s)
+     * @param string|array<string>|null $userIds    Filter by user ID(s)
+     * @param string|array<string>|null $gameIds    Filter by game ID(s)
+     * @param string|array<string>|null $languages  Filter by language(s)
+     * @param string|array<string>|null $userLogins Filter by login(s)
+     * @param string|null               $type       all or live (Twitch's default is all)
+     * @param string|null               $before     Cursor of the page before: not together with $after
      *
      * @return PaginatedResult<Stream>
+     *
+     * @throws InvalidArgumentException when both $after and $before are given
      */
     public function getStreams(
         string|array|null $userIds = null,
@@ -302,8 +391,17 @@ trait HasStreamMethods
         string|array|null $languages = null,
         int $first = 20,
         ?string $after = null,
+        string|array|null $userLogins = null,
+        ?string $type = null,
+        ?string $before = null,
     ): PaginatedResult {
-        $params = ['first' => $first];
+        if (null !== $after && null !== $before) {
+            throw new InvalidArgumentException('getStreams() takes a cursor after or before, not both.');
+        }
+
+        $params = [
+            'first' => $first,
+        ];
 
         if (null !== $userIds) {
             $params['user_id'] = $userIds;
@@ -317,11 +415,27 @@ trait HasStreamMethods
             $params['language'] = $languages;
         }
 
+        if (null !== $userLogins) {
+            $params['user_login'] = $userLogins;
+        }
+
+        if (null !== $type) {
+            $params['type'] = strtolower($type);
+        }
+
         if (null !== $after) {
             $params['after'] = $after;
         }
 
-        $raw = $this->makeRequest('GET', '/streams', $params);
+        if (null !== $before) {
+            $params['before'] = $before;
+        }
+
+        $raw = $this->makeRequest(
+            'GET',
+            '/streams',
+            $params,
+        );
 
         return PaginatedResult::fromRaw($raw, Stream::class);
     }
@@ -333,8 +447,14 @@ trait HasStreamMethods
      *
      * @param string|array<string>|null $videoIds Filter by specific video ID(s)
      * @param string                    $type     all, upload, archive, or highlight
+     * @param string|null               $language ISO 639-1 code (or `other`); only with a user or a game filter
+     * @param string|null               $period   all, day, week, or month; only with a user or a game filter
+     * @param string|null               $sort     time, trending, or views; only with a user or a game filter
+     * @param string|null               $before   Cursor of the page before: not together with $after
      *
      * @return PaginatedResult<Video>
+     *
+     * @throws InvalidArgumentException when both $after and $before are given
      */
     public function getVideos(
         ?string $userId = null,
@@ -343,10 +463,18 @@ trait HasStreamMethods
         string $type = 'all',
         int $first = 20,
         ?string $after = null,
+        ?string $language = null,
+        ?string $period = null,
+        ?string $sort = null,
+        ?string $before = null,
     ): PaginatedResult {
+        if (null !== $after && null !== $before) {
+            throw new InvalidArgumentException('getVideos() takes a cursor after or before, not both.');
+        }
+
         $params = [
             'first' => $first,
-            'type'  => $type,
+            'type'  => strtolower($type),
         ];
 
         if (null !== $userId) {
@@ -361,11 +489,31 @@ trait HasStreamMethods
             $params['id'] = $videoIds;
         }
 
+        if (null !== $language) {
+            $params['language'] = $language;
+        }
+
+        if (null !== $period) {
+            $params['period'] = strtolower($period);
+        }
+
+        if (null !== $sort) {
+            $params['sort'] = strtolower($sort);
+        }
+
         if (null !== $after) {
             $params['after'] = $after;
         }
 
-        $raw = $this->makeRequest('GET', '/videos', $params);
+        if (null !== $before) {
+            $params['before'] = $before;
+        }
+
+        $raw = $this->makeRequest(
+            'GET',
+            '/videos',
+            $params,
+        );
 
         return PaginatedResult::fromRaw($raw, Video::class);
     }

@@ -20,9 +20,9 @@ final class PollChoiceTest extends TestCase
             'channel_points_votes' => 5000,
         ]);
 
-        $this->assertSame('choice-001', $pollChoice->id);
-        $this->assertSame('Yes', $pollChoice->title);
-        $this->assertSame(120, $pollChoice->votes);
-        $this->assertSame(5000, $pollChoice->channelPointsVotes);
+        self::assertSame('choice-001', $pollChoice->id);
+        self::assertSame('Yes', $pollChoice->title);
+        self::assertSame(120, $pollChoice->votes);
+        self::assertSame(5000, $pollChoice->channelPointsVotes);
     }
 }

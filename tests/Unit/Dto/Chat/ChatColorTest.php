@@ -20,9 +20,9 @@ final class ChatColorTest extends TestCase
             'color'      => '#FF4500',
         ]);
 
-        $this->assertSame('12345', $chatColor->userId);
-        $this->assertSame('twitchdev', $chatColor->userLogin);
-        $this->assertSame('TwitchDev', $chatColor->userName);
-        $this->assertSame('#FF4500', $chatColor->color);
+        self::assertSame('12345', $chatColor->userId);
+        self::assertSame('twitchdev', $chatColor->userLogin);
+        self::assertSame('TwitchDev', $chatColor->userName);
+        self::assertSame('#FF4500', $chatColor->color);
     }
 }

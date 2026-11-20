@@ -24,10 +24,10 @@ final class BlockedTermTest extends TestCase
             'expires_at'     => null,
         ]);
 
-        $this->assertSame('term-001', $blockedTerm->id);
-        $this->assertSame('badword', $blockedTerm->text);
-        $this->assertInstanceOf(Carbon::class, $blockedTerm->createdAt);
-        $this->assertInstanceOf(Carbon::class, $blockedTerm->updatedAt);
-        $this->assertNull($blockedTerm->expiresAt);
+        self::assertSame('term-001', $blockedTerm->id);
+        self::assertSame('badword', $blockedTerm->text);
+        self::assertInstanceOf(Carbon::class, $blockedTerm->createdAt);
+        self::assertInstanceOf(Carbon::class, $blockedTerm->updatedAt);
+        self::assertNull($blockedTerm->expiresAt);
     }
 }

@@ -6,8 +6,10 @@ namespace Zairakai\LaravelTwitch\Dto\Channel;
 
 use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents a channel editor.
@@ -15,7 +17,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#get-channel-editors
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class ChannelEditor extends Data
+class ChannelEditor extends TwitchData
 {
     public function __construct(
         /**
@@ -31,6 +33,7 @@ class ChannelEditor extends Data
         /**
          * @var Carbon|null When the user was added as an editor
          */
+        #[WithCast(FlexibleDateTimeCast::class)]
         public ?Carbon $createdAt = null,
     ) {}
 }

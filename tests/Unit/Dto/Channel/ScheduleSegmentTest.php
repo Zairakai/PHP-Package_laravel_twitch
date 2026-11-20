@@ -21,16 +21,20 @@ final class ScheduleSegmentTest extends TestCase
             'start_time'     => '2024-03-04T18:00:00Z',
             'end_time'       => '2024-03-04T21:00:00Z',
             'canceled_until' => null,
-            'category'       => ['id' => '21779', 'name' => 'League of Legends'],
+            'category'       => [
+                'id'   => '21779',
+                'name' => 'League of Legends',
+            ],
         ]);
 
-        $this->assertSame('seg-001', $scheduleSegment->id);
-        $this->assertSame('Weekly stream', $scheduleSegment->title);
-        $this->assertTrue($scheduleSegment->isRecurring);
-        $this->assertInstanceOf(Carbon::class, $scheduleSegment->startTime);
-        $this->assertInstanceOf(Carbon::class, $scheduleSegment->endTime);
-        $this->assertNull($scheduleSegment->canceledUntil);
-        $this->assertSame('21779', $scheduleSegment->category['id']);
+        self::assertSame('seg-001', $scheduleSegment->id);
+        self::assertSame('Weekly stream', $scheduleSegment->title);
+        self::assertTrue($scheduleSegment->isRecurring);
+        self::assertInstanceOf(Carbon::class, $scheduleSegment->startTime);
+        self::assertInstanceOf(Carbon::class, $scheduleSegment->endTime);
+        self::assertNull($scheduleSegment->canceledUntil);
+        self::assertNotNull($scheduleSegment->category);
+        self::assertSame('21779', $scheduleSegment->category['id']);
     }
 
     #[Test]
@@ -42,8 +46,8 @@ final class ScheduleSegmentTest extends TestCase
             'is_recurring' => false,
         ]);
 
-        $this->assertNull($scheduleSegment->startTime);
-        $this->assertNull($scheduleSegment->endTime);
-        $this->assertNull($scheduleSegment->category);
+        self::assertNull($scheduleSegment->startTime);
+        self::assertNull($scheduleSegment->endTime);
+        self::assertNull($scheduleSegment->category);
     }
 }

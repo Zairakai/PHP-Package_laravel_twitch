@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Tests\Unit\Services\Concerns;
 
 use PHPUnit\Framework\Attributes\Test;
-use Zairakai\LaravelTwitch\Dto\HypeTrain\HypeTrainStatus;
-use Zairakai\LaravelTwitch\Dto\Raids\Raid;
 use Zairakai\LaravelTwitch\Services\TwitchApiService;
 use Zairakai\LaravelTwitch\Tests\TestCase;
 
@@ -32,23 +30,37 @@ final class HasRaidMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
-                return ['data' => [[
-                    'current'              => null,
-                    'all_time_high'        => null,
-                    'shared_all_time_high' => null,
-                ]]];
+                return [
+                    'data' => [
+                        [
+                            'current'              => null,
+                            'all_time_high'        => null,
+                            'shared_all_time_high' => null,
+                        ],
+                    ],
+                ];
             }
         };
 
         $service->getHypeTrainStatus('1');
 
-        $this->assertSame('GET', $capturedParams['method']);
-        $this->assertSame('/hypetrain/status', $capturedParams['endpoint']);
-        $this->assertSame(['broadcaster_id' => '1'], $capturedParams['params']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('GET', $capturedParams['method']);
+        self::assertSame('/hypetrain/status', $capturedParams['endpoint']);
+        self::assertSame([
+            'broadcaster_id' => '1',
+        ], $capturedParams['params']);
     }
 
     // ── cancelRaid ────────────────────────────────────────────────────────────
@@ -71,9 +83,16 @@ final class HasRaidMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
                 return [];
             }
@@ -81,8 +100,9 @@ final class HasRaidMethodsTest extends TestCase
 
         $service->cancelRaid('1');
 
-        $this->assertSame('DELETE', $capturedParams['method']);
-        $this->assertSame('/raids', $capturedParams['endpoint']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('DELETE', $capturedParams['method']);
+        self::assertSame('/raids', $capturedParams['endpoint']);
     }
 
     // ── startRaid ─────────────────────────────────────────────────────────────
@@ -105,18 +125,33 @@ final class HasRaidMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
-                return ['data' => [['created_at' => '2024-01-01T00:00:00Z', 'is_mature' => false]]];
+                return [
+                    'data' => [
+                        [
+                            'created_at' => '2024-01-01T00:00:00Z',
+                            'is_mature'  => false,
+                        ],
+                    ],
+                ];
             }
         };
 
         $service->startRaid('1', '2');
 
-        $this->assertSame('POST', $capturedParams['method']);
-        $this->assertSame('/raids', $capturedParams['endpoint']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('POST', $capturedParams['method']);
+        self::assertSame('/raids', $capturedParams['endpoint']);
     }
 
     // ── sendWhisper ───────────────────────────────────────────────────────────
@@ -157,12 +192,22 @@ final class HasRaidMethodsTest extends TestCase
             }
         };
 
-        $service->sendWhisper('123', '456', 'hello');
+        $service->sendWhisper(
+            '123',
+            '456',
+            'hello',
+        );
 
-        $this->assertSame('POST', $captured['method']);
-        $this->assertSame('/whispers', $captured['endpoint']);
-        $this->assertSame(['from_user_id' => '123', 'to_user_id' => '456'], $captured['queryParams']);
-        $this->assertSame(['message' => 'hello'], $captured['bodyParams']);
+        self::assertIsArray($captured);
+        self::assertSame('POST', $captured['method']);
+        self::assertSame('/whispers', $captured['endpoint']);
+        self::assertSame([
+            'from_user_id' => '123',
+            'to_user_id'   => '456',
+        ], $captured['queryParams']);
+        self::assertSame([
+            'message' => 'hello',
+        ], $captured['bodyParams']);
     }
 
     #[Test]
@@ -173,8 +218,11 @@ final class HasRaidMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
                 return [
                     'data' => [
                         [
@@ -188,7 +236,13 @@ final class HasRaidMethodsTest extends TestCase
                                 'progress'               => 200,
                                 'goal'                   => 1000,
                                 'top_contributions'      => [
-                                    ['user_id' => '123', 'user_login' => 'pogchamp', 'user_name' => 'PogChamp', 'type' => 'bits', 'total' => 50],
+                                    [
+                                        'user_id'    => '123',
+                                        'user_login' => 'pogchamp',
+                                        'user_name'  => 'PogChamp',
+                                        'type'       => 'bits',
+                                        'total'      => 50,
+                                    ],
                                 ],
                                 'shared_train_participants' => null,
                                 'started_at'                => '2024-01-01T00:00:00Z',
@@ -210,15 +264,14 @@ final class HasRaidMethodsTest extends TestCase
 
         $hypeTrainStatus = $service->getHypeTrainStatus('1');
 
-        $this->assertInstanceOf(HypeTrainStatus::class, $hypeTrainStatus);
-        $this->assertNotNull($hypeTrainStatus->current);
-        $this->assertSame('ht-1', $hypeTrainStatus->current->id);
-        $this->assertSame(2, $hypeTrainStatus->current->level);
-        $this->assertCount(1, $hypeTrainStatus->current->topContributions);
-        $this->assertNull($hypeTrainStatus->current->sharedTrainParticipants);
-        $this->assertNotNull($hypeTrainStatus->allTimeHigh);
-        $this->assertSame(6, $hypeTrainStatus->allTimeHigh->level);
-        $this->assertNull($hypeTrainStatus->sharedAllTimeHigh);
+        self::assertNotNull($hypeTrainStatus->current);
+        self::assertSame('ht-1', $hypeTrainStatus->current->id);
+        self::assertSame(2, $hypeTrainStatus->current->level);
+        self::assertCount(1, $hypeTrainStatus->current->topContributions);
+        self::assertNull($hypeTrainStatus->current->sharedTrainParticipants);
+        self::assertNotNull($hypeTrainStatus->allTimeHigh);
+        self::assertSame(6, $hypeTrainStatus->allTimeHigh->level);
+        self::assertNull($hypeTrainStatus->sharedAllTimeHigh);
     }
 
     #[Test]
@@ -229,15 +282,24 @@ final class HasRaidMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                return ['data' => [['created_at' => '2024-01-01T00:00:00Z', 'is_mature' => false]]];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                return [
+                    'data' => [
+                        [
+                            'created_at' => '2024-01-01T00:00:00Z',
+                            'is_mature'  => false,
+                        ],
+                    ],
+                ];
             }
         };
 
         $raid = $service->startRaid('1', '2');
 
-        $this->assertInstanceOf(Raid::class, $raid);
-        $this->assertFalse($raid->isMature);
+        self::assertFalse($raid->isMature);
     }
 }

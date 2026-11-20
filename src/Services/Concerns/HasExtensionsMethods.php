@@ -40,13 +40,19 @@ trait HasExtensionsMethods
      */
     public function getExtension(string $extensionId, ?string $extensionVersion = null): array
     {
-        $params = ['extension_id' => $extensionId];
+        $params = [
+            'extension_id' => $extensionId,
+        ];
 
         if (null !== $extensionVersion) {
             $params['extension_version'] = $extensionVersion;
         }
 
-        return $this->makeRequest('GET', '/extensions', $params);
+        return $this->makeRequest(
+            'GET',
+            '/extensions',
+            $params,
+        );
     }
 
     /**
@@ -89,7 +95,11 @@ trait HasExtensionsMethods
             $params['broadcaster_id'] = $broadcasterId;
         }
 
-        return $this->makeRequest('GET', '/extensions/configurations', $params);
+        return $this->makeRequest(
+            'GET',
+            '/extensions/configurations',
+            $params,
+        );
     }
 
     /**
@@ -113,7 +123,11 @@ trait HasExtensionsMethods
             $params['after'] = $after;
         }
 
-        return $this->makeRequest('GET', '/extensions/live', $params);
+        return $this->makeRequest(
+            'GET',
+            '/extensions/live',
+            $params,
+        );
     }
 
     /**
@@ -139,13 +153,19 @@ trait HasExtensionsMethods
      */
     public function getReleasedExtension(string $extensionId, ?string $extensionVersion = null): array
     {
-        $params = ['extension_id' => $extensionId];
+        $params = [
+            'extension_id' => $extensionId,
+        ];
 
         if (null !== $extensionVersion) {
             $params['extension_version'] = $extensionVersion;
         }
 
-        return $this->makeRequest('GET', '/extensions/released', $params);
+        return $this->makeRequest(
+            'GET',
+            '/extensions/released',
+            $params,
+        );
     }
 
     /**
@@ -170,22 +190,39 @@ trait HasExtensionsMethods
     /**
      * Send a PubSub message to one or more clients listening to the broadcaster's channel.
      *
-     * Requires: signed JWT from an Extension
+     * Requires: signed JWT from an Extension, given with setAccessToken(): it carries the extension and the rights.
      *
-     * @param array<string> $targets broadcast, global, or user IDs
+     * @param string        $extensionId       Not sent (the JWT names the extension): kept so that existing calls still compile
+     * @param array<string> $targets           broadcast, global, or whisper-<user ID>
+     * @param bool|null     $isGlobalBroadcast true: to every channel with the extension (the broadcaster is then not sent)
      */
     public function sendExtensionPubSubMessage(
         string $broadcasterId,
         string $extensionId,
         string $message,
-        array $targets = ['broadcast'],
+        array $targets = [
+            'broadcast',
+        ],
+        ?bool $isGlobalBroadcast = null,
     ): void {
-        $this->makeRequest('POST', '/extensions/pubsub', [
-            'broadcaster_id' => $broadcasterId,
-            'extension_id'   => $extensionId,
-            'message'        => $message,
-            'targets'        => $targets,
-        ]);
+        $body = [
+            'target'  => $targets,
+            'message' => $message,
+        ];
+
+        // A global broadcast has no broadcaster: Twitch refuses broadcaster_id with is_global_broadcast.
+        if (true === $isGlobalBroadcast) {
+            $body['is_global_broadcast'] = true;
+        }
+        else {
+            $body['broadcaster_id'] = $broadcasterId;
+        }
+
+        $this->makeRequest(
+            'POST',
+            '/extensions/pubsub',
+            $body,
+        );
     }
 
     /**
@@ -223,25 +260,31 @@ trait HasExtensionsMethods
             $params['version'] = $version;
         }
 
-        $this->makeRequest('PUT', '/extensions/configurations', $params);
+        $this->makeRequest(
+            'PUT',
+            '/extensions/configurations',
+            $params,
+        );
     }
 
     /**
      * Enable activation of a specific extension on the broadcaster's channel.
      *
-     * Requires: signed JWT from an Extension
+     * Requires: signed JWT from an Extension, given with setAccessToken().
+     *
+     * @param string $requiredConfiguration The `required_configuration` string of the new extension version
      */
     public function setExtensionRequiredConfiguration(
         string $broadcasterId,
         string $extensionId,
         string $extensionVersion,
-        string $configurationVersion,
+        string $requiredConfiguration,
     ): void {
         $this->makeRequest('PUT', '/extensions/required_configuration', [
-            'broadcaster_id'        => $broadcasterId,
-            'extension_id'          => $extensionId,
-            'extension_version'     => $extensionVersion,
-            'configuration_version' => $configurationVersion,
+            'broadcaster_id'         => $broadcasterId,
+            'extension_id'           => $extensionId,
+            'extension_version'      => $extensionVersion,
+            'required_configuration' => $requiredConfiguration,
         ]);
     }
 

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Payload of a `channel.charity_campaign.progress` EventSub notification.
@@ -16,7 +16,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/#channelcharity_campaignprogress
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class ChannelCharityCampaignProgressEvent extends Data implements EventSubEvent
+class ChannelCharityCampaignProgressEvent extends TwitchData implements EventSubEvent
 {
     public function __construct(
         public string $id,

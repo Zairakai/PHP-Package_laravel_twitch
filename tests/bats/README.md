@@ -9,7 +9,8 @@ tests/bats/
 ├── helpers/
 │   └── test_helper.bash        # Shared assertions and setup/teardown
 ├── unit/
-│   └── package-structure.bats  # Package metadata and file structure (36 tests)
+│   ├── package-structure.bats  # Package metadata and file structure (36 tests)
+│   └── twitch-watch.bats       # Structure of the Twitch watch job (5 tests)
 ├── integration/
 │   └── composer-scripts.bats   # Composer scripts and dev-tools integration (9 tests)
 └── README.md
@@ -19,13 +20,20 @@ tests/bats/
 
 ### Unit — `package-structure.bats` (36 tests)
 
-Validates package metadata, source files (services, facades, controller, model),
+Validates package metadata, source files (services, facades, controller, model), the translations (every
+language has every key), the migration, the service provider and the config,
 config/migrations, tests directory, and CI/tooling config files.
+
+### Unit — `twitch-watch.bats` (5 tests)
+
+Structure only: the script `.gitlab/scripts/twitch-watch.php` and its syntax, the `twitch:watch` job, the exclusions
+of `deps:update` and `deps:audit`, and the export-ignore of `.gitlab`. What the script does is tested by PHPUnit
+(`tests/Feature/TwitchWatchScriptTest.php`).
 
 ### Integration — `composer-scripts.bats` (9 tests)
 
 Validates that composer scripts are defined, dev-tools are installed,
-`phpunit.xml` is a copy (not a symlink), the git repository exists,
+`config/dev-tools/phpunit.xml` is a copy (not a symlink), the git repository exists,
 and `composer validate` passes.
 
 ## Running Tests

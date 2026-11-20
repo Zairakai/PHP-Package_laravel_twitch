@@ -17,6 +17,6 @@ final class PredictionOutcomeRequestTest extends TestCase
 
         $array = $predictionOutcomeRequest->toArray();
 
-        $this->assertSame('Team A wins', $array['title']);
+        self::assertSame('Team A wins', $array['title']);
     }
 }

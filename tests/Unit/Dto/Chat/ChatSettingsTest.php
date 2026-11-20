@@ -26,10 +26,10 @@ final class ChatSettingsTest extends TestCase
             'non_moderator_chat_delay_duration' => null,
         ]);
 
-        $this->assertSame('12345', $chatSettings->broadcasterId);
-        $this->assertFalse($chatSettings->emoteMode);
-        $this->assertTrue($chatSettings->followerMode);
-        $this->assertSame(10, $chatSettings->followerModeDuration);
-        $this->assertNull($chatSettings->slowModeWaitTime);
+        self::assertSame('12345', $chatSettings->broadcasterId);
+        self::assertFalse($chatSettings->emoteMode);
+        self::assertTrue($chatSettings->followerMode);
+        self::assertSame(10, $chatSettings->followerModeDuration);
+        self::assertNull($chatSettings->slowModeWaitTime);
     }
 }

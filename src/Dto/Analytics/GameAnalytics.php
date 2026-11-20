@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\Analytics;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents an analytics report URL for a game.
@@ -14,7 +14,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#get-game-analytics
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class GameAnalytics extends Data
+class GameAnalytics extends TwitchData
 {
     public function __construct(
         /**
@@ -25,6 +25,7 @@ class GameAnalytics extends Data
         /**
          * @var string URL to download the analytics report (CSV)
          */
+        #[MapInputName('URL')]
         public string $url,
 
         /**

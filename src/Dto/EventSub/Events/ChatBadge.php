@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * A single badge attached to a chat message (`{set_id, id, info}`).
@@ -16,7 +16,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * per-user-per-message shape EventSub embeds inline in chat payloads.
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class ChatBadge extends Data
+class ChatBadge extends TwitchData
 {
     public function __construct(
         public string $setId,

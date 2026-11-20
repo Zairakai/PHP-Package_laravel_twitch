@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * `channel.moderate` payload when `action` is `ban` (permanent, no expiry -
@@ -19,7 +19,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * relying on it in production.
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class ModerateBanAction extends Data
+class ModerateBanAction extends TwitchData
 {
     public function __construct(
         public string $userId,

@@ -34,7 +34,9 @@ trait HasDropsMethods
         int $first = 20,
         ?string $after = null,
     ): PaginatedResult {
-        $params = ['first' => $first];
+        $params = [
+            'first' => $first,
+        ];
 
         if (null !== $ids) {
             $params['id'] = $ids;
@@ -56,7 +58,11 @@ trait HasDropsMethods
             $params['after'] = $after;
         }
 
-        $raw = $this->makeRequest('GET', '/entitlements/drops', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/entitlements/drops',
+            $params,
+        );
 
         return PaginatedResult::fromRaw($raw, DropsEntitlement::class);
     }

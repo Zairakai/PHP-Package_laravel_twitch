@@ -9,6 +9,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Throwable;
@@ -35,60 +37,34 @@ class TwitchAuthController
         $sessionState = $request->session()->pull('twitch_oauth_state');
 
         // Verify state parameter
-        if (! is_string($state) || $state !== $sessionState) {
-            return to_route('home')->withErrors(['error' => 'Invalid state parameter']);
+        if (
+            ! is_string($state)
+            || $state !== $sessionState
+        ) {
+            return $this->failed('Invalid state parameter');
         }
 
-        if (! is_string($code) || '' === $code) {
-            return to_route('home')->withErrors(['error' => 'Authorization denied']);
+        if (
+            ! is_string($code)
+            || '' === $code
+        ) {
+            return $this->failed('Authorization denied');
         }
 
         try {
-            // Exchange code for token
-            $tokenData = $this->oauth->getAccessToken($code, $state);
+            $user = $this->connect($code, $state);
 
-            /** @var string $accessToken */
-            $accessToken = $tokenData['access_token'] ?? '';
-
-            /** @var string $refreshToken */
-            $refreshToken = $tokenData['refresh_token'] ?? '';
-
-            /** @var int $expiresIn */
-            $expiresIn = $tokenData['expires_in'] ?? 0;
-
-            /** @var array<string> $scopes */
-            $scopes = is_array($tokenData['scope'] ?? null) ? $tokenData['scope'] : [];
-
-            // Get user information from the authenticated user's token
-            $this->api->setAccessToken($accessToken);
-            $userDto = $this->api->getAuthenticatedUser();
-
-            if (! $userDto instanceof User) {
-                return to_route('home')->withErrors(['error' => 'Failed to get user information']);
+            if (! $user instanceof TwitchUser) {
+                return $this->failed('Failed to get user information');
             }
-
-            // Create or update user
-            $user = TwitchUser::updateOrCreate(
-                ['twitch_id' => $userDto->id],
-                [
-                    'login'             => $userDto->login,
-                    'display_name'      => $userDto->displayName,
-                    'email'             => $userDto->email,
-                    'profile_image_url' => $userDto->profileImageUrl,
-                    'access_token'      => $accessToken,
-                    'refresh_token'     => $refreshToken,
-                    'expires_at'        => now()->addSeconds($expiresIn),
-                    'scopes'            => $scopes,
-                ],
-            );
 
             // Store user ID in session
             $request->session()->put('twitch_user_id', $user->id);
 
-            return to_route('home')->with('success', 'Successfully connected to Twitch!');
+            return $this->back()->with('success', 'Successfully connected to Twitch!');
         }
         catch (Exception $exception) {
-            return to_route('home')->withErrors(['error' => 'Failed to authenticate: ' . $exception->getMessage()]);
+            return $this->failed('Failed to authenticate: ' . $exception->getMessage());
         }
     }
 
@@ -100,7 +76,9 @@ class TwitchAuthController
         $scopeParam = $request->get('scopes');
 
         /** @var array<string>|null $scopes */
-        $scopes = is_array($scopeParam) ? $scopeParam : null;
+        $scopes = is_array($scopeParam)
+            ? $scopeParam
+            : null;
         $state  = Str::random(40);
         $request->session()->put('twitch_oauth_state', $state);
 
@@ -114,37 +92,60 @@ class TwitchAuthController
      */
     public function webhook(Request $request): JsonResponse|Response
     {
+        $signature     = $this->header($request, 'Twitch-Eventsub-Message-Signature');
+        $timestamp     = $this->header($request, 'Twitch-Eventsub-Message-Timestamp');
+        $messageType   = $this->header($request, 'Twitch-Eventsub-Message-Type');
+        $messageId     = $this->header($request, 'Twitch-Eventsub-Message-Id');
+        $headerVersion = $this->header($request, 'Twitch-Eventsub-Subscription-Version');
+
         // Verify webhook signature
-        $headerSignature = $request->header('Twitch-Eventsub-Message-Signature');
-        $headerTimestamp = $request->header('Twitch-Eventsub-Message-Timestamp');
-        $headerType      = $request->header('Twitch-Eventsub-Message-Type');
-        $headerMessageId = $request->header('Twitch-Eventsub-Message-Id');
+        if (! $this->verifyWebhookSignature(
+            $request->getContent(),
+            $signature,
+            $timestamp,
+            $messageId,
+        )) {
+            return response()->json([
+                'error' => 'Invalid signature',
+            ], 400);
+        }
 
-        $signature   = is_string($headerSignature) ? $headerSignature : null;
-        $timestamp   = is_string($headerTimestamp) ? $headerTimestamp : null;
-        $messageType = is_string($headerType) ? $headerType : null;
-        $messageId   = is_string($headerMessageId) ? $headerMessageId : null;
-
-        if (! $this->verifyWebhookSignature($request->getContent(), $signature, $timestamp, $messageId)) {
-            return response()->json(['error' => 'Invalid signature'], 400);
+        // The timestamp is part of what is signed: an old copy of a genuine message is a replay.
+        if ($this->isTooOld($timestamp)) {
+            return response()->json([
+                'error' => 'Message too old',
+            ], 400);
         }
 
         /** @var array<string, mixed> $payload */
         $payload = $request->json()->all();
 
+        $version = $this->subscriptionVersion($headerVersion, $payload);
+
         // Handle webhook verification challenge - Twitch requires the raw
         // challenge string as a plain-text body, not JSON-wrapped, or the
         // subscription is marked webhook_callback_verification_failed.
         if ('webhook_callback_verification' === $messageType) {
-            $rawChallenge = $payload['challenge'] ?? '';
-            $challenge    = is_string($rawChallenge) ? $rawChallenge : '';
+            $challenge = $payload['challenge'] ?? '';
 
-            return response($challenge, 200, ['Content-Type' => 'text/plain']);
+            return response(is_string($challenge) ? $challenge : '', 200, [
+                'Content-Type' => 'text/plain',
+            ]);
         }
 
         // Handle EventSub notifications
         if ('notification' === $messageType) {
-            $this->handleEventSubNotification($payload);
+            // Twitch delivers at least once: the same message ID can come back, and must not run twice.
+            if (
+                null !== $messageId
+                && $this->isDuplicate($messageId)
+            ) {
+                return response()->json([
+                    'status' => 'ok',
+                ]);
+            }
+
+            $this->handleEventSubNotification($payload, $version);
         }
 
         // Handle EventSub revocations - found missing entirely during the
@@ -157,7 +158,91 @@ class TwitchAuthController
             $this->handleEventSubRevocation($payload);
         }
 
-        return response()->json(['status' => 'ok']);
+        return response()->json([
+            'status' => 'ok',
+        ]);
+    }
+
+    /**
+     * Where the application goes after the connection: `twitch.oauth.redirect_to` is a URL (it starts with `/` or
+     * `http`) or the name of a route.
+     */
+    protected function back(): RedirectResponse
+    {
+        $target = config('twitch.oauth.redirect_to');
+
+        if (
+            ! is_string($target)
+            || '' === $target
+        ) {
+            $target = 'home';
+        }
+
+        return str_starts_with($target, '/') || str_starts_with($target, 'http')
+            ? redirect($target)
+            : to_route($target);
+    }
+
+    /**
+     * Exchange the code for a token, read the user it belongs to and create or update it.
+     */
+    protected function connect(string $code, string $state): ?TwitchUser
+    {
+        $tokenData = $this->oauth->getAccessToken($code, $state);
+
+        /** @var string $accessToken */
+        $accessToken = $tokenData['access_token'] ?? '';
+
+        /** @var string $refreshToken */
+        $refreshToken = $tokenData['refresh_token'] ?? '';
+
+        /** @var int $expiresIn */
+        $expiresIn = $tokenData['expires_in'] ?? 0;
+
+        /** @var array<string> $scopes */
+        $scopes = is_array($tokenData['scope'] ?? null)
+            ? $tokenData['scope']
+            : [];
+
+        // Get user information from the authenticated user's token
+        $this->api->setAccessToken($accessToken);
+        $userDto = $this->api->getAuthenticatedUser();
+
+        if (! $userDto instanceof User) {
+            return null;
+        }
+
+        return TwitchUser::updateOrCreate(
+            [
+                'twitch_id' => $userDto->id,
+            ],
+            [
+                'login'             => $userDto->login,
+                'display_name'      => $userDto->displayName,
+                'email'             => $userDto->email,
+                'profile_image_url' => $userDto->profileImageUrl,
+                'access_token'      => $accessToken,
+                'refresh_token'     => $refreshToken,
+                'expires_at'        => now()->addSeconds($expiresIn),
+                'scopes'            => $scopes,
+            ],
+        );
+    }
+
+    protected function failed(string $message): RedirectResponse
+    {
+        return $this->back()->withErrors([
+            'error' => $message,
+        ]);
+    }
+
+    /**
+     * @phpstan-assert-if-true non-empty-string $value
+     */
+    protected function filled(?string $value): bool
+    {
+        return null !== $value
+            && ''   !== $value;
     }
 
     /**
@@ -187,21 +272,35 @@ class TwitchAuthController
      * (`notification_failures_exceeded`), killing every future event of
      * that type with no further signal.
      *
+     * The listeners receive the DTO, then the version of the subscription (the payload depends on it).
+     *
      * @param array<string, mixed> $payload
+     * @param string|null          $version Version of the subscription type, as Twitch sent it
      *
      * @see EventSubEventFactory
      */
-    protected function handleEventSubNotification(array $payload): void
+    protected function handleEventSubNotification(array $payload, ?string $version = null): void
     {
-        $subscription = is_array($payload['subscription'] ?? null) ? $payload['subscription'] : [];
-        $eventType    = is_string($subscription['type'] ?? null) ? $subscription['type'] : null;
+        $subscription = is_array($payload['subscription'] ?? null)
+            ? $payload['subscription']
+            : [];
+        $eventType    = is_string($subscription['type'] ?? null)
+            ? $subscription['type']
+            : null;
 
         if (null === $eventType) {
             return;
         }
 
+        // A batched type (drop.entitlement.grant) carries `events`, a list, instead of `event`.
         /** @var array<string, mixed> $eventData */
-        $eventData = is_array($payload['event'] ?? null) ? $payload['event'] : [];
+        $eventData = is_array($payload['event'] ?? null)
+            ? $payload['event']
+            : (is_array($payload['events'] ?? null)
+                ? [
+                    'events' => $payload['events'],
+                ]
+                : []);
 
         try {
             $eventSubEvent = EventSubEventFactory::make($eventType, $eventData);
@@ -212,12 +311,19 @@ class TwitchAuthController
                 'error' => $throwable->getMessage(),
             ]);
 
-            event('twitch.eventsub.dto_construction_failed', [$eventType, $eventData, $throwable]);
+            event('twitch.eventsub.dto_construction_failed', [
+                $eventType,
+                $eventData,
+                $throwable,
+            ]);
 
             return;
         }
 
-        event("twitch.{$eventType}", [$eventSubEvent]);
+        event("twitch.{$eventType}", [
+            $eventSubEvent,
+            $version,
+        ]);
     }
 
     /**
@@ -240,7 +346,9 @@ class TwitchAuthController
      */
     protected function handleEventSubRevocation(array $payload): void
     {
-        $subscription = is_array($payload['subscription'] ?? null) ? $payload['subscription'] : [];
+        $subscription = is_array($payload['subscription'] ?? null)
+            ? $payload['subscription']
+            : [];
 
         Log::warning('Twitch EventSub subscription revoked', [
             'subscription_id'  => $subscription['id']        ?? null,
@@ -249,7 +357,86 @@ class TwitchAuthController
             'condition'        => $subscription['condition'] ?? null,
         ]);
 
-        event('twitch.eventsub.revoked', [$subscription]);
+        event('twitch.eventsub.revoked', [
+            $subscription,
+        ]);
+    }
+
+    /**
+     * A header as a string, null when it is absent.
+     */
+    protected function header(Request $request, string $name): ?string
+    {
+        $value = $request->header($name);
+
+        return is_string($value)
+            ? $value
+            : null;
+    }
+
+    /**
+     * Whether this message ID was already handled (and remembers it otherwise).
+     */
+    protected function isDuplicate(string $messageId): bool
+    {
+        $ttl = config('twitch.eventsub.dedupe_ttl');
+
+        if (! is_int($ttl) || 0 >= $ttl) {
+            return false;
+        }
+
+        // add() only writes when the key is missing, and says whether it did.
+        return ! Cache::add(
+            'twitch.eventsub.message.' . $messageId,
+            true,
+            $ttl,
+        );
+    }
+
+    /**
+     * Whether a signed message is older than `twitch.eventsub.max_message_age` seconds.
+     */
+    protected function isTooOld(?string $timestamp): bool
+    {
+        $maxAge = config('twitch.eventsub.max_message_age');
+
+        if (
+            ! is_int($maxAge)
+            || 0 >= $maxAge
+            || null === $timestamp
+        ) {
+            return false;
+        }
+
+        try {
+            $sentAt = Date::parse($timestamp);
+        }
+        catch (Throwable) {
+            // Signed, so genuine: an unreadable date must not drop the event.
+            return false;
+        }
+
+        return now()->getTimestamp() - $sentAt->getTimestamp() > $maxAge;
+    }
+
+    /**
+     * The version of the subscription: the header when Twitch sends it, else the one of the body.
+     *
+     * @param array<string, mixed> $payload
+     */
+    protected function subscriptionVersion(?string $header, array $payload): ?string
+    {
+        $subscription = is_array($payload['subscription'] ?? null)
+            ? $payload['subscription']
+            : [];
+
+        if (null !== $header) {
+            return $header;
+        }
+
+        return is_scalar($subscription['version'] ?? null)
+            ? (string) $subscription['version']
+            : null;
     }
 
     /**
@@ -265,17 +452,28 @@ class TwitchAuthController
         ?string $timestamp,
         ?string $messageId,
     ): bool {
-        if (! $signature || ! $timestamp || ! $messageId) {
+        if (
+            ! $this->filled($signature)
+            || ! $this->filled($timestamp)
+            || ! $this->filled($messageId)
+        ) {
             return false;
         }
 
         $secret = config('twitch.eventsub.webhook_secret');
 
-        if (! is_string($secret) || '' === $secret) {
+        if (
+            ! is_string($secret)
+            || '' === $secret
+        ) {
             return false;
         }
 
-        $expectedSignature = 'sha256=' . hash_hmac('sha256', $messageId . $timestamp . $body, $secret);
+        $expectedSignature = 'sha256=' . hash_hmac(
+            'sha256',
+            $messageId . $timestamp . $body,
+            $secret,
+        );
 
         return hash_equals($expectedSignature, $signature);
     }

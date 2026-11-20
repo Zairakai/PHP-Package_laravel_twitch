@@ -25,7 +25,11 @@ trait HasPollMethods
         /** @var array<string, mixed> $requestData */
         $requestData = array_filter($createPollRequest->toArray(), static fn (mixed $v): bool => null !== $v);
 
-        $raw = $this->makeRequest('POST', '/polls', $requestData);
+        $raw = $this->makeRequest(
+            'POST',
+            '/polls',
+            $requestData,
+        );
 
         /** @var array<int, array<string, mixed>> $items */
         $items = $raw['data'];
@@ -40,12 +44,15 @@ trait HasPollMethods
      *
      * @param string $status TERMINATED (end with results) or ARCHIVED (end without showing)
      */
-    public function endPoll(string $broadcasterId, string $pollId, string $status = 'TERMINATED'): Poll
-    {
+    public function endPoll(
+        string $broadcasterId,
+        string $pollId,
+        string $status = 'TERMINATED',
+    ): Poll {
         $raw = $this->makeRequest('PATCH', '/polls', [
             'broadcaster_id' => $broadcasterId,
             'id'             => $pollId,
-            'status'         => $status,
+            'status'         => strtoupper($status),
         ]);
 
         /** @var array<int, array<string, mixed>> $items */
@@ -82,7 +89,11 @@ trait HasPollMethods
             $params['after'] = $after;
         }
 
-        $raw = $this->makeRequest('GET', '/polls', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/polls',
+            $params,
+        );
 
         return PaginatedResult::fromRaw($raw, Poll::class);
     }
