@@ -7,6 +7,7 @@ namespace Zairakai\LaravelTwitch\Tests\Unit\Http\Controllers;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Session\ArraySessionHandler;
 use Illuminate\Session\Store as SessionStore;
 use Illuminate\Support\Facades\Event;
@@ -29,11 +30,9 @@ final class TwitchAuthControllerTest extends TestCase
     {
         parent::setUp();
 
-        /** @var TwitchOAuthService $oauth */
-        $oauth = $this->createStub(TwitchOAuthService::class);
+        $oauth = self::createStub(TwitchOAuthService::class);
 
-        /** @var TwitchApiService $api */
-        $api = $this->createStub(TwitchApiService::class);
+        $api = self::createStub(TwitchApiService::class);
 
         $this->twitchAuthController = new TwitchAuthController($oauth, $api);
     }
@@ -49,12 +48,18 @@ final class TwitchAuthControllerTest extends TestCase
         // GenericEventSubEvent regardless of the (empty) event payload.
         $body      = '{"subscription":{"type":"channel.a_type_twitch_has_not_invented_yet"},"event":{}}';
         $messageId = 'msg-001';
-        $timestamp = '2024-01-01T00:00:00Z';
+        $timestamp = gmdate('Y-m-d\\TH:i:s\\Z');
 
-        config(['twitch.eventsub.webhook_secret' => $secret]);
+        config([
+            'twitch.eventsub.webhook_secret' => $secret,
+        ]);
 
         // Correct Twitch format: HMAC over message-id + timestamp + body
-        $sig = 'sha256=' . hash_hmac('sha256', $messageId . $timestamp . $body, $secret);
+        $sig = 'sha256=' . hash_hmac(
+            'sha256',
+            $messageId . $timestamp . $body,
+            $secret,
+        );
 
         $request = Request::create('/twitch/webhook', 'POST', [], [], [], [
             'HTTP_TWITCH_EVENTSUB_MESSAGE_ID'        => $messageId,
@@ -66,9 +71,15 @@ final class TwitchAuthControllerTest extends TestCase
 
         $jsonResponse = $this->twitchAuthController->webhook($request);
 
-        $this->assertSame(200, $jsonResponse->getStatusCode());
-        $data = json_decode((string) $jsonResponse->getContent(), true);
-        $this->assertSame('ok', $data['status']);
+        self::assertSame(200, $jsonResponse->getStatusCode());
+        $data = json_decode(
+            (string) $jsonResponse->getContent(),
+            true,
+            512,
+            JSON_THROW_ON_ERROR,
+        );
+        self::assertIsArray($data);
+        self::assertSame('ok', $data['status']);
     }
 
     // ── Webhook: handleEventSubNotification branches ──────────────────────────
@@ -80,14 +91,14 @@ final class TwitchAuthControllerTest extends TestCase
 
         $jsonResponse = $this->makeNotificationResponse('channel.unknown');
 
-        $this->assertSame(200, $jsonResponse->getStatusCode());
+        self::assertSame(200, $jsonResponse->getStatusCode());
 
         // String-based events dispatch the event name + raw payload array to the
         // assertion callback (not the DTO directly) - see Illuminate\Support\Testing\Fakes\EventFake.
         Event::assertDispatched(
             'twitch.channel.unknown',
             /** @param array{0: GenericEventSubEvent} $payload */
-            fn (string $name, array $payload): bool => 'channel.unknown' === $payload[0]->type,
+            fn (string $name, array $payload): bool => $payload[0] instanceof GenericEventSubEvent && 'channel.unknown' === $payload[0]->type,
         );
     }
 
@@ -107,11 +118,11 @@ final class TwitchAuthControllerTest extends TestCase
             'is_gift'                => false,
         ]);
 
-        $this->assertSame(200, $jsonResponse->getStatusCode());
+        self::assertSame(200, $jsonResponse->getStatusCode());
         Event::assertDispatched(
             'twitch.channel.subscribe',
             /** @param array{0: ChannelSubscribeEvent} $payload */
-            fn (string $name, array $payload): bool => '1000' === $payload[0]->tier,
+            fn (string $name, array $payload): bool => $payload[0] instanceof ChannelSubscribeEvent && '1000' === $payload[0]->tier,
         );
     }
 
@@ -121,19 +132,19 @@ final class TwitchAuthControllerTest extends TestCase
     public function it_dispatches_and_logs_on_revocation(): void
     {
         Event::fake();
-        Log::spy();
+        $logSpy = Log::spy();
 
         $jsonResponse = $this->makeRevocationResponse('channel.follow', 'authorization_revoked');
 
-        $this->assertSame(200, $jsonResponse->getStatusCode());
+        self::assertSame(200, $jsonResponse->getStatusCode());
 
         Event::assertDispatched(
             'twitch.eventsub.revoked',
             /** @param array{0: array<string, mixed>} $payload */
-            fn (string $name, array $payload): bool => 'authorization_revoked' === $payload[0]['status'],
+            fn (string $name, array $payload): bool => is_array($payload[0]) && 'authorization_revoked' === ($payload[0]['status'] ?? null),
         );
 
-        Log::shouldHaveReceived('warning')
+        $logSpy->shouldHaveReceived('warning')
             ->once()
             ->withArgs(fn (string $message, array $context): bool => 'Twitch EventSub subscription revoked' === $message
                 && 'channel.follow'                                                                         === $context['type']
@@ -149,7 +160,7 @@ final class TwitchAuthControllerTest extends TestCase
             'broadcaster_user_name'  => 'Zairakai',
         ]);
 
-        $this->assertSame(200, $jsonResponse->getStatusCode());
+        self::assertSame(200, $jsonResponse->getStatusCode());
     }
 
     #[Test]
@@ -164,7 +175,7 @@ final class TwitchAuthControllerTest extends TestCase
             'started_at'             => '2024-01-01T00:00:00Z',
         ]);
 
-        $this->assertSame(200, $jsonResponse->getStatusCode());
+        self::assertSame(200, $jsonResponse->getStatusCode());
     }
 
     // ── Webhook: handleEventSubNotification DTO construction failure ──────────
@@ -183,16 +194,22 @@ final class TwitchAuthControllerTest extends TestCase
     public function it_logs_and_recovers_when_dto_construction_fails_on_notification(): void
     {
         Event::fake();
-        Log::spy();
+        $logSpy = Log::spy();
 
         // channel.subscribe requires several fields - an empty event payload
         // throws an ArgumentCountError (a Throwable, not an Exception -
         // exactly why the catch below must be catch (Throwable)).
         $jsonResponse = $this->makeNotificationResponse('channel.subscribe', []);
 
-        $this->assertSame(200, $jsonResponse->getStatusCode());
-        $data = json_decode((string) $jsonResponse->getContent(), true);
-        $this->assertSame('ok', $data['status']);
+        self::assertSame(200, $jsonResponse->getStatusCode());
+        $data = json_decode(
+            (string) $jsonResponse->getContent(),
+            true,
+            512,
+            JSON_THROW_ON_ERROR,
+        );
+        self::assertIsArray($data);
+        self::assertSame('ok', $data['status']);
 
         Event::assertNotDispatched('twitch.channel.subscribe');
         Event::assertDispatched(
@@ -201,7 +218,7 @@ final class TwitchAuthControllerTest extends TestCase
             fn (string $name, array $payload): bool => 'channel.subscribe' === $payload[0],
         );
 
-        Log::shouldHaveReceived('error')
+        $logSpy->shouldHaveReceived('error')
             ->once()
             ->withArgs(fn (string $message, array $context): bool => 'Twitch EventSub notification dropped: DTO construction failed.' === $message
                 && 'channel.subscribe'                                                                                                === $context['type']);
@@ -215,7 +232,7 @@ final class TwitchAuthControllerTest extends TestCase
             ->method('getAccessToken')
             ->willThrowException(new Exception('API unavailable'));
 
-        $api                  = $this->createStub(TwitchApiService::class);
+        $api                  = self::createStub(TwitchApiService::class);
         $twitchAuthController = new TwitchAuthController($oauth, $api);
 
         $store = $this->makeSession();
@@ -229,7 +246,7 @@ final class TwitchAuthControllerTest extends TestCase
 
         $redirectResponse = $twitchAuthController->callback($request);
 
-        $this->assertSame(302, $redirectResponse->getStatusCode());
+        self::assertSame(302, $redirectResponse->getStatusCode());
     }
 
     #[Test]
@@ -242,7 +259,9 @@ final class TwitchAuthControllerTest extends TestCase
                 'access_token'  => 'tok-abc',
                 'refresh_token' => 'ref-abc',
                 'expires_in'    => 14400,
-                'scope'         => ['user:read:email'],
+                'scope'         => [
+                    'user:read:email',
+                ],
                 'token_type'    => 'bearer',
             ]);
 
@@ -263,7 +282,7 @@ final class TwitchAuthControllerTest extends TestCase
 
         $redirectResponse = $twitchAuthController->callback($request);
 
-        $this->assertSame(302, $redirectResponse->getStatusCode());
+        self::assertSame(302, $redirectResponse->getStatusCode());
     }
 
     // ── redirect ──────────────────────────────────────────────────────────────
@@ -276,7 +295,7 @@ final class TwitchAuthControllerTest extends TestCase
             ->method('getAuthorizationUrl')
             ->willReturn('https://id.twitch.tv/oauth2/authorize?client_id=test&response_type=code&state=xyz');
 
-        $api                  = $this->createStub(TwitchApiService::class);
+        $api                  = self::createStub(TwitchApiService::class);
         $twitchAuthController = new TwitchAuthController($oauth, $api);
 
         $store   = $this->makeSession();
@@ -285,9 +304,9 @@ final class TwitchAuthControllerTest extends TestCase
 
         $redirectResponse = $twitchAuthController->redirect($request);
 
-        $this->assertSame(302, $redirectResponse->getStatusCode());
-        $this->assertStringContainsString('id.twitch.tv', $redirectResponse->getTargetUrl());
-        $this->assertNotEmpty($store->get('twitch_oauth_state'));
+        self::assertSame(302, $redirectResponse->getStatusCode());
+        self::assertStringContainsString('id.twitch.tv', $redirectResponse->getTargetUrl());
+        self::assertNotEmpty($store->get('twitch_oauth_state'));
     }
 
     #[Test]
@@ -296,12 +315,14 @@ final class TwitchAuthControllerTest extends TestCase
         $store = $this->makeSession();
         $store->put('twitch_oauth_state', 'valid-state');
 
-        $request = Request::create('/twitch/auth/callback', 'GET', ['state' => 'valid-state']);
+        $request = Request::create('/twitch/auth/callback', 'GET', [
+            'state' => 'valid-state',
+        ]);
         $request->setLaravelSession($store);
 
         $redirectResponse = $this->twitchAuthController->callback($request);
 
-        $this->assertSame(302, $redirectResponse->getStatusCode());
+        self::assertSame(302, $redirectResponse->getStatusCode());
     }
 
     // ── callback ──────────────────────────────────────────────────────────────
@@ -320,13 +341,15 @@ final class TwitchAuthControllerTest extends TestCase
 
         $redirectResponse = $this->twitchAuthController->callback($request);
 
-        $this->assertSame(302, $redirectResponse->getStatusCode());
+        self::assertSame(302, $redirectResponse->getStatusCode());
     }
 
     #[Test]
     public function it_rejects_challenge_when_signature_is_invalid(): void
     {
-        config(['twitch.eventsub.webhook_secret' => 'my-secret']);
+        config([
+            'twitch.eventsub.webhook_secret' => 'my-secret',
+        ]);
 
         $body = '{"challenge":"should-not-reply","subscription":{"type":"channel.follow"}}';
 
@@ -340,7 +363,7 @@ final class TwitchAuthControllerTest extends TestCase
 
         $jsonResponse = $this->twitchAuthController->webhook($request);
 
-        $this->assertSame(400, $jsonResponse->getStatusCode());
+        self::assertSame(400, $jsonResponse->getStatusCode());
     }
 
     #[Test]
@@ -348,12 +371,18 @@ final class TwitchAuthControllerTest extends TestCase
     {
         $secret    = 'my-secret';
         $body      = '{"event":"test"}';
-        $timestamp = '2024-01-01T00:00:00Z';
+        $timestamp = gmdate('Y-m-d\\TH:i:s\\Z');
 
-        config(['twitch.eventsub.webhook_secret' => $secret]);
+        config([
+            'twitch.eventsub.webhook_secret' => $secret,
+        ]);
 
         // Signature computed without message ID (old incorrect format)
-        $sig = 'sha256=' . hash_hmac('sha256', $timestamp . $body, $secret);
+        $sig = 'sha256=' . hash_hmac(
+            'sha256',
+            $timestamp . $body,
+            $secret,
+        );
 
         $request = Request::create('/twitch/webhook', 'POST', [], [], [], [
             // message-id header intentionally absent
@@ -364,7 +393,7 @@ final class TwitchAuthControllerTest extends TestCase
 
         $jsonResponse = $this->twitchAuthController->webhook($request);
 
-        $this->assertSame(400, $jsonResponse->getStatusCode());
+        self::assertSame(400, $jsonResponse->getStatusCode());
     }
 
     // ── Webhook: no secret configured ────────────────────────────────────────
@@ -372,12 +401,18 @@ final class TwitchAuthControllerTest extends TestCase
     #[Test]
     public function it_rejects_webhook_when_no_secret_is_configured(): void
     {
-        config(['twitch.eventsub.webhook_secret' => '']);
+        config([
+            'twitch.eventsub.webhook_secret' => '',
+        ]);
 
         $body      = '{"event":"test"}';
         $messageId = 'msg-001';
-        $timestamp = '2024-01-01T00:00:00Z';
-        $sig       = 'sha256=' . hash_hmac('sha256', $messageId . $timestamp . $body, 'some-secret');
+        $timestamp = gmdate('Y-m-d\\TH:i:s\\Z');
+        $sig       = 'sha256=' . hash_hmac(
+            'sha256',
+            $messageId . $timestamp . $body,
+            'some-secret',
+        );
 
         $request = Request::create('/twitch/webhook', 'POST', [], [], [], [
             'HTTP_TWITCH_EVENTSUB_MESSAGE_ID'        => $messageId,
@@ -388,7 +423,7 @@ final class TwitchAuthControllerTest extends TestCase
 
         $jsonResponse = $this->twitchAuthController->webhook($request);
 
-        $this->assertSame(400, $jsonResponse->getStatusCode());
+        self::assertSame(400, $jsonResponse->getStatusCode());
     }
 
     #[Test]
@@ -397,12 +432,18 @@ final class TwitchAuthControllerTest extends TestCase
         $secret    = 'my-secret';
         $body      = '{"event":"test"}';
         $messageId = 'msg-001';
-        $timestamp = '2024-01-01T00:00:00Z';
+        $timestamp = gmdate('Y-m-d\\TH:i:s\\Z');
 
-        config(['twitch.eventsub.webhook_secret' => $secret]);
+        config([
+            'twitch.eventsub.webhook_secret' => $secret,
+        ]);
 
         // Old (incorrect) format: HMAC over timestamp + body only, missing message ID
-        $wrongSig = 'sha256=' . hash_hmac('sha256', $timestamp . $body, $secret);
+        $wrongSig = 'sha256=' . hash_hmac(
+            'sha256',
+            $timestamp . $body,
+            $secret,
+        );
 
         $request = Request::create('/twitch/webhook', 'POST', [], [], [], [
             'HTTP_TWITCH_EVENTSUB_MESSAGE_ID'        => $messageId,
@@ -413,7 +454,7 @@ final class TwitchAuthControllerTest extends TestCase
 
         $jsonResponse = $this->twitchAuthController->webhook($request);
 
-        $this->assertSame(400, $jsonResponse->getStatusCode());
+        self::assertSame(400, $jsonResponse->getStatusCode());
     }
 
     // ── Webhook: missing headers ──────────────────────────────────────────────
@@ -421,7 +462,9 @@ final class TwitchAuthControllerTest extends TestCase
     #[Test]
     public function it_rejects_webhook_when_signature_header_is_missing(): void
     {
-        config(['twitch.eventsub.webhook_secret' => 'my-secret']);
+        config([
+            'twitch.eventsub.webhook_secret' => 'my-secret',
+        ]);
 
         $request = Request::create('/twitch/webhook', 'POST', [], [], [], [
             'HTTP_TWITCH_EVENTSUB_MESSAGE_ID'        => 'msg-001',
@@ -432,7 +475,7 @@ final class TwitchAuthControllerTest extends TestCase
 
         $jsonResponse = $this->twitchAuthController->webhook($request);
 
-        $this->assertSame(400, $jsonResponse->getStatusCode());
+        self::assertSame(400, $jsonResponse->getStatusCode());
     }
 
     // ── Webhook: wrong signature ──────────────────────────────────────────────
@@ -440,7 +483,9 @@ final class TwitchAuthControllerTest extends TestCase
     #[Test]
     public function it_rejects_webhook_with_incorrect_hmac(): void
     {
-        config(['twitch.eventsub.webhook_secret' => 'my-secret']);
+        config([
+            'twitch.eventsub.webhook_secret' => 'my-secret',
+        ]);
 
         $request = Request::create('/twitch/webhook', 'POST', [], [], [], [
             'HTTP_TWITCH_EVENTSUB_MESSAGE_ID'        => 'msg-001',
@@ -451,7 +496,7 @@ final class TwitchAuthControllerTest extends TestCase
 
         $jsonResponse = $this->twitchAuthController->webhook($request);
 
-        $this->assertSame(400, $jsonResponse->getStatusCode());
+        self::assertSame(400, $jsonResponse->getStatusCode());
     }
 
     // ── Webhook: challenge verification ──────────────────────────────────────
@@ -462,11 +507,17 @@ final class TwitchAuthControllerTest extends TestCase
         $secret    = 'my-secret';
         $body      = '{"challenge":"verify-me-123","subscription":{"type":"channel.follow"}}';
         $messageId = 'msg-002';
-        $timestamp = '2024-01-01T00:00:00Z';
+        $timestamp = gmdate('Y-m-d\\TH:i:s\\Z');
 
-        config(['twitch.eventsub.webhook_secret' => $secret]);
+        config([
+            'twitch.eventsub.webhook_secret' => $secret,
+        ]);
 
-        $sig = 'sha256=' . hash_hmac('sha256', $messageId . $timestamp . $body, $secret);
+        $sig = 'sha256=' . hash_hmac(
+            'sha256',
+            $messageId . $timestamp . $body,
+            $secret,
+        );
 
         $request = Request::create('/twitch/webhook', 'POST', [], [], [], [
             'HTTP_TWITCH_EVENTSUB_MESSAGE_ID'        => $messageId,
@@ -481,9 +532,9 @@ final class TwitchAuthControllerTest extends TestCase
         // Twitch requires the raw challenge string as a plain-text body, not
         // JSON-wrapped, or the subscription is marked
         // webhook_callback_verification_failed.
-        $this->assertSame(200, $response->getStatusCode());
-        $this->assertSame('verify-me-123', $response->getContent());
-        $this->assertStringContainsString('text/plain', (string) $response->headers->get('Content-Type'));
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame('verify-me-123', $response->getContent());
+        self::assertStringContainsString('text/plain', (string) $response->headers->get('Content-Type'));
     }
 
     #[Test]
@@ -508,7 +559,9 @@ final class TwitchAuthControllerTest extends TestCase
                 'access_token'  => 'tok-abc',
                 'refresh_token' => 'ref-abc',
                 'expires_in'    => 14400,
-                'scope'         => ['user:read:email'],
+                'scope'         => [
+                    'user:read:email',
+                ],
                 'token_type'    => 'bearer',
             ]);
 
@@ -529,8 +582,11 @@ final class TwitchAuthControllerTest extends TestCase
 
         $redirectResponse = $twitchAuthController->callback($request);
 
-        $this->assertSame(302, $redirectResponse->getStatusCode());
-        $this->assertDatabaseHas('twitch_users', ['twitch_id' => '123456', 'login' => 'ninja']);
+        self::assertSame(302, $redirectResponse->getStatusCode());
+        self::assertDatabaseHas('twitch_users', [
+            'twitch_id' => '123456',
+            'login'     => 'ninja',
+        ]);
     }
 
     protected function defineRoutes($router): void
@@ -541,16 +597,31 @@ final class TwitchAuthControllerTest extends TestCase
     /**
      * @param array<string, mixed> $eventData
      */
-    private function makeNotificationResponse(string $eventType, array $eventData = []): JsonResponse
+    private function makeNotificationResponse(string $eventType, array $eventData = []): JsonResponse|Response
     {
         $secret    = 'my-secret';
-        $body      = json_encode(['subscription' => ['type' => $eventType], 'event' => $eventData]);
-        $messageId = 'msg-' . str_replace('.', '-', $eventType);
-        $timestamp = '2024-01-01T00:00:00Z';
+        $body      = json_encode([
+            'subscription' => [
+                'type' => $eventType,
+            ],
+            'event' => $eventData,
+        ], JSON_THROW_ON_ERROR);
+        $messageId = 'msg-' . str_replace(
+            '.',
+            '-',
+            $eventType,
+        );
+        $timestamp = gmdate('Y-m-d\\TH:i:s\\Z');
 
-        config(['twitch.eventsub.webhook_secret' => $secret]);
+        config([
+            'twitch.eventsub.webhook_secret' => $secret,
+        ]);
 
-        $sig = 'sha256=' . hash_hmac('sha256', $messageId . $timestamp . $body, $secret);
+        $sig = 'sha256=' . hash_hmac(
+            'sha256',
+            $messageId . $timestamp . $body,
+            $secret,
+        );
 
         $request = Request::create('/twitch/webhook', 'POST', [], [], [], [
             'HTTP_TWITCH_EVENTSUB_MESSAGE_ID'        => $messageId,
@@ -563,16 +634,32 @@ final class TwitchAuthControllerTest extends TestCase
         return $this->twitchAuthController->webhook($request);
     }
 
-    private function makeRevocationResponse(string $eventType, string $status): JsonResponse
+    private function makeRevocationResponse(string $eventType, string $status): JsonResponse|Response
     {
         $secret    = 'my-secret';
-        $body      = json_encode(['subscription' => ['id' => 'sub-1', 'type' => $eventType, 'status' => $status]]);
-        $messageId = 'msg-revoke-' . str_replace('.', '-', $eventType);
-        $timestamp = '2024-01-01T00:00:00Z';
+        $body      = json_encode([
+            'subscription' => [
+                'id'     => 'sub-1',
+                'type'   => $eventType,
+                'status' => $status,
+            ],
+        ], JSON_THROW_ON_ERROR);
+        $messageId = 'msg-revoke-' . str_replace(
+            '.',
+            '-',
+            $eventType,
+        );
+        $timestamp = gmdate('Y-m-d\\TH:i:s\\Z');
 
-        config(['twitch.eventsub.webhook_secret' => $secret]);
+        config([
+            'twitch.eventsub.webhook_secret' => $secret,
+        ]);
 
-        $sig = 'sha256=' . hash_hmac('sha256', $messageId . $timestamp . $body, $secret);
+        $sig = 'sha256=' . hash_hmac(
+            'sha256',
+            $messageId . $timestamp . $body,
+            $secret,
+        );
 
         $request = Request::create('/twitch/webhook', 'POST', [], [], [], [
             'HTTP_TWITCH_EVENTSUB_MESSAGE_ID'        => $messageId,

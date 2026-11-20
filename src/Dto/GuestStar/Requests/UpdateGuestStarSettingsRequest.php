@@ -6,8 +6,8 @@ namespace Zairakai\LaravelTwitch\Dto\GuestStar\Requests;
 
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Attributes\MapOutputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Request DTO for updating Guest Star channel settings.
@@ -18,7 +18,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  */
 #[MapInputName(SnakeCaseMapper::class)]
 #[MapOutputName(SnakeCaseMapper::class)]
-class UpdateGuestStarSettingsRequest extends Data
+class UpdateGuestStarSettingsRequest extends TwitchData
 {
     public function __construct(
         /**
@@ -27,7 +27,7 @@ class UpdateGuestStarSettingsRequest extends Data
         public readonly ?bool $isModeratorSendLiveEnabled = null,
 
         /**
-         * @var int|null Number of available guest slots (1–8)
+         * @var int|null Number of available guest slots (1-6)
          */
         public readonly ?int $slotCount = null,
 
@@ -37,12 +37,14 @@ class UpdateGuestStarSettingsRequest extends Data
         public readonly ?bool $isBrowserSourceAudioEnabled = null,
 
         /**
-         * @var string|null Layout: TILED_LAYOUT, SCREENSHARE_LAYOUT, HORIZONTAL_LAYOUT, VERTICAL_LAYOUT
+         * @var string|null Layout: TILED or SCREENSHARE
          */
         public readonly ?string $groupLayout = null,
 
         /**
-         * @var string|null Broadcaster audio setting: HOST_ONLY, GUESTS_ONLY, EVERYONE
+         * @var string|null Not in the current Twitch API reference: never sent (kept so that existing calls still compile)
+         *
+         * @deprecated Twitch no longer documents this setting
          */
         public readonly ?string $broadcasterAudioSetting = null,
 

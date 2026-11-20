@@ -24,15 +24,19 @@ final class SearchChannelTest extends TestCase
             'title'                => 'Hanging out!',
             'is_live'              => true,
             'thumbnail_url'        => 'https://example.com/thumb.jpg',
-            'tags'                 => ['IRL'],
+            'tags'                 => [
+                'IRL',
+            ],
             'started_at'           => '2024-01-01T18:00:00Z',
         ]);
 
-        $this->assertSame('44444', $searchChannel->id);
-        $this->assertSame('LiveStreamer', $searchChannel->displayName);
-        $this->assertTrue($searchChannel->isLive);
-        $this->assertSame(['IRL'], $searchChannel->tags);
-        $this->assertInstanceOf(Carbon::class, $searchChannel->startedAt);
+        self::assertSame('44444', $searchChannel->id);
+        self::assertSame('LiveStreamer', $searchChannel->displayName);
+        self::assertTrue($searchChannel->isLive);
+        self::assertSame([
+            'IRL',
+        ], $searchChannel->tags);
+        self::assertInstanceOf(Carbon::class, $searchChannel->startedAt);
     }
 
     #[Test]
@@ -50,8 +54,28 @@ final class SearchChannelTest extends TestCase
             'thumbnail_url'        => '',
         ]);
 
-        $this->assertFalse($searchChannel->isLive);
-        $this->assertNull($searchChannel->startedAt);
-        $this->assertSame([], $searchChannel->tags);
+        self::assertFalse($searchChannel->isLive);
+        self::assertNull($searchChannel->startedAt);
+        self::assertSame([], $searchChannel->tags);
+    }
+
+    #[Test]
+    public function it_reads_an_empty_started_at_as_null(): void
+    {
+        // The real API sends "" (not null) for an offline channel: the DTO used to throw CannotCastDate.
+        $searchChannel = SearchChannel::from([
+            'id'                   => '44444',
+            'display_name'         => 'Offline',
+            'broadcaster_login'    => 'offline',
+            'broadcaster_language' => 'en',
+            'game_id'              => '',
+            'game_name'            => '',
+            'title'                => '',
+            'is_live'              => false,
+            'thumbnail_url'        => '',
+            'started_at'           => '',
+        ]);
+
+        self::assertNull($searchChannel->startedAt);
     }
 }

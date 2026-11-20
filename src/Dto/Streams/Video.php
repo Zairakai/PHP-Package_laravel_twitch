@@ -6,8 +6,10 @@ namespace Zairakai\LaravelTwitch\Dto\Streams;
 
 use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents a Twitch video (VOD, highlight, or upload).
@@ -15,7 +17,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#get-videos
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class Video extends Data
+class Video extends TwitchData
 {
     public function __construct(
         /**
@@ -91,16 +93,18 @@ class Video extends Data
         /**
          * @var Carbon|null When the video was created
          */
+        #[WithCast(FlexibleDateTimeCast::class)]
         public ?Carbon $createdAt = null,
 
         /**
          * @var Carbon|null When the video was published
          */
+        #[WithCast(FlexibleDateTimeCast::class)]
         public ?Carbon $publishedAt = null,
 
         /**
-         * @var array<int, array{offset: int, duration: int}> Muted segments
+         * @var array<int, array{offset: int, duration: int}>|null Muted segments (null with an app access token)
          */
-        public array $mutedSegments = [],
+        public ?array $mutedSegments = [],
     ) {}
 }

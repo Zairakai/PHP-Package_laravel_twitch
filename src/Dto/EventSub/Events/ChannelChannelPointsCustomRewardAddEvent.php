@@ -7,9 +7,9 @@ namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Attributes\WithCast;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Payload of a `channel.channel_points_custom_reward.add` EventSub notification.
@@ -19,7 +19,7 @@ use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
  * @see https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/#channelchannel_points_custom_rewardadd
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class ChannelChannelPointsCustomRewardAddEvent extends Data implements EventSubEvent
+class ChannelChannelPointsCustomRewardAddEvent extends TwitchData implements EventSubEvent
 {
     public function __construct(
         public string $id,

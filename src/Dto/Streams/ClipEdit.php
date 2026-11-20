@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\Streams;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents the result of creating a clip (edit URL + clip ID).
@@ -14,7 +14,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#create-clip
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class ClipEdit extends Data
+class ClipEdit extends TwitchData
 {
     public function __construct(
         /**

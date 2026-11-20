@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\Chat\Requests;
 
 use Spatie\LaravelData\Attributes\MapOutputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Request DTO for updating chat settings.
@@ -16,7 +16,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#update-chat-settings
  */
 #[MapOutputName(SnakeCaseMapper::class)]
-class UpdateChatSettingsRequest extends Data
+class UpdateChatSettingsRequest extends TwitchData
 {
     public function __construct(
         /**

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\Chat;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents a user's chat color.
@@ -14,7 +14,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#get-user-chat-color
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class ChatColor extends Data
+class ChatColor extends TwitchData
 {
     public function __construct(
         /**

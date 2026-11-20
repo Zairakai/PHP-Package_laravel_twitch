@@ -22,8 +22,8 @@ final class UpdateScheduleSettingsRequestTest extends TestCase
 
         $array = $updateScheduleSettingsRequest->toArray();
 
-        $this->assertTrue($array['is_vacation_enabled']);
-        $this->assertSame('2024-08-01T00:00:00Z', $array['vacation_start_time']);
-        $this->assertSame('Europe/Paris', $array['timezone']);
+        self::assertTrue($array['is_vacation_enabled']);
+        self::assertSame('2024-08-01T00:00:00Z', $array['vacation_start_time']);
+        self::assertSame('Europe/Paris', $array['timezone']);
     }
 }

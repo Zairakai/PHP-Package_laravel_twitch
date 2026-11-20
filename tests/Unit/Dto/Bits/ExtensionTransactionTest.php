@@ -25,21 +25,24 @@ final class ExtensionTransactionTest extends TestCase
             'product_type'      => 'BITS_IN_EXTENSION',
             'product_data'      => [
                 'sku'          => 'testSku100',
-                'cost'         => ['amount' => 100, 'type' => 'bits'],
+                'cost'         => [
+                    'amount' => 100,
+                    'type'   => 'bits',
+                ],
                 'display_name' => 'Test Product',
             ],
         ]);
 
-        $this->assertSame('tx-uuid-1234', $extensionTransaction->id);
-        $this->assertSame('2024-01-28T04:15:53.325Z', $extensionTransaction->timestamp);
-        $this->assertSame('439964613', $extensionTransaction->broadcasterId);
-        $this->assertSame('twitchdev', $extensionTransaction->broadcasterLogin);
-        $this->assertSame('TwitchDev', $extensionTransaction->broadcasterName);
-        $this->assertSame('527115020', $extensionTransaction->userId);
-        $this->assertSame('twitchuser', $extensionTransaction->userLogin);
-        $this->assertSame('TwitchUser', $extensionTransaction->userName);
-        $this->assertSame('BITS_IN_EXTENSION', $extensionTransaction->productType);
-        $this->assertIsArray($extensionTransaction->productData);
-        $this->assertSame('testSku100', $extensionTransaction->productData['sku']);
+        self::assertSame('tx-uuid-1234', $extensionTransaction->id);
+        self::assertSame('2024-01-28T04:15:53.325Z', $extensionTransaction->timestamp);
+        self::assertSame('439964613', $extensionTransaction->broadcasterId);
+        self::assertSame('twitchdev', $extensionTransaction->broadcasterLogin);
+        self::assertSame('TwitchDev', $extensionTransaction->broadcasterName);
+        self::assertSame('527115020', $extensionTransaction->userId);
+        self::assertSame('twitchuser', $extensionTransaction->userLogin);
+        self::assertSame('TwitchUser', $extensionTransaction->userName);
+        self::assertSame('BITS_IN_EXTENSION', $extensionTransaction->productType);
+        self::assertIsArray($extensionTransaction->productData);
+        self::assertSame('testSku100', $extensionTransaction->productData['sku']);
     }
 }

@@ -24,15 +24,15 @@ final class DropsEntitlementTest extends TestCase
             'updated_at'         => '2024-01-16T08:30:00Z',
         ]);
 
-        $this->assertSame('ent-001', $dropsEntitlement->id);
-        $this->assertSame('benefit-abc', $dropsEntitlement->benefitId);
-        $this->assertSame('12345', $dropsEntitlement->userId);
-        $this->assertSame('67890', $dropsEntitlement->gameId);
-        $this->assertSame('CLAIMED', $dropsEntitlement->fulfillmentStatus);
-        $this->assertInstanceOf(Carbon::class, $dropsEntitlement->timestamp);
-        $this->assertSame('2024-01-15 12:00:00', $dropsEntitlement->timestamp->toDateTimeString());
-        $this->assertInstanceOf(Carbon::class, $dropsEntitlement->updatedAt);
-        $this->assertSame('2024-01-16 08:30:00', $dropsEntitlement->updatedAt->toDateTimeString());
+        self::assertSame('ent-001', $dropsEntitlement->id);
+        self::assertSame('benefit-abc', $dropsEntitlement->benefitId);
+        self::assertSame('12345', $dropsEntitlement->userId);
+        self::assertSame('67890', $dropsEntitlement->gameId);
+        self::assertSame('CLAIMED', $dropsEntitlement->fulfillmentStatus);
+        self::assertInstanceOf(Carbon::class, $dropsEntitlement->timestamp);
+        self::assertSame('2024-01-15 12:00:00', $dropsEntitlement->timestamp->toDateTimeString());
+        self::assertInstanceOf(Carbon::class, $dropsEntitlement->updatedAt);
+        self::assertSame('2024-01-16 08:30:00', $dropsEntitlement->updatedAt->toDateTimeString());
     }
 
     #[Test]
@@ -46,9 +46,9 @@ final class DropsEntitlementTest extends TestCase
             'fulfillment_status' => 'UNFULFILLED',
         ]);
 
-        $this->assertSame('ent-002', $dropsEntitlement->id);
-        $this->assertSame('UNFULFILLED', $dropsEntitlement->fulfillmentStatus);
-        $this->assertNull($dropsEntitlement->timestamp);
-        $this->assertNull($dropsEntitlement->updatedAt);
+        self::assertSame('ent-002', $dropsEntitlement->id);
+        self::assertSame('UNFULFILLED', $dropsEntitlement->fulfillmentStatus);
+        self::assertNull($dropsEntitlement->timestamp);
+        self::assertNull($dropsEntitlement->updatedAt);
     }
 }

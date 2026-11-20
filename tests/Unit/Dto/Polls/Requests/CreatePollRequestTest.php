@@ -17,7 +17,10 @@ final class CreatePollRequestTest extends TestCase
         $createPollRequest = new CreatePollRequest(
             broadcasterId: '12345',
             title: 'Best game?',
-            choices: [new PollChoiceRequest(title: 'LoL'), new PollChoiceRequest(title: 'Dota')],
+            choices: [
+                new PollChoiceRequest(title: 'LoL'),
+                new PollChoiceRequest(title: 'Dota'),
+            ],
             duration: 300,
             channelPointsVotingEnabled: true,
             channelPointsPerVote: 100,
@@ -25,10 +28,10 @@ final class CreatePollRequestTest extends TestCase
 
         $array = $createPollRequest->toArray();
 
-        $this->assertSame('12345', $array['broadcaster_id']);
-        $this->assertSame('Best game?', $array['title']);
-        $this->assertSame(300, $array['duration']);
-        $this->assertTrue($array['channel_points_voting_enabled']);
-        $this->assertSame(100, $array['channel_points_per_vote']);
+        self::assertSame('12345', $array['broadcaster_id']);
+        self::assertSame('Best game?', $array['title']);
+        self::assertSame(300, $array['duration']);
+        self::assertTrue($array['channel_points_voting_enabled']);
+        self::assertSame(100, $array['channel_points_per_vote']);
     }
 }

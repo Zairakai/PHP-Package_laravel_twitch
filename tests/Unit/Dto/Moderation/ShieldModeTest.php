@@ -21,9 +21,9 @@ final class ShieldModeTest extends TestCase
             'last_activated_at'  => '2024-03-01T10:00:00Z',
         ]);
 
-        $this->assertTrue($shieldMode->isActive);
-        $this->assertSame('67890', $shieldMode->moderatorId);
-        $this->assertSame('2024-03-01T10:00:00Z', $shieldMode->lastActivatedAt);
+        self::assertTrue($shieldMode->isActive);
+        self::assertSame('67890', $shieldMode->moderatorId);
+        self::assertSame('2024-03-01T10:00:00Z', $shieldMode->lastActivatedAt);
     }
 
     #[Test]
@@ -36,7 +36,7 @@ final class ShieldModeTest extends TestCase
             'moderator_name'  => 'ModUser',
         ]);
 
-        $this->assertFalse($shieldMode->isActive);
-        $this->assertNull($shieldMode->lastActivatedAt);
+        self::assertFalse($shieldMode->isActive);
+        self::assertNull($shieldMode->lastActivatedAt);
     }
 }

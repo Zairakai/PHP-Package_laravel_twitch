@@ -7,9 +7,9 @@ namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Attributes\WithCast;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Payload of a `channel.unban_request.create` EventSub notification.
@@ -19,7 +19,7 @@ use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
  * @see https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/#channelunban_requestcreate
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class ChannelUnbanRequestCreateEvent extends Data implements EventSubEvent
+class ChannelUnbanRequestCreateEvent extends TwitchData implements EventSubEvent
 {
     public function __construct(
         public string $id,

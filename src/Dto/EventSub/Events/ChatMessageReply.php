@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Present on a `channel.chat.message` event when the message is a reply to
@@ -14,7 +14,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * reply thread.
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class ChatMessageReply extends Data
+class ChatMessageReply extends TwitchData
 {
     public function __construct(
         public string $parentMessageId,

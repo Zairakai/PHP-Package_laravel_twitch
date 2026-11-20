@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\Moderation;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents a broadcaster's AutoMod settings.
@@ -14,7 +14,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#get-automod-settings
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class AutoModSettings extends Data
+class AutoModSettings extends TwitchData
 {
     public function __construct(
         /**

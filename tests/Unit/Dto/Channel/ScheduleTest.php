@@ -29,12 +29,12 @@ final class ScheduleTest extends TestCase
             ],
         ]);
 
-        $this->assertSame('99999', $schedule->broadcasterId);
-        $this->assertSame('Zairakai', $schedule->broadcasterName);
-        $this->assertSame('zairakai', $schedule->broadcasterLogin);
-        $this->assertCount(1, $schedule->segments);
-        $this->assertInstanceOf(ScheduleSegment::class, $schedule->segments->first());
-        $this->assertNull($schedule->vacation);
+        self::assertSame('99999', $schedule->broadcasterId);
+        self::assertSame('Zairakai', $schedule->broadcasterName);
+        self::assertSame('zairakai', $schedule->broadcasterLogin);
+        self::assertCount(1, $schedule->segments);
+        self::assertInstanceOf(ScheduleSegment::class, $schedule->segments->first());
+        self::assertNull($schedule->vacation);
     }
 
     #[Test]
@@ -51,7 +51,7 @@ final class ScheduleTest extends TestCase
             ],
         ]);
 
-        $this->assertIsArray($schedule->vacation);
-        $this->assertSame('2024-02-01T00:00:00Z', $schedule->vacation['start_time']);
+        self::assertIsArray($schedule->vacation);
+        self::assertSame('2024-02-01T00:00:00Z', $schedule->vacation['start_time']);
     }
 }

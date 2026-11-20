@@ -20,15 +20,20 @@ final class OutcomeTest extends TestCase
             'users'          => 25,
             'color'          => 'BLUE',
             'top_predictors' => [
-                ['user_id' => '11111', 'user_login' => 'top1', 'channel_points_won' => 2000],
+                [
+                    'user_id'            => '11111',
+                    'user_login'         => 'top1',
+                    'channel_points_won' => 2000,
+                ],
             ],
         ]);
 
-        $this->assertSame('outcome-001', $outcome->id);
-        $this->assertSame('Yes', $outcome->title);
-        $this->assertSame(5000, $outcome->channelPoints);
-        $this->assertSame('BLUE', $outcome->color);
-        $this->assertCount(1, $outcome->topPredictors);
+        self::assertSame('outcome-001', $outcome->id);
+        self::assertSame('Yes', $outcome->title);
+        self::assertSame(5000, $outcome->channelPoints);
+        self::assertSame('BLUE', $outcome->color);
+        self::assertNotNull($outcome->topPredictors);
+        self::assertCount(1, $outcome->topPredictors);
     }
 
     #[Test]
@@ -42,6 +47,6 @@ final class OutcomeTest extends TestCase
             'color'          => 'PINK',
         ]);
 
-        $this->assertSame([], $outcome->topPredictors);
+        self::assertSame([], $outcome->topPredictors);
     }
 }

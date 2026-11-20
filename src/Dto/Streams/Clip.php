@@ -6,8 +6,10 @@ namespace Zairakai\LaravelTwitch\Dto\Streams;
 
 use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents a Twitch clip.
@@ -15,7 +17,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#get-clips
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class Clip extends Data
+class Clip extends TwitchData
 {
     public function __construct(
         /**
@@ -91,6 +93,7 @@ class Clip extends Data
         /**
          * @var Carbon|null When the clip was created
          */
+        #[WithCast(FlexibleDateTimeCast::class)]
         public ?Carbon $createdAt = null,
 
         /**

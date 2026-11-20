@@ -21,11 +21,11 @@ final class BanResultTest extends TestCase
             'end_time'       => '2024-01-08T00:00:00Z',
         ]);
 
-        $this->assertSame('12345', $banResult->broadcasterId);
-        $this->assertSame('67890', $banResult->moderatorId);
-        $this->assertSame('11111', $banResult->userId);
-        $this->assertSame('2024-01-01T00:00:00Z', $banResult->createdAt);
-        $this->assertSame('2024-01-08T00:00:00Z', $banResult->endTime);
+        self::assertSame('12345', $banResult->broadcasterId);
+        self::assertSame('67890', $banResult->moderatorId);
+        self::assertSame('11111', $banResult->userId);
+        self::assertSame('2024-01-01T00:00:00Z', $banResult->createdAt);
+        self::assertSame('2024-01-08T00:00:00Z', $banResult->endTime);
     }
 
     #[Test]
@@ -38,6 +38,6 @@ final class BanResultTest extends TestCase
             'created_at'     => '2024-01-01T00:00:00Z',
         ]);
 
-        $this->assertNull($banResult->endTime);
+        self::assertNull($banResult->endTime);
     }
 }

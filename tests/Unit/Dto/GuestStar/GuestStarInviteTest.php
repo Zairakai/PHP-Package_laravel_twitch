@@ -23,12 +23,12 @@ final class GuestStarInviteTest extends TestCase
             'is_guest_star_participant' => true,
         ]);
 
-        $this->assertSame('12345', $guestStarInvite->userId);
-        $this->assertSame('twitchdev', $guestStarInvite->userLogin);
-        $this->assertSame('TwitchDev', $guestStarInvite->userDisplayName);
-        $this->assertTrue($guestStarInvite->isVideoEnabled);
-        $this->assertTrue($guestStarInvite->isAudioEnabled);
-        $this->assertFalse($guestStarInvite->isModerator);
-        $this->assertTrue($guestStarInvite->isGuestStarParticipant);
+        self::assertSame('12345', $guestStarInvite->userId);
+        self::assertSame('twitchdev', $guestStarInvite->userLogin);
+        self::assertSame('TwitchDev', $guestStarInvite->userDisplayName);
+        self::assertTrue($guestStarInvite->isVideoEnabled);
+        self::assertTrue($guestStarInvite->isAudioEnabled);
+        self::assertFalse($guestStarInvite->isModerator);
+        self::assertTrue($guestStarInvite->isGuestStarParticipant);
     }
 }

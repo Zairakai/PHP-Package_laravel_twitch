@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\ChannelPoints;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents a custom channel point reward.
@@ -14,7 +14,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#get-custom-reward
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class CustomReward extends Data
+class CustomReward extends TwitchData
 {
     public function __construct(
         /**
@@ -83,19 +83,19 @@ class CustomReward extends Data
         public bool $shouldRedemptionsSkipRequestQueue,
 
         /**
-         * @var int|null Max redemptions per stream (null = unlimited)
+         * @var array{is_enabled: bool, max_per_stream: int}|null Max redemptions per stream
          */
-        public ?int $maxPerStreamSetting = null,
+        public ?array $maxPerStreamSetting = null,
 
         /**
-         * @var int|null Max redemptions per user per stream (null = unlimited)
+         * @var array{is_enabled: bool, max_per_user_per_stream: int}|null Max redemptions per user per stream
          */
-        public ?int $maxPerUserPerStreamSetting = null,
+        public ?array $maxPerUserPerStreamSetting = null,
 
         /**
-         * @var int|null Global cooldown in seconds (null = no cooldown)
+         * @var array{is_enabled: bool, global_cooldown_seconds: int}|null Global cooldown
          */
-        public ?int $globalCooldownSetting = null,
+        public ?array $globalCooldownSetting = null,
 
         /**
          * @var int|null Number of redemptions during current stream
@@ -108,7 +108,7 @@ class CustomReward extends Data
         public ?string $cooldownExpiresAt = null,
 
         /**
-         * @var array{url: string|null, animated: array{url_1x: string, url_2x: string, url_4x: string}|null, static: array{url_1x: string, url_2x: string, url_4x: string}|null}|null Custom image
+         * @var array{url_1x: string, url_2x: string, url_4x: string}|null Custom image (null when the reward has none)
          */
         public ?array $image = null,
 

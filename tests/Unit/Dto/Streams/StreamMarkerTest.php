@@ -24,20 +24,22 @@ final class StreamMarkerTest extends TestCase
             'created_at'          => '2024-03-01T19:00:00Z',
         ]);
 
-        $this->assertSame('marker-001', $streamMarker->id);
-        $this->assertSame('Epic moment', $streamMarker->description);
-        $this->assertSame(3600, $streamMarker->positionSeconds);
-        $this->assertTrue($streamMarker->isEditorHighlight);
-        $this->assertInstanceOf(Carbon::class, $streamMarker->createdAt);
+        self::assertSame('marker-001', $streamMarker->id);
+        self::assertSame('Epic moment', $streamMarker->description);
+        self::assertSame(3600, $streamMarker->positionSeconds);
+        self::assertTrue($streamMarker->isEditorHighlight);
+        self::assertInstanceOf(Carbon::class, $streamMarker->createdAt);
     }
 
     #[Test]
     public function it_defaults_optional_fields_to_null(): void
     {
-        $streamMarker = StreamMarker::from(['id' => 'marker-002']);
+        $streamMarker = StreamMarker::from([
+            'id' => 'marker-002',
+        ]);
 
-        $this->assertNull($streamMarker->description);
-        $this->assertNull($streamMarker->positionSeconds);
-        $this->assertNull($streamMarker->createdAt);
+        self::assertNull($streamMarker->description);
+        self::assertNull($streamMarker->positionSeconds);
+        self::assertNull($streamMarker->createdAt);
     }
 }

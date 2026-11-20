@@ -18,9 +18,9 @@ final class SentMessageTest extends TestCase
             'is_sent'    => true,
         ]);
 
-        $this->assertSame('msg-abc', $sentMessage->messageId);
-        $this->assertTrue($sentMessage->isSent);
-        $this->assertNull($sentMessage->dropReason);
+        self::assertSame('msg-abc', $sentMessage->messageId);
+        self::assertTrue($sentMessage->isSent);
+        self::assertNull($sentMessage->dropReason);
     }
 
     #[Test]
@@ -29,10 +29,15 @@ final class SentMessageTest extends TestCase
         $sentMessage = SentMessage::from([
             'message_id'  => 'msg-xyz',
             'is_sent'     => false,
-            'drop_reason' => ['code' => 'channel_settings_blocked', 'message' => 'Blocked by channel settings.', 'user_id' => '99999'],
+            'drop_reason' => [
+                'code'    => 'channel_settings_blocked',
+                'message' => 'Blocked by channel settings.',
+                'user_id' => '99999',
+            ],
         ]);
 
-        $this->assertFalse($sentMessage->isSent);
-        $this->assertSame('channel_settings_blocked', $sentMessage->dropReason['code']);
+        self::assertFalse($sentMessage->isSent);
+        self::assertNotNull($sentMessage->dropReason);
+        self::assertSame('channel_settings_blocked', $sentMessage->dropReason['code']);
     }
 }

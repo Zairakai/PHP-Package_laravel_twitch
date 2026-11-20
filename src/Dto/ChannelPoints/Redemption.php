@@ -6,8 +6,10 @@ namespace Zairakai\LaravelTwitch\Dto\ChannelPoints;
 
 use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents a channel point reward redemption.
@@ -15,7 +17,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#get-custom-reward-redemption
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class Redemption extends Data
+class Redemption extends TwitchData
 {
     public function __construct(
         /**
@@ -61,22 +63,22 @@ class Redemption extends Data
         /**
          * @var string Reward ID
          */
-        public string $rewardId,
+        public ?string $rewardId = null,
 
         /**
          * @var string Reward title
          */
-        public string $rewardTitle,
+        public ?string $rewardTitle = null,
 
         /**
          * @var int Reward cost
          */
-        public int $rewardCost,
+        public ?int $rewardCost = null,
 
         /**
          * @var string Reward prompt
          */
-        public string $rewardPrompt,
+        public ?string $rewardPrompt = null,
 
         /**
          * @var string|null User input (if required)
@@ -86,6 +88,35 @@ class Redemption extends Data
         /**
          * @var Carbon|null When the redemption occurred
          */
+        #[WithCast(FlexibleDateTimeCast::class)]
         public ?Carbon $redeemedAt = null,
+
+        /**
+         * @var array{id: string, title: string, prompt: string, cost: int}|null The reward, as Twitch sends it
+         */
+        public ?array $reward = null,
     ) {}
+
+    /**
+     * Twitch sends the reward as an object: its fields are also available flat (rewardId, rewardTitle...).
+     *
+     * @param array<mixed> $properties
+     *
+     * @return array<mixed>
+     */
+    public static function prepareForPipeline(array $properties): array
+    {
+        $properties = parent::prepareForPipeline($properties);
+
+        $reward = $properties['reward'] ?? null;
+
+        if (is_array($reward)) {
+            $properties['reward_id']     ??= $reward['id']     ?? null;
+            $properties['reward_title']  ??= $reward['title']  ?? null;
+            $properties['reward_prompt'] ??= $reward['prompt'] ?? null;
+            $properties['reward_cost']   ??= $reward['cost']   ?? null;
+        }
+
+        return $properties;
+    }
 }

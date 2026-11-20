@@ -17,14 +17,20 @@ final class UserAuthorizationTest extends TestCase
             'user_id'        => '1234',
             'user_name'      => 'SomeUser',
             'user_login'     => 'someuser',
-            'scopes'         => ['user:read:email', 'channel:read:subscriptions'],
+            'scopes'         => [
+                'user:read:email',
+                'channel:read:subscriptions',
+            ],
             'has_authorized' => true,
         ]);
 
-        $this->assertSame('1234', $userAuthorization->userId);
-        $this->assertSame('SomeUser', $userAuthorization->userName);
-        $this->assertSame('someuser', $userAuthorization->userLogin);
-        $this->assertSame(['user:read:email', 'channel:read:subscriptions'], $userAuthorization->scopes);
-        $this->assertTrue($userAuthorization->hasAuthorized);
+        self::assertSame('1234', $userAuthorization->userId);
+        self::assertSame('SomeUser', $userAuthorization->userName);
+        self::assertSame('someuser', $userAuthorization->userLogin);
+        self::assertSame([
+            'user:read:email',
+            'channel:read:subscriptions',
+        ], $userAuthorization->scopes);
+        self::assertTrue($userAuthorization->hasAuthorized);
     }
 }

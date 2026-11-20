@@ -16,15 +16,21 @@ final class GuestStarSessionTest extends TestCase
         $guestStarSession = GuestStarSession::from([
             'id'     => 'session-abc',
             'guests' => [
-                ['user_id' => '11111', 'user_login' => 'guest_one'],
-                ['user_id' => '22222', 'user_login' => 'guest_two'],
+                [
+                    'user_id'    => '11111',
+                    'user_login' => 'guest_one',
+                ],
+                [
+                    'user_id'    => '22222',
+                    'user_login' => 'guest_two',
+                ],
             ],
         ]);
 
-        $this->assertSame('session-abc', $guestStarSession->id);
-        $this->assertCount(2, $guestStarSession->guests);
-        $this->assertSame('11111', $guestStarSession->guests[0]['user_id']);
-        $this->assertSame('guest_two', $guestStarSession->guests[1]['user_login']);
+        self::assertSame('session-abc', $guestStarSession->id);
+        self::assertCount(2, $guestStarSession->guests);
+        self::assertSame('11111', $guestStarSession->guests[0]['user_id']);
+        self::assertSame('guest_two', $guestStarSession->guests[1]['user_login']);
     }
 
     #[Test]
@@ -34,7 +40,7 @@ final class GuestStarSessionTest extends TestCase
             'id' => 'session-empty',
         ]);
 
-        $this->assertSame('session-empty', $guestStarSession->id);
-        $this->assertSame([], $guestStarSession->guests);
+        self::assertSame('session-empty', $guestStarSession->id);
+        self::assertSame([], $guestStarSession->guests);
     }
 }

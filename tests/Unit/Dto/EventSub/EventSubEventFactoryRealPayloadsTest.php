@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Tests\Unit\Dto\EventSub;
 
+use Illuminate\Support\Arr;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use Zairakai\LaravelTwitch\Dto\EventSub\Events\AutomodMessageUpdateEvent;
+use Zairakai\LaravelTwitch\Dto\EventSub\Events\ChannelChatNotificationEvent;
+use Zairakai\LaravelTwitch\Dto\EventSub\Events\ChannelPointsRedemptionEvent;
 use Zairakai\LaravelTwitch\Dto\EventSub\Events\GenericEventSubEvent;
 use Zairakai\LaravelTwitch\Dto\EventSub\EventSubEventFactory;
 use Zairakai\LaravelTwitch\Tests\TestCase;
@@ -27,7 +31,9 @@ final class EventSubEventFactoryRealPayloadsTest extends TestCase
         $fixtures = require __DIR__ . '/../../../Fixtures/eventsub_examples.php';
 
         foreach (array_keys($fixtures) as $type) {
-            yield $type => [$type];
+            yield $type => [
+                $type,
+            ];
         }
     }
 
@@ -91,8 +97,8 @@ final class EventSubEventFactoryRealPayloadsTest extends TestCase
 
         $eventSubEvent = EventSubEventFactory::make('channel.goal.progress', $payload);
 
-        $this->assertNotInstanceOf(GenericEventSubEvent::class, $eventSubEvent);
-        $this->assertNull($eventSubEvent->description);
+        self::assertNotInstanceOf(GenericEventSubEvent::class, $eventSubEvent);
+        self::assertNull($eventSubEvent->description);
     }
 
     /**
@@ -122,9 +128,18 @@ final class EventSubEventFactoryRealPayloadsTest extends TestCase
             'should_redemptions_skip_request_queue'     => true,
             'cooldown_expires_at'                       => null,
             'redemptions_redeemed_current_stream'       => null,
-            'max_per_stream'                            => ['is_enabled' => false, 'value' => 0],
-            'max_per_user_per_stream'                   => ['is_enabled' => false, 'value' => 0],
-            'global_cooldown'                           => ['is_enabled' => true, 'seconds' => 300],
+            'max_per_stream'                            => [
+                'is_enabled' => false,
+                'value'      => 0,
+            ],
+            'max_per_user_per_stream'                   => [
+                'is_enabled' => false,
+                'value'      => 0,
+            ],
+            'global_cooldown'                           => [
+                'is_enabled' => true,
+                'seconds'    => 300,
+            ],
             'background_color'                          => '#F9D793',
             'image'                                     => null,
             'default_image'                             => [
@@ -136,8 +151,8 @@ final class EventSubEventFactoryRealPayloadsTest extends TestCase
 
         $eventSubEvent = EventSubEventFactory::make('channel.channel_points_custom_reward.update', $payload);
 
-        $this->assertNotInstanceOf(GenericEventSubEvent::class, $eventSubEvent);
-        $this->assertNull($eventSubEvent->image);
+        self::assertNotInstanceOf(GenericEventSubEvent::class, $eventSubEvent);
+        self::assertNull($eventSubEvent->image);
     }
 
     /**
@@ -171,8 +186,8 @@ final class EventSubEventFactoryRealPayloadsTest extends TestCase
 
         $eventSubEvent = EventSubEventFactory::make('channel.guest_star_guest.update', $payload);
 
-        $this->assertNotInstanceOf(GenericEventSubEvent::class, $eventSubEvent);
-        $this->assertNull($eventSubEvent->moderatorUserId);
+        self::assertNotInstanceOf(GenericEventSubEvent::class, $eventSubEvent);
+        self::assertNull($eventSubEvent->moderatorUserId);
     }
 
     #[Test]
@@ -199,8 +214,8 @@ final class EventSubEventFactoryRealPayloadsTest extends TestCase
 
         $eventSubEvent = EventSubEventFactory::make('channel.channel_points_custom_reward_redemption.add', $payload);
 
-        $this->assertNotInstanceOf(GenericEventSubEvent::class, $eventSubEvent);
-        $this->assertNull($eventSubEvent->reward->prompt);
+        self::assertInstanceOf(ChannelPointsRedemptionEvent::class, $eventSubEvent);
+        self::assertNull($eventSubEvent->reward->prompt);
     }
 
     /**
@@ -233,9 +248,18 @@ final class EventSubEventFactoryRealPayloadsTest extends TestCase
             'should_redemptions_skip_request_queue'   => false,
             'cooldown_expires_at'                     => null,
             'redemptions_redeemed_current_stream'     => null,
-            'max_per_stream'                          => ['is_enabled' => false, 'value' => 0],
-            'max_per_user_per_stream'                 => ['is_enabled' => false, 'value' => 0],
-            'global_cooldown'                         => ['is_enabled' => false, 'seconds' => 0],
+            'max_per_stream'                          => [
+                'is_enabled' => false,
+                'value'      => 0,
+            ],
+            'max_per_user_per_stream'                 => [
+                'is_enabled' => false,
+                'value'      => 0,
+            ],
+            'global_cooldown'                         => [
+                'is_enabled' => false,
+                'seconds'    => 0,
+            ],
             'background_color'                        => '#4A90D9',
             'image'                                   => [],
             'default_image'                           => [],
@@ -243,8 +267,8 @@ final class EventSubEventFactoryRealPayloadsTest extends TestCase
 
         $eventSubEvent = EventSubEventFactory::make('channel.channel_points_custom_reward.update', $payload);
 
-        $this->assertNotInstanceOf(GenericEventSubEvent::class, $eventSubEvent);
-        $this->assertNull($eventSubEvent->prompt);
+        self::assertNotInstanceOf(GenericEventSubEvent::class, $eventSubEvent);
+        self::assertNull($eventSubEvent->prompt);
     }
 
     /**
@@ -277,8 +301,8 @@ final class EventSubEventFactoryRealPayloadsTest extends TestCase
 
         $eventSubEvent = EventSubEventFactory::make('channel.unban_request.resolve', $payload);
 
-        $this->assertNotInstanceOf(GenericEventSubEvent::class, $eventSubEvent);
-        $this->assertNull($eventSubEvent->resolutionText);
+        self::assertNotInstanceOf(GenericEventSubEvent::class, $eventSubEvent);
+        self::assertNull($eventSubEvent->resolutionText);
     }
 
     /**
@@ -307,18 +331,24 @@ final class EventSubEventFactoryRealPayloadsTest extends TestCase
             'badges'                 => [],
             'system_message'         => 'cooler_user watched 10 consecutive streams and sparked a watch streak!',
             'message_id'             => 'watch-streak-message-id',
-            'message'                => ['text' => null, 'fragments' => []],
+            'message'                => [
+                'text'      => null,
+                'fragments' => [],
+            ],
             'notice_type'            => 'watch_streak',
-            'watch_streak'           => ['streak_count' => 10, 'channel_points_awarded' => 450],
+            'watch_streak'           => [
+                'streak_count'           => 10,
+                'channel_points_awarded' => 450,
+            ],
         ];
 
         $eventSubEvent = EventSubEventFactory::make('channel.chat.notification', $payload);
 
-        $this->assertNotInstanceOf(GenericEventSubEvent::class, $eventSubEvent);
-        $this->assertNull($eventSubEvent->message->text);
-        $this->assertNotNull($eventSubEvent->watchStreak);
-        $this->assertSame(10, $eventSubEvent->watchStreak->streakCount);
-        $this->assertSame(450, $eventSubEvent->watchStreak->channelPointsAwarded);
+        self::assertInstanceOf(ChannelChatNotificationEvent::class, $eventSubEvent);
+        self::assertNull($eventSubEvent->message->text);
+        self::assertNotNull($eventSubEvent->watchStreak);
+        self::assertSame(10, $eventSubEvent->watchStreak->streakCount);
+        self::assertSame(450, $eventSubEvent->watchStreak->channelPointsAwarded);
     }
 
     /**
@@ -350,18 +380,23 @@ final class EventSubEventFactoryRealPayloadsTest extends TestCase
             ],
             'reason'       => 'automod',
             'status'       => 'approved',
-            'automod'      => ['category' => 'namecalling', 'level' => 2, 'boundaries' => []],
+            'automod'      => [
+                'category'   => 'namecalling',
+                'level'      => 2,
+                'boundaries' => [],
+            ],
             'blocked_term' => null,
             'held_at'      => '2026-08-27T18:00:00Z',
         ];
 
         $eventSubEvent = EventSubEventFactory::make('automod.message.update', $payload);
 
-        $this->assertNotInstanceOf(GenericEventSubEvent::class, $eventSubEvent);
-        $this->assertSame('held message text', $eventSubEvent->message->text);
-        $this->assertSame('approved', $eventSubEvent->status);
-        $this->assertSame('namecalling', $eventSubEvent->automod['category']);
-        $this->assertNull($eventSubEvent->blockedTerm);
+        self::assertInstanceOf(AutomodMessageUpdateEvent::class, $eventSubEvent);
+        self::assertSame('held message text', $eventSubEvent->message->text);
+        self::assertSame('approved', $eventSubEvent->status);
+        self::assertNotNull($eventSubEvent->automod);
+        self::assertSame('namecalling', $eventSubEvent->automod['category']);
+        self::assertNull($eventSubEvent->blockedTerm);
     }
 
     #[Test]
@@ -375,17 +410,25 @@ final class EventSubEventFactoryRealPayloadsTest extends TestCase
 
         // Strip the // comments Twitch's docs embed in their JSON examples, and
         // the trailing commas that removing them leaves behind.
-        $cleaned = preg_replace('/(?<=\s)\/\/[^\n]*/', '', $raw);
-        $cleaned = preg_replace('/,(\s*[}\]])/', '$1', (string) $cleaned);
+        $cleaned = preg_replace(
+            '/(?<=\s)\/\/[^\n]*/',
+            '',
+            $raw,
+        );
+        $cleaned = preg_replace(
+            '/,(\s*[}\]])/',
+            '$1',
+            (string) $cleaned,
+        );
 
         /** @var array<string, mixed>|null $payload */
         $payload = json_decode((string) $cleaned, true);
 
-        $this->assertIsArray($payload, "Fixture for {$type} is not valid JSON once cleaned.");
+        self::assertIsArray($payload, "Fixture for {$type} is not valid JSON once cleaned.");
 
         $event = EventSubEventFactory::make($type, $payload);
 
-        $this->assertNotInstanceOf(
+        self::assertNotInstanceOf(
             GenericEventSubEvent::class,
             $event,
             "{$type} is expected to resolve to a dedicated DTO, not the generic fallback.",
@@ -395,9 +438,11 @@ final class EventSubEventFactoryRealPayloadsTest extends TestCase
     #[Test]
     public function it_falls_back_to_generic_event_for_a_type_with_no_dedicated_dto(): void
     {
-        $eventSubEvent = EventSubEventFactory::make('channel.some_future_type', ['id' => '1']);
+        $eventSubEvent = EventSubEventFactory::make('channel.some_future_type', [
+            'id' => '1',
+        ]);
 
-        $this->assertInstanceOf(GenericEventSubEvent::class, $eventSubEvent);
+        self::assertInstanceOf(GenericEventSubEvent::class, $eventSubEvent);
     }
 
     #[Test]
@@ -407,8 +452,16 @@ final class EventSubEventFactoryRealPayloadsTest extends TestCase
         /** @var array<string, string> $fixtures */
         $fixtures = require __DIR__ . '/../../../Fixtures/eventsub_examples.php';
 
-        $cleaned = preg_replace('/(?<=\s)\/\/[^\n]*/', '', $fixtures[$type]);
-        $cleaned = preg_replace('/,(\s*[}\]])/', '$1', (string) $cleaned);
+        $cleaned = preg_replace(
+            '/(?<=\s)\/\/[^\n]*/',
+            '',
+            $fixtures[$type],
+        );
+        $cleaned = preg_replace(
+            '/,(\s*[}\]])/',
+            '$1',
+            (string) $cleaned,
+        );
 
         /** @var array<string, mixed> $payload */
         $payload = json_decode((string) $cleaned, true);
@@ -416,14 +469,22 @@ final class EventSubEventFactoryRealPayloadsTest extends TestCase
         $event = EventSubEventFactory::make($type, $payload);
 
         $expected = match (true) {
-            in_array($type, self::typesWithNoBroadcaster(), true)      => null,
+            in_array(
+                $type,
+                self::typesWithNoBroadcaster(),
+                true,
+            )                                                          => null,
             'channel.raid' === $type                                   => $payload['to_broadcaster_user_id'],
-            in_array($type, self::typesWithBroadcasterIdField(), true) => $payload['broadcaster_id'],
-            'automod.settings.update' === $type                        => $payload['data'][0]['broadcaster_user_id'],
+            in_array(
+                $type,
+                self::typesWithBroadcasterIdField(),
+                true,
+            )                                                          => $payload['broadcaster_id'],
+            'automod.settings.update' === $type                        => Arr::get($payload, 'data.0.broadcaster_user_id'),
             default                                                    => $payload['broadcaster_user_id'] ?? null,
         };
 
-        $this->assertSame(
+        self::assertSame(
             $expected,
             $event->getBroadcasterUserId(),
             "Unexpected getBroadcasterUserId() for {$type}.",

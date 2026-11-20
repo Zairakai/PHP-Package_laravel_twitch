@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Tests\Feature;
 
+use Illuminate\Database\QueryException;
 use PHPUnit\Framework\Attributes\Test;
 use Zairakai\LaravelTwitch\Models\TwitchUser;
 use Zairakai\LaravelTwitch\Tests\TestCase;
@@ -17,12 +18,15 @@ final class TwitchUserModelTest extends TestCase
             'twitch_id'    => '123456789',
             'login'        => 'testuser',
             'display_name' => 'Test User',
-            'scopes'       => ['user:read:email', 'channel:read:subscriptions'],
+            'scopes'       => [
+                'user:read:email',
+                'channel:read:subscriptions',
+            ],
         ]);
 
-        $this->assertTrue($user->hasScope('user:read:email'));
-        $this->assertTrue($user->hasScope('channel:read:subscriptions'));
-        $this->assertFalse($user->hasScope('channel:manage:redemptions'));
+        self::assertTrue($user->hasScope('user:read:email'));
+        self::assertTrue($user->hasScope('channel:read:subscriptions'));
+        self::assertFalse($user->hasScope('channel:manage:redemptions'));
     }
 
     #[Test]
@@ -35,11 +39,13 @@ final class TwitchUserModelTest extends TestCase
             'expires_at'   => now()->addHour(),
         ]);
 
-        $this->assertTrue($user->isTokenValid());
+        self::assertTrue($user->isTokenValid());
 
-        $user->update(['expires_at' => now()->subHour()]);
+        $user->update([
+            'expires_at' => now()->subHour(),
+        ]);
 
-        $this->assertFalse($user->isTokenValid());
+        self::assertFalse($user->isTokenValid());
     }
 
     #[Test]
@@ -57,7 +63,7 @@ final class TwitchUserModelTest extends TestCase
             'created_at_twitch' => now(),
         ]);
 
-        $this->assertDatabaseHas('twitch_users', [
+        self::assertDatabaseHas('twitch_users', [
             'twitch_id' => '123456789',
             'login'     => 'testuser',
         ]);
@@ -74,8 +80,8 @@ final class TwitchUserModelTest extends TestCase
 
         $user = TwitchUser::findByLogin('testuser');
 
-        $this->assertNotNull($user);
-        $this->assertEquals('123456789', $user->twitch_id);
+        self::assertNotNull($user);
+        self::assertEquals('123456789', $user->twitch_id);
     }
 
     #[Test]
@@ -89,8 +95,8 @@ final class TwitchUserModelTest extends TestCase
 
         $user = TwitchUser::findByTwitchId('123456789');
 
-        $this->assertNotNull($user);
-        $this->assertEquals('testuser', $user->login);
+        self::assertNotNull($user);
+        self::assertEquals('testuser', $user->login);
     }
 
     #[Test]
@@ -106,14 +112,66 @@ final class TwitchUserModelTest extends TestCase
             'access_token'  => 'new-access-token',
             'refresh_token' => 'new-refresh-token',
             'expires_in'    => 3600,
-            'scope'         => ['user:read:email'],
+            'scope'         => [
+                'user:read:email',
+            ],
         ];
 
         $user->updateTokens($tokenData);
 
-        $this->assertEquals('new-access-token', $user->access_token);
-        $this->assertEquals('new-refresh-token', $user->refresh_token);
-        $this->assertTrue($user->isTokenValid());
-        $this->assertEquals(['user:read:email'], $user->scopes);
+        self::assertEquals('new-access-token', $user->access_token);
+        self::assertEquals('new-refresh-token', $user->refresh_token);
+        self::assertTrue($user->isTokenValid());
+        self::assertEquals([
+            'user:read:email',
+        ], $user->scopes);
+    }
+
+    #[Test]
+    public function the_id_is_what_identifies_a_user_not_the_login(): void
+    {
+        TwitchUser::create([
+            'twitch_id'    => '1',
+            'login'        => 'oldname',
+            'display_name' => 'OldName',
+        ]);
+
+        // The login was changed on Twitch, then taken by someone else: two rows can carry it
+        $second = TwitchUser::create([
+            'twitch_id'    => '2',
+            'login'        => 'oldname',
+            'display_name' => 'OldName',
+        ]);
+
+        self::assertCount(2, TwitchUser::query()->where('login', 'oldname')->get());
+        self::assertSame('2', $second->twitch_id);
+
+        $this->expectException(QueryException::class);
+
+        TwitchUser::create([
+            'twitch_id'    => '1',
+            'login'        => 'another',
+            'display_name' => 'Another',
+        ]);
+    }
+
+    #[Test]
+    public function the_table_and_the_connection_come_from_the_configuration(): void
+    {
+        self::assertSame('twitch_users', new TwitchUser()->getTable());
+
+        config([
+            'twitch.database.table_prefix' => 'tw_',
+            'twitch.database.connection'   => 'other',
+        ]);
+
+        self::assertSame('tw_users', new TwitchUser()->getTable());
+        self::assertSame('other', new TwitchUser()->getConnectionName());
+
+        // Back to the defaults: the migrations of the test run on them
+        config([
+            'twitch.database.table_prefix' => 'twitch_',
+            'twitch.database.connection'   => null,
+        ]);
     }
 }

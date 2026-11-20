@@ -23,9 +23,9 @@ final class ChatBadgeTest extends TestCase
             'info'   => null,
         ]);
 
-        $this->assertSame('moderator', $chatBadge->setId);
-        $this->assertSame('1', $chatBadge->id);
-        $this->assertNull($chatBadge->info);
+        self::assertSame('moderator', $chatBadge->setId);
+        self::assertSame('1', $chatBadge->id);
+        self::assertNull($chatBadge->info);
     }
 
     #[Test]
@@ -37,6 +37,6 @@ final class ChatBadgeTest extends TestCase
             'info'   => '16',
         ]);
 
-        $this->assertSame('16', $chatBadge->info);
+        self::assertSame('16', $chatBadge->info);
     }
 }

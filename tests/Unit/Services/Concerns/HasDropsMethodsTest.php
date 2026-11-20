@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Tests\Unit\Services\Concerns;
 
 use PHPUnit\Framework\Attributes\Test;
-use Zairakai\LaravelTwitch\Dto\Drops\DropsEntitlement;
-use Zairakai\LaravelTwitch\Dto\PaginatedResult;
 use Zairakai\LaravelTwitch\Services\TwitchApiService;
 use Zairakai\LaravelTwitch\Tests\TestCase;
 
@@ -32,18 +30,31 @@ final class HasDropsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
-                return ['data' => [], 'pagination' => ['cursor' => '']];
+                return [
+                    'data'       => [],
+                    'pagination' => [
+                        'cursor' => '',
+                    ],
+                ];
             }
         };
 
         $service->getDropsEntitlements();
 
-        $this->assertSame('GET', $capturedParams['method']);
-        $this->assertSame('/entitlements/drops', $capturedParams['endpoint']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('GET', $capturedParams['method']);
+        self::assertSame('/entitlements/drops', $capturedParams['endpoint']);
     }
 
     #[Test]
@@ -54,8 +65,11 @@ final class HasDropsMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
                 return [
                     'data' => [
                         [
@@ -67,17 +81,17 @@ final class HasDropsMethodsTest extends TestCase
                             'timestamp'          => '2024-01-01T00:00:00Z',
                         ],
                     ],
-                    'pagination' => ['cursor' => 'abc123'],
+                    'pagination' => [
+                        'cursor' => 'abc123',
+                    ],
                 ];
             }
         };
 
         $paginatedResult = $service->getDropsEntitlements();
 
-        $this->assertInstanceOf(PaginatedResult::class, $paginatedResult);
-        $this->assertCount(1, $paginatedResult->items);
-        $this->assertInstanceOf(DropsEntitlement::class, $paginatedResult->items[0]);
-        $this->assertSame('ent-1', $paginatedResult->items[0]->id);
-        $this->assertSame('CLAIMED', $paginatedResult->items[0]->fulfillmentStatus);
+        self::assertCount(1, $paginatedResult->items);
+        self::assertSame('ent-1', $paginatedResult->items[0]->id);
+        self::assertSame('CLAIMED', $paginatedResult->items[0]->fulfillmentStatus);
     }
 }

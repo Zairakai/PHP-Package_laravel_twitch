@@ -27,9 +27,9 @@ final class SubscriptionTest extends TestCase
             'gifter_name'       => 'GenerousGifter',
         ]);
 
-        $this->assertTrue($subscription->isGift);
-        $this->assertSame('generousgifter', $subscription->gifterLogin);
-        $this->assertSame('2000', $subscription->tier);
+        self::assertTrue($subscription->isGift);
+        self::assertSame('generousgifter', $subscription->gifterLogin);
+        self::assertSame('2000', $subscription->tier);
     }
 
     #[Test]
@@ -47,10 +47,10 @@ final class SubscriptionTest extends TestCase
             'is_gift'           => false,
         ]);
 
-        $this->assertSame('12345', $subscription->broadcasterId);
-        $this->assertSame('1000', $subscription->tier);
-        $this->assertFalse($subscription->isGift);
-        $this->assertNull($subscription->gifterLogin);
-        $this->assertNull($subscription->message);
+        self::assertSame('12345', $subscription->broadcasterId);
+        self::assertSame('1000', $subscription->tier);
+        self::assertFalse($subscription->isGift);
+        self::assertNull($subscription->gifterLogin);
+        self::assertNull($subscription->message);
     }
 }

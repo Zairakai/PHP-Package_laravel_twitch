@@ -28,6 +28,7 @@ trait HasGameMethods
     public function getGames(
         string|array|null $ids = null,
         string|array|null $names = null,
+        string|array|null $igdbIds = null,
     ): DataCollection {
         $params = [];
 
@@ -39,7 +40,15 @@ trait HasGameMethods
             $params['name'] = $names;
         }
 
-        $raw = $this->makeRequest('GET', '/games', $params);
+        if (null !== $igdbIds) {
+            $params['igdb_id'] = $igdbIds;
+        }
+
+        $raw = $this->makeRequest(
+            'GET',
+            '/games',
+            $params,
+        );
 
         /** @var list<array<string, mixed>> $items */
         $items = $raw['data'] ?? [];
@@ -59,13 +68,19 @@ trait HasGameMethods
      */
     public function getTopGames(int $first = 20, ?string $after = null): PaginatedResult
     {
-        $params = ['first' => $first];
+        $params = [
+            'first' => $first,
+        ];
 
         if (null !== $after) {
             $params['after'] = $after;
         }
 
-        $raw = $this->makeRequest('GET', '/games/top', $params);
+        $raw = $this->makeCachedRequest(
+            'top_games',
+            '/games/top',
+            $params,
+        );
 
         return PaginatedResult::fromRaw($raw, Game::class);
     }
@@ -77,8 +92,11 @@ trait HasGameMethods
      *
      * @return PaginatedResult<Game>
      */
-    public function searchCategories(string $query, int $first = 20, ?string $after = null): PaginatedResult
-    {
+    public function searchCategories(
+        string $query,
+        int $first = 20,
+        ?string $after = null,
+    ): PaginatedResult {
         $params = [
             'query' => $query,
             'first' => $first,
@@ -88,7 +106,11 @@ trait HasGameMethods
             $params['after'] = $after;
         }
 
-        $raw = $this->makeRequest('GET', '/search/categories', $params);
+        $raw = $this->makeRequest(
+            'GET',
+            '/search/categories',
+            $params,
+        );
 
         return PaginatedResult::fromRaw($raw, Game::class);
     }

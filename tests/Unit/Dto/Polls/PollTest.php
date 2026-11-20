@@ -25,18 +25,28 @@ final class PollTest extends TestCase
             'channel_points_voting_enabled' => true,
             'channel_points_per_vote'       => 100,
             'choices'                       => [
-                ['id' => 'c1', 'title' => 'LoL', 'votes' => 50, 'channel_points_votes' => 2000],
-                ['id' => 'c2', 'title' => 'Dota', 'votes' => 30, 'channel_points_votes' => 1000],
+                [
+                    'id'                   => 'c1',
+                    'title'                => 'LoL',
+                    'votes'                => 50,
+                    'channel_points_votes' => 2000,
+                ],
+                [
+                    'id'                   => 'c2',
+                    'title'                => 'Dota',
+                    'votes'                => 30,
+                    'channel_points_votes' => 1000,
+                ],
             ],
             'started_at' => '2024-03-01T10:00:00Z',
         ]);
 
-        $this->assertSame('poll-001', $poll->id);
-        $this->assertSame('ACTIVE', $poll->status);
-        $this->assertSame(300, $poll->duration);
-        $this->assertTrue($poll->channelPointsVotingEnabled);
-        $this->assertCount(2, $poll->choices);
-        $this->assertInstanceOf(Carbon::class, $poll->startedAt);
-        $this->assertNull($poll->endedAt);
+        self::assertSame('poll-001', $poll->id);
+        self::assertSame('ACTIVE', $poll->status);
+        self::assertSame(300, $poll->duration);
+        self::assertTrue($poll->channelPointsVotingEnabled);
+        self::assertCount(2, $poll->choices);
+        self::assertInstanceOf(Carbon::class, $poll->startedAt);
+        self::assertNull($poll->endedAt);
     }
 }

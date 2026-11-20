@@ -23,12 +23,12 @@ final class AdScheduleTest extends TestCase
             'snooze_refresh_at' => '2024-06-01T14:45:00Z',
         ]);
 
-        $this->assertSame(30, $adSchedule->duration);
-        $this->assertSame(2, $adSchedule->snoozeCount);
-        $this->assertSame(0, $adSchedule->prerollFreeTime);
-        $this->assertInstanceOf(Carbon::class, $adSchedule->nextAdAt);
-        $this->assertInstanceOf(Carbon::class, $adSchedule->lastAdAt);
-        $this->assertInstanceOf(Carbon::class, $adSchedule->snoozeRefreshAt);
+        self::assertSame(30, $adSchedule->duration);
+        self::assertSame(2, $adSchedule->snoozeCount);
+        self::assertSame(0, $adSchedule->prerollFreeTime);
+        self::assertInstanceOf(Carbon::class, $adSchedule->nextAdAt);
+        self::assertInstanceOf(Carbon::class, $adSchedule->lastAdAt);
+        self::assertInstanceOf(Carbon::class, $adSchedule->snoozeRefreshAt);
     }
 
     #[Test]
@@ -40,9 +40,9 @@ final class AdScheduleTest extends TestCase
             'preroll_free_time' => 90,
         ]);
 
-        $this->assertSame(60, $adSchedule->duration);
-        $this->assertNull($adSchedule->nextAdAt);
-        $this->assertNull($adSchedule->lastAdAt);
-        $this->assertNull($adSchedule->snoozeRefreshAt);
+        self::assertSame(60, $adSchedule->duration);
+        self::assertNull($adSchedule->nextAdAt);
+        self::assertNull($adSchedule->lastAdAt);
+        self::assertNull($adSchedule->snoozeRefreshAt);
     }
 }

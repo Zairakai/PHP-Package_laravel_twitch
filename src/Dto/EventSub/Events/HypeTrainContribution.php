@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * A single contributor entry inside `top_contributions` (always present) or
@@ -14,7 +14,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * same shape.
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class HypeTrainContribution extends Data
+class HypeTrainContribution extends TwitchData
 {
     public function __construct(
         public string $userId,

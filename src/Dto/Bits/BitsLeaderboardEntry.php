@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\Bits;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents a single entry in the Bits leaderboard.
@@ -14,7 +14,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#get-bits-leaderboard
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class BitsLeaderboardEntry extends Data
+class BitsLeaderboardEntry extends TwitchData
 {
     public function __construct(
         /**

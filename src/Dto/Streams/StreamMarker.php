@@ -6,8 +6,10 @@ namespace Zairakai\LaravelTwitch\Dto\Streams;
 
 use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents a stream marker (created manually on a live stream).
@@ -19,7 +21,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#get-stream-markers
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class StreamMarker extends Data
+class StreamMarker extends TwitchData
 {
     public function __construct(
         /**
@@ -45,6 +47,7 @@ class StreamMarker extends Data
         /**
          * @var string|null URL to the marker in the VOD
          */
+        #[MapInputName('URL')]
         public ?string $url = null,
 
         /**
@@ -55,6 +58,7 @@ class StreamMarker extends Data
         /**
          * @var Carbon|null When the marker was created
          */
+        #[WithCast(FlexibleDateTimeCast::class)]
         public ?Carbon $createdAt = null,
     ) {}
 }

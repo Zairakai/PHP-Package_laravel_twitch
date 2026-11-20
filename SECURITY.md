@@ -1,6 +1,6 @@
 # Security Policy
 
-> This project follows the [Zairakai Global Security Policy][handbook-security].
+> This project follows the [Zairakai Global Security Policy][handbook-security].  
 > Please refer to it for standard protections, response timeline, and contact information.
 
 ---
@@ -23,7 +23,7 @@ Please **do not disclose vulnerabilities publicly** until they have been reviewe
 
 | Layer | Security Protection |
 | :--- | :--- |
-| **Static Analysis** | PHPStan Level Max + Larastan compliance and Rector modernizations. |
+| **Static Analysis** | PHPStan Level Max compliance and Rector modernizations. |
 | **CI Pipeline** | Automated secret detection in GitLab CI. |
 
 ---

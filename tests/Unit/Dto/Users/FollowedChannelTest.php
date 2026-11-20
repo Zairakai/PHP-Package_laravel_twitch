@@ -21,8 +21,8 @@ final class FollowedChannelTest extends TestCase
             'followed_at'       => '2022-06-01T00:00:00Z',
         ]);
 
-        $this->assertSame('12345', $followedChannel->broadcasterId);
-        $this->assertSame('twitchdev', $followedChannel->broadcasterLogin);
-        $this->assertInstanceOf(Carbon::class, $followedChannel->followedAt);
+        self::assertSame('12345', $followedChannel->broadcasterId);
+        self::assertSame('twitchdev', $followedChannel->broadcasterLogin);
+        self::assertInstanceOf(Carbon::class, $followedChannel->followedAt);
     }
 }

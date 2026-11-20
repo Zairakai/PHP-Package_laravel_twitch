@@ -6,8 +6,10 @@ namespace Zairakai\LaravelTwitch\Dto\Users;
 
 use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents a channel that the authenticated user follows.
@@ -15,7 +17,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#get-followed-channels
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class FollowedChannel extends Data
+class FollowedChannel extends TwitchData
 {
     public function __construct(
         /**
@@ -36,6 +38,7 @@ class FollowedChannel extends Data
         /**
          * @var Carbon|null When the user started following this channel
          */
+        #[WithCast(FlexibleDateTimeCast::class)]
         public ?Carbon $followedAt = null,
     ) {}
 }

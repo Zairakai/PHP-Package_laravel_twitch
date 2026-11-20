@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Bare user identity `{user_id, user_login, user_name}` - Twitch's simplest
@@ -18,7 +18,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * Twitch embeds inline in notification payloads, nothing more.
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class EventSubUserReference extends Data
+class EventSubUserReference extends TwitchData
 {
     public function __construct(
         public string $userId,

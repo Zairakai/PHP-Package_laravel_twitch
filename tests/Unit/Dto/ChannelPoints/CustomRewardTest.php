@@ -29,14 +29,14 @@ final class CustomRewardTest extends TestCase
             'should_redemptions_skip_request_queue' => false,
         ]);
 
-        $this->assertSame('reward-abc', $customReward->id);
-        $this->assertSame('Hydrate!', $customReward->title);
-        $this->assertSame(500, $customReward->cost);
-        $this->assertSame('#00E5CB', $customReward->backgroundColor);
-        $this->assertTrue($customReward->isEnabled);
-        $this->assertFalse($customReward->isPaused);
-        $this->assertTrue($customReward->isInStock);
-        $this->assertNull($customReward->maxPerStreamSetting);
-        $this->assertNull($customReward->cooldownExpiresAt);
+        self::assertSame('reward-abc', $customReward->id);
+        self::assertSame('Hydrate!', $customReward->title);
+        self::assertSame(500, $customReward->cost);
+        self::assertSame('#00E5CB', $customReward->backgroundColor);
+        self::assertTrue($customReward->isEnabled);
+        self::assertFalse($customReward->isPaused);
+        self::assertTrue($customReward->isInStock);
+        self::assertNull($customReward->maxPerStreamSetting);
+        self::assertNull($customReward->cooldownExpiresAt);
     }
 }

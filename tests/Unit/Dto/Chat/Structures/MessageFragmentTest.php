@@ -19,14 +19,18 @@ final class MessageFragmentTest extends TestCase
         $messageFragment = MessageFragment::from([
             'type'      => 'cheermote',
             'text'      => 'Cheer100',
-            'cheermote' => ['prefix' => 'Cheer', 'bits' => 100, 'tier' => 1],
+            'cheermote' => [
+                'prefix' => 'Cheer',
+                'bits'   => 100,
+                'tier'   => 1,
+            ],
             'emote'     => null,
             'mention'   => null,
         ]);
 
-        $this->assertSame('cheermote', $messageFragment->type);
-        $this->assertInstanceOf(CheermoteFragment::class, $messageFragment->cheermote);
-        $this->assertSame(100, $messageFragment->cheermote->bits);
+        self::assertSame('cheermote', $messageFragment->type);
+        self::assertInstanceOf(CheermoteFragment::class, $messageFragment->cheermote);
+        self::assertSame(100, $messageFragment->cheermote->bits);
     }
 
     #[Test]
@@ -37,12 +41,16 @@ final class MessageFragmentTest extends TestCase
             'text'      => '@zairakai',
             'cheermote' => null,
             'emote'     => null,
-            'mention'   => ['user_id' => '99999', 'user_login' => 'zairakai', 'user_name' => 'Zairakai'],
+            'mention'   => [
+                'user_id'    => '99999',
+                'user_login' => 'zairakai',
+                'user_name'  => 'Zairakai',
+            ],
         ]);
 
-        $this->assertSame('mention', $messageFragment->type);
-        $this->assertInstanceOf(MentionFragment::class, $messageFragment->mention);
-        $this->assertSame('zairakai', $messageFragment->mention->userLogin);
+        self::assertSame('mention', $messageFragment->type);
+        self::assertInstanceOf(MentionFragment::class, $messageFragment->mention);
+        self::assertSame('zairakai', $messageFragment->mention->userLogin);
     }
 
     #[Test]
@@ -56,11 +64,11 @@ final class MessageFragmentTest extends TestCase
             'mention'    => null,
         ]);
 
-        $this->assertSame('text', $messageFragment->type);
-        $this->assertSame('Hello world', $messageFragment->text);
-        $this->assertNull($messageFragment->cheermote);
-        $this->assertNull($messageFragment->emote);
-        $this->assertNull($messageFragment->mention);
+        self::assertSame('text', $messageFragment->type);
+        self::assertSame('Hello world', $messageFragment->text);
+        self::assertNull($messageFragment->cheermote);
+        self::assertNull($messageFragment->emote);
+        self::assertNull($messageFragment->mention);
     }
 
     #[Test]
@@ -70,12 +78,19 @@ final class MessageFragmentTest extends TestCase
             'type'      => 'emote',
             'text'      => 'PogChamp',
             'cheermote' => null,
-            'emote'     => ['id' => 'emote-1', 'emote_set_id' => 'set-1', 'owner_id' => 'owner-1', 'format' => ['static']],
+            'emote'     => [
+                'id'           => 'emote-1',
+                'emote_set_id' => 'set-1',
+                'owner_id'     => 'owner-1',
+                'format'       => [
+                    'static',
+                ],
+            ],
             'mention'   => null,
         ]);
 
-        $this->assertSame('emote', $messageFragment->type);
-        $this->assertInstanceOf(EmoteFragment::class, $messageFragment->emote);
-        $this->assertSame('emote-1', $messageFragment->emote->id);
+        self::assertSame('emote', $messageFragment->type);
+        self::assertInstanceOf(EmoteFragment::class, $messageFragment->emote);
+        self::assertSame('emote-1', $messageFragment->emote->id);
     }
 }

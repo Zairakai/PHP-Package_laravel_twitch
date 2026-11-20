@@ -6,8 +6,10 @@ namespace Zairakai\LaravelTwitch\Dto\Users;
 
 use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents a Twitch user profile.
@@ -15,7 +17,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#get-users
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class User extends Data
+class User extends TwitchData
 {
     public function __construct(
         /**
@@ -66,6 +68,7 @@ class User extends Data
         /**
          * @var Carbon|null Account creation date (RFC3339)
          */
+        #[WithCast(FlexibleDateTimeCast::class)]
         public ?Carbon $createdAt = null,
 
         /**

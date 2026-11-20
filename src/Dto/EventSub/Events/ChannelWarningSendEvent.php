@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Payload of a `channel.warning.send` EventSub notification.
@@ -16,7 +16,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/#channelwarningsend
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class ChannelWarningSendEvent extends Data implements EventSubEvent
+class ChannelWarningSendEvent extends TwitchData implements EventSubEvent
 {
     public function __construct(
         public string $broadcasterUserId,
@@ -28,11 +28,14 @@ class ChannelWarningSendEvent extends Data implements EventSubEvent
         public string $userId,
         public string $userLogin,
         public string $userName,
-        public string $reason,
 
         /**
          * @var array<int, string>|null Chat rule text cited by the moderator, if any
          */
+        /**
+         * @var string|null Reason of the warning
+         */
+        public ?string $reason = null,
         public ?array $chatRulesCited = null,
     ) {}
 

@@ -23,10 +23,10 @@ final class GameAnalyticsTest extends TestCase
             ],
         ]);
 
-        $this->assertSame('54321', $gameAnalytics->gameId);
-        $this->assertSame('http://example.com/game-report.csv', $gameAnalytics->url);
-        $this->assertSame('overview_v2', $gameAnalytics->type);
-        $this->assertIsArray($gameAnalytics->dateRange);
-        $this->assertSame('2021-01-01T00:00:00Z', $gameAnalytics->dateRange['started_at']);
+        self::assertSame('54321', $gameAnalytics->gameId);
+        self::assertSame('http://example.com/game-report.csv', $gameAnalytics->url);
+        self::assertSame('overview_v2', $gameAnalytics->type);
+        self::assertIsArray($gameAnalytics->dateRange);
+        self::assertSame('2021-01-01T00:00:00Z', $gameAnalytics->dateRange['started_at']);
     }
 }

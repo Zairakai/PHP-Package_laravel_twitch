@@ -7,10 +7,10 @@ namespace Zairakai\LaravelTwitch\Dto\Chat;
 use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Attributes\WithCast;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 use Zairakai\LaravelTwitch\Dto\Chat\Structures\Message;
 use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents the broadcaster's currently mod-pinned chat message. At most
@@ -23,7 +23,7 @@ use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
  * @see https://dev.twitch.tv/docs/api/reference/#get-pinned-chat-message
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class PinnedChatMessage extends Data
+class PinnedChatMessage extends TwitchData
 {
     public function __construct(
         public string $messageId,
@@ -34,7 +34,7 @@ class PinnedChatMessage extends Data
         public string $pinnedByUserId,
         public string $pinnedByUserLogin,
         public string $pinnedByUserName,
-        public Message $message,
+        public ?Message $message,
         #[WithCast(FlexibleDateTimeCast::class)]
         public Carbon $startsAt,
         #[WithCast(FlexibleDateTimeCast::class)]

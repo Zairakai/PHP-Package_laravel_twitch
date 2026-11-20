@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\HypeTrain;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents the status of a broadcaster's Hype Train, as returned by
@@ -15,7 +15,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#get-hype-train-status
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class HypeTrainStatus extends Data
+class HypeTrainStatus extends TwitchData
 {
     public function __construct(
         /**

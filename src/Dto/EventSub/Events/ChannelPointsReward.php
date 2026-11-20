@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Reward snapshot nested inside a channel points redemption EventSub event.
@@ -16,7 +16,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * in the EventSub redemption payload.
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class ChannelPointsReward extends Data
+class ChannelPointsReward extends TwitchData
 {
     public function __construct(
         public string $id,

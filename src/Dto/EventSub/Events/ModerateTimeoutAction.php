@@ -7,9 +7,9 @@ namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Attributes\WithCast;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * `channel.moderate` payload when `action` is `timeout` (temporary - see
@@ -21,7 +21,7 @@ use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
  * before relying on it in production.
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class ModerateTimeoutAction extends Data
+class ModerateTimeoutAction extends TwitchData
 {
     public function __construct(
         public string $userId,

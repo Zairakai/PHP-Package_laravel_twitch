@@ -18,7 +18,7 @@ final class ConduitTest extends TestCase
             'shard_count' => 5,
         ]);
 
-        $this->assertSame('abc123', $conduit->id);
-        $this->assertSame(5, $conduit->shardCount);
+        self::assertSame('abc123', $conduit->id);
+        self::assertSame(5, $conduit->shardCount);
     }
 }

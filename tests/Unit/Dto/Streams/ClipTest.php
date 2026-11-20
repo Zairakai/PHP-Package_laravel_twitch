@@ -34,11 +34,11 @@ final class ClipTest extends TestCase
             'is_featured'      => false,
         ]);
 
-        $this->assertSame('AwkwardHelp', $clip->id);
-        $this->assertSame(5432, $clip->viewCount);
-        $this->assertSame(30.5, $clip->duration);
-        $this->assertSame(1234, $clip->vodOffset);
-        $this->assertInstanceOf(Carbon::class, $clip->createdAt);
-        $this->assertFalse($clip->isFeatured);
+        self::assertSame('AwkwardHelp', $clip->id);
+        self::assertSame(5432, $clip->viewCount);
+        self::assertSame(30.5, $clip->duration);
+        self::assertSame(1234, $clip->vodOffset);
+        self::assertInstanceOf(Carbon::class, $clip->createdAt);
+        self::assertFalse($clip->isFeatured);
     }
 }

@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Tests\Unit\Services\Concerns;
 
 use PHPUnit\Framework\Attributes\Test;
-use Zairakai\LaravelTwitch\Dto\Charity\CharityCampaign;
-use Zairakai\LaravelTwitch\Dto\Charity\CharityDonation;
-use Zairakai\LaravelTwitch\Dto\PaginatedResult;
 use Zairakai\LaravelTwitch\Services\TwitchApiService;
 use Zairakai\LaravelTwitch\Tests\TestCase;
 
@@ -33,9 +30,16 @@ final class HasCharityMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
                 return [
                     'data' => [
@@ -48,8 +52,16 @@ final class HasCharityMethodsTest extends TestCase
                             'charity_description' => 'Desc',
                             'charity_logo'        => 'https://example.com/logo.png',
                             'charity_website'     => 'https://example.com',
-                            'current_amount'      => ['value' => 100, 'decimal_places' => 2, 'currency' => 'USD'],
-                            'target_amount'       => ['value' => 1000, 'decimal_places' => 2, 'currency' => 'USD'],
+                            'current_amount'      => [
+                                'value'          => 100,
+                                'decimal_places' => 2,
+                                'currency'       => 'USD',
+                            ],
+                            'target_amount'       => [
+                                'value'          => 1000,
+                                'decimal_places' => 2,
+                                'currency'       => 'USD',
+                            ],
                         ],
                     ],
                 ];
@@ -58,9 +70,12 @@ final class HasCharityMethodsTest extends TestCase
 
         $service->getCharityCampaign('1');
 
-        $this->assertSame('GET', $capturedParams['method']);
-        $this->assertSame('/charity/campaigns', $capturedParams['endpoint']);
-        $this->assertSame(['broadcaster_id' => '1'], $capturedParams['params']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('GET', $capturedParams['method']);
+        self::assertSame('/charity/campaigns', $capturedParams['endpoint']);
+        self::assertSame([
+            'broadcaster_id' => '1',
+        ], $capturedParams['params']);
     }
 
     // ── getCharityCampaignDonations ───────────────────────────────────────────
@@ -83,18 +98,31 @@ final class HasCharityMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
-                $this->captured = ['method' => $method, 'endpoint' => $endpoint, 'params' => $params];
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
+                $this->captured = [
+                    'method'   => $method,
+                    'endpoint' => $endpoint,
+                    'params'   => $params,
+                ];
 
-                return ['data' => [], 'pagination' => ['cursor' => '']];
+                return [
+                    'data'       => [],
+                    'pagination' => [
+                        'cursor' => '',
+                    ],
+                ];
             }
         };
 
         $service->getCharityCampaignDonations('1');
 
-        $this->assertSame('GET', $capturedParams['method']);
-        $this->assertSame('/charity/donations', $capturedParams['endpoint']);
+        self::assertIsArray($capturedParams);
+        self::assertSame('GET', $capturedParams['method']);
+        self::assertSame('/charity/donations', $capturedParams['endpoint']);
     }
 
     #[Test]
@@ -105,8 +133,11 @@ final class HasCharityMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
                 return [
                     'data' => [
                         [
@@ -118,8 +149,16 @@ final class HasCharityMethodsTest extends TestCase
                             'charity_description' => 'Desc',
                             'charity_logo'        => 'https://example.com/logo.png',
                             'charity_website'     => 'https://example.com',
-                            'current_amount'      => ['value' => 100, 'decimal_places' => 2, 'currency' => 'USD'],
-                            'target_amount'       => ['value' => 1000, 'decimal_places' => 2, 'currency' => 'USD'],
+                            'current_amount'      => [
+                                'value'          => 100,
+                                'decimal_places' => 2,
+                                'currency'       => 'USD',
+                            ],
+                            'target_amount'       => [
+                                'value'          => 1000,
+                                'decimal_places' => 2,
+                                'currency'       => 'USD',
+                            ],
                         ],
                     ],
                 ];
@@ -128,9 +167,9 @@ final class HasCharityMethodsTest extends TestCase
 
         $charityCampaign = $service->getCharityCampaign('1');
 
-        $this->assertInstanceOf(CharityCampaign::class, $charityCampaign);
-        $this->assertSame('camp-1', $charityCampaign->id);
-        $this->assertSame('Charity', $charityCampaign->charityName);
+        self::assertNotNull($charityCampaign);
+        self::assertSame('camp-1', $charityCampaign->id);
+        self::assertSame('Charity', $charityCampaign->charityName);
     }
 
     #[Test]
@@ -141,8 +180,11 @@ final class HasCharityMethodsTest extends TestCase
             /**
              * @param array<string, mixed> $params
              */
-            protected function makeRequest(string $method, string $endpoint, array $params = []): array
-            {
+            protected function makeRequest(
+                string $method,
+                string $endpoint,
+                array $params = [],
+            ): array {
                 return [
                     'data' => [
                         [
@@ -151,19 +193,23 @@ final class HasCharityMethodsTest extends TestCase
                             'user_id'     => '1',
                             'user_login'  => 'test',
                             'user_name'   => 'Test',
-                            'amount'      => ['value' => 100, 'decimal_places' => 2, 'currency' => 'USD'],
+                            'amount'      => [
+                                'value'          => 100,
+                                'decimal_places' => 2,
+                                'currency'       => 'USD',
+                            ],
                         ],
                     ],
-                    'pagination' => ['cursor' => 'abc123'],
+                    'pagination' => [
+                        'cursor' => 'abc123',
+                    ],
                 ];
             }
         };
 
         $paginatedResult = $service->getCharityCampaignDonations('1');
 
-        $this->assertInstanceOf(PaginatedResult::class, $paginatedResult);
-        $this->assertCount(1, $paginatedResult->items);
-        $this->assertInstanceOf(CharityDonation::class, $paginatedResult->items[0]);
-        $this->assertSame('don-1', $paginatedResult->items[0]->id);
+        self::assertCount(1, $paginatedResult->items);
+        self::assertSame('don-1', $paginatedResult->items[0]->id);
     }
 }

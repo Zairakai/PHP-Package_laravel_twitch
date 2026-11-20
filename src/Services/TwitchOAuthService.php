@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Services;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\TransferException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Zairakai\LaravelTwitch\Exceptions\TwitchApiException;
 
 class TwitchOAuthService
 {
@@ -20,7 +21,9 @@ class TwitchOAuthService
     ) {
         /** @var string $authUrl */
         $authUrl = config('twitch.api.auth_url');
-        $timeout = is_int($t = config('twitch.api.timeout')) ? $t : 30;
+        $timeout = is_int($t = config('twitch.api.timeout'))
+            ? $t
+            : 30;
 
         $this->client = new Client([
             'base_uri' => $authUrl,
@@ -65,13 +68,13 @@ class TwitchOAuthService
                 'token_type'    => $data['token_type'] ?? 'Bearer',
             ];
         }
-        catch (RequestException $requestException) {
+        catch (TransferException $transferException) {
             Log::error('Failed to get Twitch access token', [
                 'code'  => $code,
-                'error' => $requestException->getMessage(),
+                'error' => $transferException->getMessage(),
             ]);
 
-            throw $requestException;
+            throw TwitchApiException::from($transferException);
         }
     }
 
@@ -86,7 +89,9 @@ class TwitchOAuthService
             $configScopes = config('twitch.scopes', []);
 
             /** @var array<string> $scopes */
-            $scopes       = is_array($configScopes) ? $configScopes : [];
+            $scopes       = is_array($configScopes)
+                ? $configScopes
+                : [];
         }
 
         $state ??= Str::random(32);
@@ -141,13 +146,12 @@ class TwitchOAuthService
                 'token_type'    => $data['token_type'] ?? 'Bearer',
             ];
         }
-        catch (RequestException $requestException) {
+        catch (TransferException $transferException) {
             Log::error('Failed to refresh Twitch token', [
-                'refresh_token' => substr($refreshToken, 0, 8) . '...',
-                'error'         => $requestException->getMessage(),
+                'error'         => $transferException->getMessage(),
             ]);
 
-            throw $requestException;
+            throw TwitchApiException::from($transferException);
         }
     }
 
@@ -166,10 +170,9 @@ class TwitchOAuthService
 
             return true;
         }
-        catch (RequestException $requestException) {
+        catch (TransferException $transferException) {
             Log::error('Failed to revoke Twitch token', [
-                'token' => substr($accessToken, 0, 8) . '...',
-                'error' => $requestException->getMessage(),
+                'error' => $transferException->getMessage(),
             ]);
 
             return false;
@@ -195,13 +198,12 @@ class TwitchOAuthService
 
             return $result;
         }
-        catch (RequestException $requestException) {
+        catch (TransferException $transferException) {
             Log::error('Failed to validate Twitch token', [
-                'token' => substr($accessToken, 0, 8) . '...',
-                'error' => $requestException->getMessage(),
+                'error' => $transferException->getMessage(),
             ]);
 
-            throw $requestException;
+            throw TwitchApiException::from($transferException);
         }
     }
 }

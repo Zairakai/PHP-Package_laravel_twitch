@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\Channel\Requests;
 
 use Spatie\LaravelData\Attributes\MapOutputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Request DTO for updating the broadcaster's stream schedule settings (e.g. vacation mode).
@@ -14,7 +14,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#update-channel-stream-schedule
  */
 #[MapOutputName(SnakeCaseMapper::class)]
-class UpdateScheduleSettingsRequest extends Data
+class UpdateScheduleSettingsRequest extends TwitchData
 {
     public function __construct(
         /**

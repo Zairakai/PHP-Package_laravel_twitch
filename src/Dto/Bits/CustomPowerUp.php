@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\Bits;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents a broadcaster's custom Bits Power-up (distinct from
@@ -16,7 +16,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#get-custom-power-up
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class CustomPowerUp extends Data
+class CustomPowerUp extends TwitchData
 {
     public function __construct(
         public string $broadcasterId,

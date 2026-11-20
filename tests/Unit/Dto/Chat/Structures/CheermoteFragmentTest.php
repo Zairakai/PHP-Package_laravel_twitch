@@ -19,8 +19,8 @@ final class CheermoteFragmentTest extends TestCase
             'tier'   => 1000,
         ]);
 
-        $this->assertSame('Cheer', $cheermoteFragment->prefix);
-        $this->assertSame(1000, $cheermoteFragment->bits);
-        $this->assertSame(1000, $cheermoteFragment->tier);
+        self::assertSame('Cheer', $cheermoteFragment->prefix);
+        self::assertSame(1000, $cheermoteFragment->bits);
+        self::assertSame(1000, $cheermoteFragment->tier);
     }
 }

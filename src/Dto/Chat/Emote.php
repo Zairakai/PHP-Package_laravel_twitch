@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\Chat;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents a Twitch emote (channel, global, or emote set).
@@ -14,7 +14,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#get-channel-emotes
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class Emote extends Data
+class Emote extends TwitchData
 {
     public function __construct(
         /**
@@ -28,24 +28,24 @@ class Emote extends Data
         public string $name,
 
         /**
-         * @var array{url_1x: string, url_2x: string, url_4x: string} Static image URLs
+         * @var array{url_1x?: string, url_2x?: string, url_4x?: string} Image URLs (empty for Get User Emotes: use the template)
          */
-        public array $images,
+        public array $images = [],
 
         /**
          * @var array<string> Formats: animated, static
          */
-        public array $format,
+        public array $format = [],
 
         /**
          * @var array<string> Scales: 1.0, 2.0, 3.0
          */
-        public array $scale,
+        public array $scale = [],
 
         /**
          * @var array<string> Theme modes: dark, light
          */
-        public array $themeMode,
+        public array $themeMode = [],
 
         /**
          * @var string|null Emote type: bitstier, follower, subscriptions
@@ -61,5 +61,10 @@ class Emote extends Data
          * @var string|null Tier (for sub emotes): 1000, 2000, 3000
          */
         public ?string $tier = null,
+
+        /**
+         * @var string|null Owner channel ID (Get Emote Sets and Get User Emotes)
+         */
+        public ?string $ownerId = null,
     ) {}
 }

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Payload of a `channel.subscription.message` EventSub notification.
@@ -17,7 +17,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/#channelsubscriptionmessage
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class ChannelSubscriptionMessageEvent extends Data implements EventSubEvent
+class ChannelSubscriptionMessageEvent extends TwitchData implements EventSubEvent
 {
     public function __construct(
         public string $userId,

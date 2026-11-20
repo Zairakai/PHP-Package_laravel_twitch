@@ -21,7 +21,10 @@ final class CheermoteTest extends TestCase
                     'min_bits'          => 1,
                     'id'                => '1',
                     'color'             => '#979797',
-                    'images'            => ['dark' => [], 'light' => []],
+                    'images'            => [
+                        'dark'  => [],
+                        'light' => [],
+                    ],
                     'can_cheer'         => true,
                     'show_in_bits_card' => true,
                 ],
@@ -32,12 +35,12 @@ final class CheermoteTest extends TestCase
             'is_charitable' => false,
         ]);
 
-        $this->assertSame('Cheer', $cheermote->prefix);
-        $this->assertSame('global_first_party', $cheermote->type);
-        $this->assertSame(1, $cheermote->order);
-        $this->assertFalse($cheermote->isCharitable);
-        $this->assertCount(1, $cheermote->tiers);
-        $this->assertInstanceOf(CheermoteTier::class, $cheermote->tiers->first());
+        self::assertSame('Cheer', $cheermote->prefix);
+        self::assertSame('global_first_party', $cheermote->type);
+        self::assertSame(1, $cheermote->order);
+        self::assertFalse($cheermote->isCharitable);
+        self::assertCount(1, $cheermote->tiers);
+        self::assertInstanceOf(CheermoteTier::class, $cheermote->tiers->first());
     }
 
     #[Test]
@@ -62,10 +65,11 @@ final class CheermoteTest extends TestCase
         ]);
 
         $tier = $cheermote->tiers->first();
-        $this->assertSame(1000, $tier->minBits);
-        $this->assertSame('1000', $tier->id);
-        $this->assertSame('#1db2a5', $tier->color);
-        $this->assertTrue($tier->canCheer);
-        $this->assertFalse($tier->showInBitsCard);
+        self::assertInstanceOf(CheermoteTier::class, $tier);
+        self::assertSame(1000, $tier->minBits);
+        self::assertSame('1000', $tier->id);
+        self::assertSame('#1db2a5', $tier->color);
+        self::assertTrue($tier->canCheer);
+        self::assertFalse($tier->showInBitsCard);
     }
 }

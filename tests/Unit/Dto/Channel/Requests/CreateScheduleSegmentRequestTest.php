@@ -24,10 +24,10 @@ final class CreateScheduleSegmentRequestTest extends TestCase
 
         $array = $createScheduleSegmentRequest->toArray();
 
-        $this->assertSame('2024-03-04T18:00:00Z', $array['start_time']);
-        $this->assertSame('America/New_York', $array['timezone']);
-        $this->assertSame(180, $array['duration']);
-        $this->assertTrue($array['is_recurring']);
-        $this->assertSame('21779', $array['category_id']);
+        self::assertSame('2024-03-04T18:00:00Z', $array['start_time']);
+        self::assertSame('America/New_York', $array['timezone']);
+        self::assertSame(180, $array['duration']);
+        self::assertTrue($array['is_recurring']);
+        self::assertSame('21779', $array['category_id']);
     }
 }

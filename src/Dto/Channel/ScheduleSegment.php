@@ -6,8 +6,10 @@ namespace Zairakai\LaravelTwitch\Dto\Channel;
 
 use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents a single segment in a broadcaster's stream schedule.
@@ -15,7 +17,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#get-channel-stream-schedule
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class ScheduleSegment extends Data
+class ScheduleSegment extends TwitchData
 {
     public function __construct(
         /**
@@ -36,16 +38,19 @@ class ScheduleSegment extends Data
         /**
          * @var Carbon|null When the segment starts
          */
+        #[WithCast(FlexibleDateTimeCast::class)]
         public ?Carbon $startTime = null,
 
         /**
          * @var Carbon|null When the segment ends
          */
+        #[WithCast(FlexibleDateTimeCast::class)]
         public ?Carbon $endTime = null,
 
         /**
          * @var Carbon|null If vacation, when segments resume
          */
+        #[WithCast(FlexibleDateTimeCast::class)]
         public ?Carbon $canceledUntil = null,
 
         /**

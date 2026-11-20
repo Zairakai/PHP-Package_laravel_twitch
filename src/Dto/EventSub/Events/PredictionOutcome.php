@@ -6,9 +6,9 @@ namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
 use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * A single prediction outcome. `users`/`channelPoints`/`topPredictors` are
@@ -19,7 +19,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * shape).
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class PredictionOutcome extends Data
+class PredictionOutcome extends TwitchData
 {
     public function __construct(
         public string $id,

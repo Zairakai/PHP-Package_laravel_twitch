@@ -20,9 +20,9 @@ final class WarnedUserTest extends TestCase
             'reason'         => 'Off-topic spam',
         ]);
 
-        $this->assertSame('12345', $warnedUser->broadcasterId);
-        $this->assertSame('11111', $warnedUser->userId);
-        $this->assertSame('Off-topic spam', $warnedUser->reason);
+        self::assertSame('12345', $warnedUser->broadcasterId);
+        self::assertSame('11111', $warnedUser->userId);
+        self::assertSame('Off-topic spam', $warnedUser->reason);
     }
 
     #[Test]
@@ -34,6 +34,6 @@ final class WarnedUserTest extends TestCase
             'moderator_id'   => '67890',
         ]);
 
-        $this->assertNull($warnedUser->reason);
+        self::assertNull($warnedUser->reason);
     }
 }

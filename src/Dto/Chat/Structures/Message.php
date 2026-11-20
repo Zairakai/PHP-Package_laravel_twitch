@@ -6,9 +6,9 @@ namespace Zairakai\LaravelTwitch\Dto\Chat\Structures;
 
 use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents the body of a Twitch chat message.
@@ -34,7 +34,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/#channelchatmessage
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class Message extends Data
+class Message extends TwitchData
 {
     public function __construct(
         /**

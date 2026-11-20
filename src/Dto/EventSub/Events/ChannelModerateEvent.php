@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Payload of a `channel.moderate` EventSub notification.
@@ -19,7 +19,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/#channelmoderate
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class ChannelModerateEvent extends Data implements EventSubEvent
+class ChannelModerateEvent extends TwitchData implements EventSubEvent
 {
     public function __construct(
         public string $broadcasterUserId,
@@ -81,6 +81,18 @@ class ChannelModerateEvent extends Data implements EventSubEvent
          * Shared-chat mirror of delete.
          */
         public ?ModerateDeleteAction $sharedChatDelete = null,
+
+        /**
+         * Present when action is `warn` (version 2 only).
+         */
+        public ?ModerateWarnAction $warn = null,
+
+        /**
+         * @var string|null Channel where the action was taken (shared chat); the broadcaster when it is the same channel
+         */
+        public ?string $sourceBroadcasterUserId = null,
+        public ?string $sourceBroadcasterUserLogin = null,
+        public ?string $sourceBroadcasterUserName = null,
     ) {}
 
     public function getBroadcasterUserId(): string

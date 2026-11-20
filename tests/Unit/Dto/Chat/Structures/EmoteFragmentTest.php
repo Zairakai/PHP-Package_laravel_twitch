@@ -17,12 +17,18 @@ final class EmoteFragmentTest extends TestCase
             'id'           => 'emotesv2_abc123',
             'emote_set_id' => 'set-456',
             'owner_id'     => 'broadcaster-789',
-            'format'       => ['animated', 'static'],
+            'format'       => [
+                'animated',
+                'static',
+            ],
         ]);
 
-        $this->assertSame('emotesv2_abc123', $emoteFragment->id);
-        $this->assertSame('set-456', $emoteFragment->emoteSetId);
-        $this->assertSame('broadcaster-789', $emoteFragment->ownerId);
-        $this->assertSame(['animated', 'static'], $emoteFragment->format);
+        self::assertSame('emotesv2_abc123', $emoteFragment->id);
+        self::assertSame('set-456', $emoteFragment->emoteSetId);
+        self::assertSame('broadcaster-789', $emoteFragment->ownerId);
+        self::assertSame([
+            'animated',
+            'static',
+        ], $emoteFragment->format);
     }
 }

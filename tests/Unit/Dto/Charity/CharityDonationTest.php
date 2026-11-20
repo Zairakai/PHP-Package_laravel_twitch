@@ -26,13 +26,13 @@ final class CharityDonationTest extends TestCase
             ],
         ]);
 
-        $this->assertSame('98765', $charityDonation->id);
-        $this->assertSame('charity-123', $charityDonation->campaignId);
-        $this->assertSame('12345', $charityDonation->userId);
-        $this->assertSame('donor_user', $charityDonation->userLogin);
-        $this->assertSame('DonorUser', $charityDonation->userName);
-        $this->assertIsArray($charityDonation->amount);
-        $this->assertSame(1000, $charityDonation->amount['value']);
-        $this->assertSame('USD', $charityDonation->amount['currency']);
+        self::assertSame('98765', $charityDonation->id);
+        self::assertSame('charity-123', $charityDonation->campaignId);
+        self::assertSame('12345', $charityDonation->userId);
+        self::assertSame('donor_user', $charityDonation->userLogin);
+        self::assertSame('DonorUser', $charityDonation->userName);
+        self::assertIsArray($charityDonation->amount);
+        self::assertSame(1000, $charityDonation->amount['value']);
+        self::assertSame('USD', $charityDonation->amount['currency']);
     }
 }

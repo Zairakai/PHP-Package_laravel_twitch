@@ -19,8 +19,8 @@ final class SharedChatParticipantTest extends TestCase
             'broadcaster_name'  => 'PartnerChannel',
         ]);
 
-        $this->assertSame('11111', $sharedChatParticipant->broadcasterId);
-        $this->assertSame('partner_channel', $sharedChatParticipant->broadcasterLogin);
-        $this->assertSame('PartnerChannel', $sharedChatParticipant->broadcasterName);
+        self::assertSame('11111', $sharedChatParticipant->broadcasterId);
+        self::assertSame('partner_channel', $sharedChatParticipant->broadcasterLogin);
+        self::assertSame('PartnerChannel', $sharedChatParticipant->broadcasterName);
     }
 }

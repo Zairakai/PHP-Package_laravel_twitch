@@ -19,8 +19,8 @@ final class ContentClassificationLabelTest extends TestCase
             'name'        => 'Mature-rated game',
         ]);
 
-        $this->assertSame('MatureGame', $contentClassificationLabel->id);
-        $this->assertSame('Indicates that the game being played may have mature-rated content.', $contentClassificationLabel->description);
-        $this->assertSame('Mature-rated game', $contentClassificationLabel->name);
+        self::assertSame('MatureGame', $contentClassificationLabel->id);
+        self::assertSame('Indicates that the game being played may have mature-rated content.', $contentClassificationLabel->description);
+        self::assertSame('Mature-rated game', $contentClassificationLabel->name);
     }
 }

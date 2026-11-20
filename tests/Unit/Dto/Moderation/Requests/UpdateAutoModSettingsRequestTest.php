@@ -21,8 +21,8 @@ final class UpdateAutoModSettingsRequestTest extends TestCase
 
         $array = $updateAutoModSettingsRequest->toArray();
 
-        $this->assertSame(3, $array['overall_level']);
-        $this->assertSame(2, $array['aggression']);
-        $this->assertSame(1, $array['swearing']);
+        self::assertSame(3, $array['overall_level']);
+        self::assertSame(2, $array['aggression']);
+        self::assertSame(1, $array['swearing']);
     }
 }

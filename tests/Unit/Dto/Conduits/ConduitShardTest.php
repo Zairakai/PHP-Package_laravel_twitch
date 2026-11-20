@@ -22,11 +22,11 @@ final class ConduitShardTest extends TestCase
             ],
         ]);
 
-        $this->assertSame('shard-1', $conduitShard->id);
-        $this->assertSame('enabled', $conduitShard->status);
-        $this->assertIsArray($conduitShard->transport);
-        $this->assertSame('webhook', $conduitShard->transport['method']);
-        $this->assertSame('https://example.com/webhook', $conduitShard->transport['callback']);
+        self::assertSame('shard-1', $conduitShard->id);
+        self::assertSame('enabled', $conduitShard->status);
+        self::assertIsArray($conduitShard->transport);
+        self::assertSame('webhook', $conduitShard->transport['method']);
+        self::assertSame('https://example.com/webhook', $conduitShard->transport['callback']);
     }
 
     #[Test]
@@ -37,8 +37,8 @@ final class ConduitShardTest extends TestCase
             'status' => 'disabled',
         ]);
 
-        $this->assertSame('shard-2', $conduitShard->id);
-        $this->assertSame('disabled', $conduitShard->status);
-        $this->assertSame([], $conduitShard->transport);
+        self::assertSame('shard-2', $conduitShard->id);
+        self::assertSame('disabled', $conduitShard->status);
+        self::assertSame([], $conduitShard->transport);
     }
 }
