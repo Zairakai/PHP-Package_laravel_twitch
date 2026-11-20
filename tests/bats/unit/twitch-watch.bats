@@ -12,8 +12,9 @@ setup() {
     setup_test_env
     SCRIPT="${PROJECT_ROOT}/.gitlab/scripts/twitch-watch.php"
 
-    recent="$(date -u -d '-2 days' '+%a, %d %b %Y 00:00:00 +0000')"
-    old="$(date -u -d '-90 days' '+%a, %d %b %Y 00:00:00 +0000')"
+    # php, not date -d: the image of the CI is Alpine, whose date does not read "-2 days"
+    recent="$(php -r 'echo gmdate("D, d M Y 00:00:00 +0000", strtotime("-2 days"));')"
+    old="$(php -r 'echo gmdate("D, d M Y 00:00:00 +0000", strtotime("-90 days"));')"
 
     cat > "${TEST_TEMP_DIR}/changelog.xml" <<XML
 <?xml version="1.0" encoding="UTF-8"?>

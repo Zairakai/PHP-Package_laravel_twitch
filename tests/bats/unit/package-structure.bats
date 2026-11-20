@@ -238,10 +238,10 @@ teardown() {
 
 @test "every language has the same keys as English" {
     local expected
-    expected="$(grep -oE "^\s+'[a-z_]+' =>" "${PROJECT_ROOT}/lang/en/errors.php" | tr -d ' ')"
+    expected="$(grep -oE "^[[:space:]]+'[a-z_]+' =>" "${PROJECT_ROOT}/lang/en/errors.php" | tr -d ' ')"
 
     for dir in "${PROJECT_ROOT}"/lang/*/; do
-        [ "$(grep -oE "^\s+'[a-z_]+' =>" "${dir}errors.php" | tr -d ' ')" = "$expected" ]
+        [ "$(grep -oE "^[[:space:]]+'[a-z_]+' =>" "${dir}errors.php" | tr -d ' ')" = "$expected" ]
     done
 }
 
