@@ -7,9 +7,11 @@ namespace Zairakai\LaravelTwitch\Dto\Polls;
 use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents a Twitch poll.
@@ -17,7 +19,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#get-polls
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class Poll extends Data
+class Poll extends TwitchData
 {
     public function __construct(
         /**
@@ -74,11 +76,13 @@ class Poll extends Data
         /**
          * @var Carbon|null When the poll started
          */
+        #[WithCast(FlexibleDateTimeCast::class)]
         public ?Carbon $startedAt = null,
 
         /**
          * @var Carbon|null When the poll ended
          */
+        #[WithCast(FlexibleDateTimeCast::class)]
         public ?Carbon $endedAt = null,
     ) {}
 }

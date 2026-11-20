@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Payload of a `channel.chat.clear_user_messages` EventSub notification.
@@ -16,7 +16,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/#channelchatclear_user_messages
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class ChannelChatClearUserMessagesEvent extends Data implements EventSubEvent
+class ChannelChatClearUserMessagesEvent extends TwitchData implements EventSubEvent
 {
     public function __construct(
         public string $broadcasterUserId,

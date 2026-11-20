@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * `channel.chat.notification` payload when `notice_type` is `pay_it_forward`
@@ -17,7 +17,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * before relying on it in production.
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class ChatNotificationPayItForward extends Data
+class ChatNotificationPayItForward extends TwitchData
 {
     public function __construct(
         public bool $gifterIsAnonymous,

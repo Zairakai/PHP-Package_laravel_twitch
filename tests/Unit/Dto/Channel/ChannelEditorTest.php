@@ -20,9 +20,9 @@ final class ChannelEditorTest extends TestCase
             'created_at' => '2023-01-15T10:00:00Z',
         ]);
 
-        $this->assertSame('55555', $channelEditor->userId);
-        $this->assertSame('EditorUser', $channelEditor->userName);
-        $this->assertInstanceOf(Carbon::class, $channelEditor->createdAt);
+        self::assertSame('55555', $channelEditor->userId);
+        self::assertSame('EditorUser', $channelEditor->userName);
+        self::assertInstanceOf(Carbon::class, $channelEditor->createdAt);
     }
 
     #[Test]
@@ -33,6 +33,6 @@ final class ChannelEditorTest extends TestCase
             'user_name' => 'EditorUser',
         ]);
 
-        $this->assertNull($channelEditor->createdAt);
+        self::assertNull($channelEditor->createdAt);
     }
 }

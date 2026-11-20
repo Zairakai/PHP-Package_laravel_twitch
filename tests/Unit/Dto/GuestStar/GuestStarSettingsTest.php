@@ -22,25 +22,26 @@ final class GuestStarSettingsTest extends TestCase
             'browser_source_token'            => 'token-xyz',
         ]);
 
-        $this->assertSame('98765', $guestStarSettings->broadcasterId);
-        $this->assertTrue($guestStarSettings->isModeratorSendLiveEnabled);
-        $this->assertSame(5, $guestStarSettings->slotCount);
-        $this->assertFalse($guestStarSettings->isBrowserSourceAudioEnabled);
-        $this->assertSame('TILED_LAYOUT', $guestStarSettings->groupLayout);
-        $this->assertSame('token-xyz', $guestStarSettings->browserSourceToken);
+        self::assertSame('98765', $guestStarSettings->broadcasterId);
+        self::assertTrue($guestStarSettings->isModeratorSendLiveEnabled);
+        self::assertSame(5, $guestStarSettings->slotCount);
+        self::assertFalse($guestStarSettings->isBrowserSourceAudioEnabled);
+        self::assertSame('TILED_LAYOUT', $guestStarSettings->groupLayout);
+        self::assertSame('token-xyz', $guestStarSettings->browserSourceToken);
     }
 
     #[Test]
-    public function it_defaults_browser_source_token_to_empty_string(): void
+    public function it_leaves_the_browser_source_token_null_for_a_caller_who_is_not_the_broadcaster(): void
     {
         $guestStarSettings = GuestStarSettings::from([
             'broadcaster_id'                   => '11111',
             'is_moderator_send_live_enabled'   => false,
             'slot_count'                       => 2,
             'is_browser_source_audio_enabled'  => true,
-            'group_layout'                     => 'SCREENSHARE_LAYOUT',
+            'group_layout'                     => 'SCREENSHARE',
         ]);
 
-        $this->assertSame('', $guestStarSettings->browserSourceToken);
+        // Twitch gives the token to the broadcaster only (null otherwise).
+        self::assertNull($guestStarSettings->browserSourceToken);
     }
 }

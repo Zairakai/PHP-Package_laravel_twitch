@@ -18,7 +18,7 @@ final class AutoModCheckResultTest extends TestCase
             'is_permitted' => true,
         ]);
 
-        $this->assertSame('msg-001', $autoModCheckResult->msgId);
-        $this->assertTrue($autoModCheckResult->isPermitted);
+        self::assertSame('msg-001', $autoModCheckResult->msgId);
+        self::assertTrue($autoModCheckResult->isPermitted);
     }
 }

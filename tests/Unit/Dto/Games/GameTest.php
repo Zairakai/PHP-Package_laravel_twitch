@@ -20,9 +20,9 @@ final class GameTest extends TestCase
             'igdb_id'     => '115',
         ]);
 
-        $this->assertSame('21779', $game->id);
-        $this->assertSame('League of Legends', $game->name);
-        $this->assertSame('115', $game->igdbId);
+        self::assertSame('21779', $game->id);
+        self::assertSame('League of Legends', $game->name);
+        self::assertSame('115', $game->igdbId);
     }
 
     #[Test]
@@ -34,6 +34,6 @@ final class GameTest extends TestCase
             'box_art_url' => 'https://static-cdn.jtvnw.net/ttv-boxart/509658-{width}x{height}.jpg',
         ]);
 
-        $this->assertNull($game->igdbId);
+        self::assertNull($game->igdbId);
     }
 }

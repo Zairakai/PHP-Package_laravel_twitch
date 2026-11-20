@@ -21,10 +21,10 @@ final class BitsLeaderboardEntryTest extends TestCase
             'rank'       => 1,
         ]);
 
-        $this->assertSame('12345', $bitsLeaderboardEntry->userId);
-        $this->assertSame('twitchdev', $bitsLeaderboardEntry->userLogin);
-        $this->assertSame('TwitchDev', $bitsLeaderboardEntry->userName);
-        $this->assertSame(12500, $bitsLeaderboardEntry->score);
-        $this->assertSame(1, $bitsLeaderboardEntry->rank);
+        self::assertSame('12345', $bitsLeaderboardEntry->userId);
+        self::assertSame('twitchdev', $bitsLeaderboardEntry->userLogin);
+        self::assertSame('TwitchDev', $bitsLeaderboardEntry->userName);
+        self::assertSame(12500, $bitsLeaderboardEntry->score);
+        self::assertSame(1, $bitsLeaderboardEntry->rank);
     }
 }

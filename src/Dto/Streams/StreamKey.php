@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\Streams;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents a broadcaster's stream key.
@@ -14,17 +14,17 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#get-stream-key
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class StreamKey extends Data
+class StreamKey extends TwitchData
 {
     public function __construct(
         /**
-         * @var string Broadcaster user ID
-         */
-        public string $broadcasterId,
-
-        /**
-         * @var string The broadcaster's stream key
+         * @var string Stream key (a secret: never log it)
          */
         public string $streamKey,
+
+        /**
+         * @var string|null Broadcaster ID (not sent by Twitch: filled in by getStreamKey())
+         */
+        public ?string $broadcasterId = null,
     ) {}
 }

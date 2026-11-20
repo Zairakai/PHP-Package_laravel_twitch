@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\Channel\Requests;
 
 use Spatie\LaravelData\Attributes\MapOutputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Request DTO for adding a segment to a broadcaster's streaming schedule.
@@ -14,7 +14,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#create-channel-stream-schedule-segment
  */
 #[MapOutputName(SnakeCaseMapper::class)]
-class CreateScheduleSegmentRequest extends Data
+class CreateScheduleSegmentRequest extends TwitchData
 {
     public function __construct(
         /**

@@ -27,16 +27,16 @@ final class UserTest extends TestCase
             'created_at'        => '2020-01-15T12:00:00Z',
         ]);
 
-        $this->assertSame('12345', $user->id);
-        $this->assertSame('zairakai', $user->login);
-        $this->assertSame('Zairakai', $user->displayName);
-        $this->assertSame('', $user->type);
-        $this->assertSame('affiliate', $user->broadcasterType);
-        $this->assertSame('Hello world', $user->description);
-        $this->assertSame('https://example.com/avatar.jpg', $user->profileImageUrl);
-        $this->assertSame('https://example.com/offline.jpg', $user->offlineImageUrl);
-        $this->assertSame(9999, $user->viewCount);
-        $this->assertInstanceOf(Carbon::class, $user->createdAt);
+        self::assertSame('12345', $user->id);
+        self::assertSame('zairakai', $user->login);
+        self::assertSame('Zairakai', $user->displayName);
+        self::assertSame('', $user->type);
+        self::assertSame('affiliate', $user->broadcasterType);
+        self::assertSame('Hello world', $user->description);
+        self::assertSame('https://example.com/avatar.jpg', $user->profileImageUrl);
+        self::assertSame('https://example.com/offline.jpg', $user->offlineImageUrl);
+        self::assertSame(9999, $user->viewCount);
+        self::assertInstanceOf(Carbon::class, $user->createdAt);
     }
 
     #[Test]
@@ -55,7 +55,7 @@ final class UserTest extends TestCase
             'email'             => 'stanislas@example.com',
         ]);
 
-        $this->assertSame('stanislas@example.com', $user->email);
-        $this->assertNull($user->createdAt);
+        self::assertSame('stanislas@example.com', $user->email);
+        self::assertNull($user->createdAt);
     }
 }

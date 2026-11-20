@@ -8,10 +8,11 @@ use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Attributes\WithCast;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
+use Zairakai\LaravelTwitch\Dto\HypeTrain\HypeTrainParticipant;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Payload of a `channel.hype_train.begin` EventSub notification.
@@ -21,7 +22,7 @@ use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
  * @see https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/#channelhype_trainbegin
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class ChannelHypeTrainBeginEvent extends Data implements EventSubEvent
+class ChannelHypeTrainBeginEvent extends TwitchData implements EventSubEvent
 {
     public function __construct(
         public string $id,
@@ -48,9 +49,9 @@ class ChannelHypeTrainBeginEvent extends Data implements EventSubEvent
         public int $allTimeHighTotal,
 
         /**
-         * @var DataCollection<int, HypeTrainContribution>|null Present when is_shared_train is true
+         * @var DataCollection<int, HypeTrainParticipant>|null Present when is_shared_train is true
          */
-        #[DataCollectionOf(HypeTrainContribution::class)]
+        #[DataCollectionOf(HypeTrainParticipant::class)]
         public ?DataCollection $sharedTrainParticipants = null,
     ) {}
 

@@ -74,6 +74,7 @@ use Zairakai\LaravelTwitch\Dto\EventSub\Events\ChannelVipRemoveEvent;
 use Zairakai\LaravelTwitch\Dto\EventSub\Events\ChannelWarningAcknowledgeEvent;
 use Zairakai\LaravelTwitch\Dto\EventSub\Events\ChannelWarningSendEvent;
 use Zairakai\LaravelTwitch\Dto\EventSub\Events\ConduitShardDisabledEvent;
+use Zairakai\LaravelTwitch\Dto\EventSub\Events\DropEntitlementGrantEvent;
 use Zairakai\LaravelTwitch\Dto\EventSub\Events\EventSubEvent;
 use Zairakai\LaravelTwitch\Dto\EventSub\Events\ExtensionBitsTransactionCreateEvent;
 use Zairakai\LaravelTwitch\Dto\EventSub\Events\GenericEventSubEvent;
@@ -87,11 +88,9 @@ use Zairakai\LaravelTwitch\Dto\EventSub\Events\UserWhisperMessageEvent;
 /**
  * Resolves a raw EventSub notification into its typed DTO.
  *
- * Covers the full EventSub subscription type catalog (77 types, verified
- * against the official example payloads on 2026-08-09, `channel.bits.use`
- * added 2026-08-13 - `drop.entitlement.grant` deliberately left out: it is
- * organization/campaign-scoped, not broadcaster-scoped, and its exact
- * payload shape is not fully published in the official docs). Any future type
+ * Covers the full EventSub subscription type catalog (79 types, `drop.entitlement.grant` included: its payload
+ * is a batch, see DropEntitlementGrantEvent). The DTOs read every version of a type that Twitch still serves
+ * (the fields that differ are optional). Any future type
  * Twitch adds before this factory is updated still falls back to
  * GenericEventSubEvent - no notification is ever silently dropped or left
  * untyped at the object level.
@@ -174,6 +173,7 @@ final class EventSubEventFactory
         'channel.vip.remove'                                     => ChannelVipRemoveEvent::class,
         'channel.warning.acknowledge'                            => ChannelWarningAcknowledgeEvent::class,
         'channel.warning.send'                                   => ChannelWarningSendEvent::class,
+        'drop.entitlement.grant'                                 => DropEntitlementGrantEvent::class,
         'conduit.shard.disabled'                                 => ConduitShardDisabledEvent::class,
         'extension.bits_transaction.create'                      => ExtensionBitsTransactionCreateEvent::class,
         'stream.offline'                                         => StreamOfflineEvent::class,

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Payload of a `channel.guest_star_guest.update` EventSub notification.
@@ -16,33 +16,38 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/#channelguest_star_guestupdate
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class ChannelGuestStarGuestUpdateEvent extends Data implements EventSubEvent
+class ChannelGuestStarGuestUpdateEvent extends TwitchData implements EventSubEvent
 {
     public function __construct(
         public string $broadcasterUserId,
         public string $broadcasterUserName,
         public string $broadcasterUserLogin,
         public string $sessionId,
+        /**
+         * @var string|null The host: listed by the reference, absent from its example
+         */
+        public ?string $hostUserId = null,
+        public ?string $hostUserName = null,
+        public ?string $hostUserLogin = null,
+        public ?string $moderatorUserId = null,
+        public ?string $moderatorUserName = null,
+        public ?string $moderatorUserLogin = null,
+        public ?string $guestUserId = null,
+        public ?string $guestUserName = null,
+        public ?string $guestUserLogin = null,
 
         /**
-         * @var string|null Caught live (2026-08-28) via the #18 resilience
-         *                  catch, which dropped this one event instead of
-         *                  crashing the webhook - a guest state change that
-         *                  is not the direct result of a moderator API call
-         *                  (e.g. the guest's own slot updating) sends
-         *                  `moderator_user_id: null`.
+         * @var string|null Slot of the guest (null while invited, or removed)
          */
-        public ?string $moderatorUserId,
-        public ?string $moderatorUserName,
-        public ?string $moderatorUserLogin,
-        public string $guestUserId,
-        public string $guestUserName,
-        public string $guestUserLogin,
-        public string $slotId,
-        public string $state,
-        public bool $hostVideoEnabled,
-        public bool $hostAudioEnabled,
-        public int $hostVolume,
+        public ?string $slotId = null,
+
+        /**
+         * @var string|null invited, accepted, ready, backstage or live
+         */
+        public ?string $state = null,
+        public ?bool $hostVideoEnabled = null,
+        public ?bool $hostAudioEnabled = null,
+        public ?int $hostVolume = null,
     ) {}
 
     public function getBroadcasterUserId(): string

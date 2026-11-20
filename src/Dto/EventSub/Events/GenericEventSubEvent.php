@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
-use Spatie\LaravelData\Data;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Fallback payload for any EventSub subscription type without a dedicated DTO yet.
@@ -15,7 +15,7 @@ use Spatie\LaravelData\Data;
  *
  * @see EventSubEventFactory
  */
-class GenericEventSubEvent extends Data implements EventSubEvent
+class GenericEventSubEvent extends TwitchData implements EventSubEvent
 {
     public function __construct(
         /**
@@ -33,6 +33,8 @@ class GenericEventSubEvent extends Data implements EventSubEvent
     {
         $broadcasterUserId = $this->payload['broadcaster_user_id'] ?? null;
 
-        return is_string($broadcasterUserId) ? $broadcasterUserId : null;
+        return is_string($broadcasterUserId)
+            ? $broadcasterUserId
+            : null;
     }
 }

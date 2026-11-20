@@ -17,6 +17,6 @@ final class PollChoiceRequestTest extends TestCase
 
         $array = $pollChoiceRequest->toArray();
 
-        $this->assertSame('Option A', $array['title']);
+        self::assertSame('Option A', $array['title']);
     }
 }

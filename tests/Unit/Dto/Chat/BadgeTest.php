@@ -16,13 +16,22 @@ final class BadgeTest extends TestCase
         $badge = Badge::from([
             'set_id'   => 'subscriber',
             'versions' => [
-                ['id' => '0', 'image_url_1x' => 'https://example.com/1x.png', 'image_url_2x' => 'https://example.com/2x.png', 'image_url_4x' => 'https://example.com/4x.png', 'title' => 'Subscriber', 'description' => 'subscriber', 'click_action' => null, 'click_url' => null],
+                [
+                    'id'           => '0',
+                    'image_url_1x' => 'https://example.com/1x.png',
+                    'image_url_2x' => 'https://example.com/2x.png',
+                    'image_url_4x' => 'https://example.com/4x.png',
+                    'title'        => 'Subscriber',
+                    'description'  => 'subscriber',
+                    'click_action' => null,
+                    'click_url'    => null,
+                ],
             ],
         ]);
 
-        $this->assertSame('subscriber', $badge->setId);
-        $this->assertCount(1, $badge->versions);
-        $this->assertSame('0', $badge->versions[0]['id']);
-        $this->assertSame('Subscriber', $badge->versions[0]['title']);
+        self::assertSame('subscriber', $badge->setId);
+        self::assertCount(1, $badge->versions);
+        self::assertSame('0', $badge->versions[0]['id']);
+        self::assertSame('Subscriber', $badge->versions[0]['title']);
     }
 }

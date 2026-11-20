@@ -21,10 +21,10 @@ final class UpdateGuestStarSettingsRequestTest extends TestCase
 
         $array = $updateGuestStarSettingsRequest->toArray();
 
-        $this->assertTrue($array['is_moderator_send_live_enabled']);
-        $this->assertSame(4, $array['slot_count']);
-        $this->assertSame('TILED_LAYOUT', $array['group_layout']);
-        $this->assertNull($array['is_browser_source_audio_enabled']);
-        $this->assertNull($array['regenerate_browser_sources']);
+        self::assertTrue($array['is_moderator_send_live_enabled']);
+        self::assertSame(4, $array['slot_count']);
+        self::assertSame('TILED_LAYOUT', $array['group_layout']);
+        self::assertNull($array['is_browser_source_audio_enabled']);
+        self::assertNull($array['regenerate_browser_sources']);
     }
 }

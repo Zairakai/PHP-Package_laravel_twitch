@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\Users;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents whether a user has authorized the application, and the scopes
@@ -15,7 +15,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#get-authorization-by-user
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class UserAuthorization extends Data
+class UserAuthorization extends TwitchData
 {
     public function __construct(
         /**

@@ -7,9 +7,9 @@ namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Attributes\WithCast;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Payload of a `channel.ad_break.begin` EventSub notification.
@@ -19,13 +19,13 @@ use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
  * @see https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/#channelad_breakbegin
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class ChannelAdBreakBeginEvent extends Data implements EventSubEvent
+class ChannelAdBreakBeginEvent extends TwitchData implements EventSubEvent
 {
     public function __construct(
-        public string $durationSeconds,
+        public int $durationSeconds,
         #[WithCast(FlexibleDateTimeCast::class)]
         public Carbon $startedAt,
-        public string $isAutomatic,
+        public bool $isAutomatic,
         public string $broadcasterUserId,
         public string $broadcasterUserLogin,
         public string $broadcasterUserName,

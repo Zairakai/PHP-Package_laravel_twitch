@@ -21,8 +21,8 @@ final class UpdateCustomRewardRequestTest extends TestCase
 
         $array = $updateCustomRewardRequest->toArray();
 
-        $this->assertSame('New title', $array['title']);
-        $this->assertSame(1000, $array['cost']);
-        $this->assertTrue($array['is_paused']);
+        self::assertSame('New title', $array['title']);
+        self::assertSame(1000, $array['cost']);
+        self::assertTrue($array['is_paused']);
     }
 }

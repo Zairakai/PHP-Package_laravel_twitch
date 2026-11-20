@@ -18,7 +18,7 @@ final class ChannelChatNotificationEventTest extends TestCase
         // Twitch's docs example.
         $channelChatNotificationEvent = ChannelChatNotificationEvent::from($this->minimalPayload(null));
 
-        $this->assertNull($channelChatNotificationEvent->color);
+        self::assertNull($channelChatNotificationEvent->color);
     }
 
     #[Test]
@@ -26,7 +26,7 @@ final class ChannelChatNotificationEventTest extends TestCase
     {
         $channelChatNotificationEvent = ChannelChatNotificationEvent::from($this->minimalPayload('#00FF7F'));
 
-        $this->assertSame('#00FF7F', $channelChatNotificationEvent->color);
+        self::assertSame('#00FF7F', $channelChatNotificationEvent->color);
     }
 
     /**

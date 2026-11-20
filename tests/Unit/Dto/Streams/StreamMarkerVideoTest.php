@@ -27,9 +27,9 @@ final class StreamMarkerVideoTest extends TestCase
             ],
         ]);
 
-        $this->assertSame('vid-abc', $streamMarkerVideo->videoId);
-        $this->assertCount(1, $streamMarkerVideo->markers);
-        $this->assertInstanceOf(StreamMarker::class, $streamMarkerVideo->markers->first());
+        self::assertSame('vid-abc', $streamMarkerVideo->videoId);
+        self::assertCount(1, $streamMarkerVideo->markers);
+        self::assertInstanceOf(StreamMarker::class, $streamMarkerVideo->markers->first());
     }
 
     #[Test]
@@ -40,7 +40,7 @@ final class StreamMarkerVideoTest extends TestCase
             'markers'  => [],
         ]);
 
-        $this->assertSame('vid-xyz', $streamMarkerVideo->videoId);
-        $this->assertCount(0, $streamMarkerVideo->markers);
+        self::assertSame('vid-xyz', $streamMarkerVideo->videoId);
+        self::assertCount(0, $streamMarkerVideo->markers);
     }
 }

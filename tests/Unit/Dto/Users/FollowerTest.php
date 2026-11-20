@@ -21,8 +21,8 @@ final class FollowerTest extends TestCase
             'followed_at' => '2023-03-15T10:00:00Z',
         ]);
 
-        $this->assertSame('99999', $follower->userId);
-        $this->assertSame('followeruser', $follower->userLogin);
-        $this->assertInstanceOf(Carbon::class, $follower->followedAt);
+        self::assertSame('99999', $follower->userId);
+        self::assertSame('followeruser', $follower->userLogin);
+        self::assertInstanceOf(Carbon::class, $follower->followedAt);
     }
 }

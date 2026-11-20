@@ -22,9 +22,9 @@ final class UpdateChatSettingsRequestTest extends TestCase
 
         $array = $updateChatSettingsRequest->toArray();
 
-        $this->assertTrue($array['emote_mode']);
-        $this->assertFalse($array['follower_mode']);
-        $this->assertTrue($array['slow_mode']);
-        $this->assertSame(30, $array['slow_mode_wait_time']);
+        self::assertTrue($array['emote_mode']);
+        self::assertFalse($array['follower_mode']);
+        self::assertTrue($array['slow_mode']);
+        self::assertSame(30, $array['slow_mode_wait_time']);
     }
 }

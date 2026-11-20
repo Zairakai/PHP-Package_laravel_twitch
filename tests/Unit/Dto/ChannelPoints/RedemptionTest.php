@@ -31,12 +31,12 @@ final class RedemptionTest extends TestCase
             'redeemed_at'       => '2024-03-01T12:00:00Z',
         ]);
 
-        $this->assertSame('redemption-xyz', $redemption->id);
-        $this->assertSame('UNFULFILLED', $redemption->status);
-        $this->assertSame('viewer', $redemption->userLogin);
-        $this->assertSame(500, $redemption->rewardCost);
-        $this->assertSame('Please!', $redemption->userInput);
-        $this->assertInstanceOf(Carbon::class, $redemption->redeemedAt);
+        self::assertSame('redemption-xyz', $redemption->id);
+        self::assertSame('UNFULFILLED', $redemption->status);
+        self::assertSame('viewer', $redemption->userLogin);
+        self::assertSame(500, $redemption->rewardCost);
+        self::assertSame('Please!', $redemption->userInput);
+        self::assertInstanceOf(Carbon::class, $redemption->redeemedAt);
     }
 
     #[Test]
@@ -57,7 +57,7 @@ final class RedemptionTest extends TestCase
             'reward_prompt'     => '',
         ]);
 
-        $this->assertNull($redemption->userInput);
-        $this->assertNull($redemption->redeemedAt);
+        self::assertNull($redemption->userInput);
+        self::assertNull($redemption->redeemedAt);
     }
 }

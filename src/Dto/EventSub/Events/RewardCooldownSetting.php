@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Zairakai\LaravelTwitch\Dto\EventSub\Events;
 
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Shape of `global_cooldown` on channel points custom reward events
@@ -14,7 +14,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * uses a differently named value field (`seconds` instead of `value`).
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class RewardCooldownSetting extends Data
+class RewardCooldownSetting extends TwitchData
 {
     public function __construct(
         public bool $isEnabled,

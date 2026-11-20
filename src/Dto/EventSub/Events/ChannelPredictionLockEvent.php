@@ -8,10 +8,10 @@ use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Attributes\WithCast;
-use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Payload of a `channel.prediction.lock` EventSub notification.
@@ -21,7 +21,7 @@ use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
  * @see https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/#channelpredictionlock
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class ChannelPredictionLockEvent extends Data implements EventSubEvent
+class ChannelPredictionLockEvent extends TwitchData implements EventSubEvent
 {
     public function __construct(
         public string $id,

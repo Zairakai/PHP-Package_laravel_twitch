@@ -18,7 +18,7 @@ final class ClipEditTest extends TestCase
             'edit_url' => 'https://clips.twitch.tv/AwkwardHelp/edit',
         ]);
 
-        $this->assertSame('AwkwardHelp', $clipEdit->id);
-        $this->assertSame('https://clips.twitch.tv/AwkwardHelp/edit', $clipEdit->editUrl);
+        self::assertSame('AwkwardHelp', $clipEdit->id);
+        self::assertSame('https://clips.twitch.tv/AwkwardHelp/edit', $clipEdit->editUrl);
     }
 }

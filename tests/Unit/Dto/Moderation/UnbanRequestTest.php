@@ -26,11 +26,11 @@ final class UnbanRequestTest extends TestCase
             'created_at'        => '2024-01-01T00:00:00Z',
         ]);
 
-        $this->assertSame('req-001', $unbanRequest->id);
-        $this->assertSame('pending', $unbanRequest->status);
-        $this->assertSame('I promise I will follow the rules.', $unbanRequest->text);
-        $this->assertSame('2024-01-01T00:00:00Z', $unbanRequest->createdAt);
-        $this->assertNull($unbanRequest->moderatorId);
-        $this->assertNull($unbanRequest->resolvedAt);
+        self::assertSame('req-001', $unbanRequest->id);
+        self::assertSame('pending', $unbanRequest->status);
+        self::assertSame('I promise I will follow the rules.', $unbanRequest->text);
+        self::assertSame('2024-01-01T00:00:00Z', $unbanRequest->createdAt);
+        self::assertNull($unbanRequest->moderatorId);
+        self::assertNull($unbanRequest->resolvedAt);
     }
 }

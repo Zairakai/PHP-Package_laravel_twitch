@@ -22,14 +22,23 @@ final class CharityCampaignTest extends TestCase
             'charity_description' => 'Help plant trees worldwide.',
             'charity_logo'        => 'https://example.com/logo.png',
             'charity_website'     => 'https://example.com',
-            'current_amount'      => ['value' => 5000, 'decimal_places' => 2, 'currency' => 'USD'],
-            'target_amount'       => ['value' => 100000, 'decimal_places' => 2, 'currency' => 'USD'],
+            'current_amount'      => [
+                'value'          => 5000,
+                'decimal_places' => 2,
+                'currency'       => 'USD',
+            ],
+            'target_amount'       => [
+                'value'          => 100000,
+                'decimal_places' => 2,
+                'currency'       => 'USD',
+            ],
         ]);
 
-        $this->assertSame('campaign-001', $charityCampaign->id);
-        $this->assertSame('Save the Forests', $charityCampaign->charityName);
-        $this->assertSame('USD', $charityCampaign->currentAmount['currency']);
-        $this->assertSame(100000, $charityCampaign->targetAmount['value']);
+        self::assertSame('campaign-001', $charityCampaign->id);
+        self::assertSame('Save the Forests', $charityCampaign->charityName);
+        self::assertSame('USD', $charityCampaign->currentAmount['currency']);
+        self::assertNotNull($charityCampaign->targetAmount);
+        self::assertSame(100000, $charityCampaign->targetAmount['value']);
     }
 
     #[Test]
@@ -44,9 +53,13 @@ final class CharityCampaignTest extends TestCase
             'charity_description' => '',
             'charity_logo'        => '',
             'charity_website'     => '',
-            'current_amount'      => ['value' => 0, 'decimal_places' => 2, 'currency' => 'USD'],
+            'current_amount'      => [
+                'value'          => 0,
+                'decimal_places' => 2,
+                'currency'       => 'USD',
+            ],
         ]);
 
-        $this->assertNull($charityCampaign->targetAmount);
+        self::assertNull($charityCampaign->targetAmount);
     }
 }

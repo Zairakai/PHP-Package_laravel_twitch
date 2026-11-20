@@ -26,10 +26,10 @@ final class GoalTest extends TestCase
             'created_at'        => '2024-02-01T00:00:00Z',
         ]);
 
-        $this->assertSame('goal-001', $goal->id);
-        $this->assertSame('follower', $goal->type);
-        $this->assertSame(750, $goal->currentAmount);
-        $this->assertSame(1000, $goal->targetAmount);
-        $this->assertInstanceOf(Carbon::class, $goal->createdAt);
+        self::assertSame('goal-001', $goal->id);
+        self::assertSame('follower', $goal->type);
+        self::assertSame(750, $goal->currentAmount);
+        self::assertSame(1000, $goal->targetAmount);
+        self::assertInstanceOf(Carbon::class, $goal->createdAt);
     }
 }

@@ -6,8 +6,10 @@ namespace Zairakai\LaravelTwitch\Dto\Goals;
 
 use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents a creator goal (follower, subscription, new subscription, etc.).
@@ -15,7 +17,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#get-creator-goals
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class Goal extends Data
+class Goal extends TwitchData
 {
     public function __construct(
         /**
@@ -39,7 +41,7 @@ class Goal extends Data
         public string $broadcasterName,
 
         /**
-         * @var string Goal type: follower, subscription, new_subscription, new_subscription_count, new_bit_gifter
+         * @var string Goal type: follower, subscription, new_subscription, new_subscription_count, new_bit_gifter, new_bit, new_cheerer
          */
         public string $type,
 
@@ -61,6 +63,7 @@ class Goal extends Data
         /**
          * @var Carbon|null When the goal was created
          */
+        #[WithCast(FlexibleDateTimeCast::class)]
         public ?Carbon $createdAt = null,
     ) {}
 }

@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Dto\GuestStar;
 
+use Carbon\Carbon;
 use Spatie\LaravelData\Attributes\MapInputName;
-use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Zairakai\LaravelTwitch\Dto\EventSub\Casts\FlexibleDateTimeCast;
+use Zairakai\LaravelTwitch\Dto\TwitchData;
 
 /**
  * Represents a pending Guest Star session invitation.
@@ -14,23 +17,13 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
  * @see https://dev.twitch.tv/docs/api/reference/#get-guest-star-invites
  */
 #[MapInputName(SnakeCaseMapper::class)]
-class GuestStarInvite extends Data
+class GuestStarInvite extends TwitchData
 {
     public function __construct(
         /**
-         * @var string User ID of the invited guest
+         * @var string Invited user ID
          */
         public string $userId,
-
-        /**
-         * @var string User login of the invited guest
-         */
-        public string $userLogin,
-
-        /**
-         * @var string Display name of the invited guest
-         */
-        public string $userDisplayName,
 
         /**
          * @var bool Whether the guest's video is enabled
@@ -43,13 +36,44 @@ class GuestStarInvite extends Data
         public bool $isAudioEnabled,
 
         /**
-         * @var bool Whether the guest is a moderator
+         * @var Carbon|null When the invite was sent
          */
-        public bool $isModerator,
+        #[WithCast(FlexibleDateTimeCast::class)]
+        public ?Carbon $invitedAt = null,
 
         /**
-         * @var bool Whether the guest has Guest Star participant status
+         * @var string|null Invite status (always INVITED: only pending invites are listed)
          */
-        public bool $isGuestStarParticipant,
+        public ?string $status = null,
+
+        /**
+         * @var bool|null Whether the guest's video is available
+         */
+        public ?bool $isVideoAvailable = null,
+
+        /**
+         * @var bool|null Whether the guest's audio is available
+         */
+        public ?bool $isAudioAvailable = null,
+
+        /**
+         * @var string|null Not sent by Twitch
+         */
+        public ?string $userLogin = null,
+
+        /**
+         * @var string|null Not sent by Twitch
+         */
+        public ?string $userDisplayName = null,
+
+        /**
+         * @var bool|null Not sent by Twitch
+         */
+        public ?bool $isModerator = null,
+
+        /**
+         * @var bool|null Not sent by Twitch
+         */
+        public ?bool $isGuestStarParticipant = null,
     ) {}
 }

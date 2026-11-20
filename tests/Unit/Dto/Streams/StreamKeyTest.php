@@ -18,7 +18,7 @@ final class StreamKeyTest extends TestCase
             'stream_key'     => 'live_12345_abcdefghij',
         ]);
 
-        $this->assertSame('12345', $streamKey->broadcasterId);
-        $this->assertSame('live_12345_abcdefghij', $streamKey->streamKey);
+        self::assertSame('12345', $streamKey->broadcasterId);
+        self::assertSame('live_12345_abcdefghij', $streamKey->streamKey);
     }
 }
