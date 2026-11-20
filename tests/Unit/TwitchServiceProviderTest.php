@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Zairakai\LaravelTwitch\Tests\Unit;
 
+use Illuminate\Routing\Route;
+use Illuminate\Routing\Router;
 use PHPUnit\Framework\Attributes\Test;
 use Zairakai\LaravelTwitch\Services\TwitchApiService;
 use Zairakai\LaravelTwitch\Services\TwitchOAuthService;
@@ -17,13 +19,13 @@ final class TwitchServiceProviderTest extends TestCase
     #[Test]
     public function it_declares_provided_services(): void
     {
-        $twitchServiceProvider  = new TwitchServiceProvider($this->app);
+        $twitchServiceProvider  = new TwitchServiceProvider(app());
         $provides               = $twitchServiceProvider->provides();
 
-        $this->assertContains(TwitchApiService::class, $provides);
-        $this->assertContains(TwitchOAuthService::class, $provides);
-        $this->assertContains('twitch', $provides);
-        $this->assertContains('twitch.oauth', $provides);
+        self::assertContains(TwitchApiService::class, $provides);
+        self::assertContains(TwitchOAuthService::class, $provides);
+        self::assertContains('twitch', $provides);
+        self::assertContains('twitch.oauth', $provides);
     }
 
     // ── boot ──────────────────────────────────────────────────────────────────
@@ -31,31 +33,27 @@ final class TwitchServiceProviderTest extends TestCase
     #[Test]
     public function it_loads_routes(): void
     {
-        $routes = $this->app['router']->getRoutes();
-
         $routeNames = array_map(
-            static fn (mixed $route): ?string => is_object($route) && method_exists($route, 'getName')
-                ? $route->getName()
-                : null,
-            iterator_to_array($routes),
+            static fn (Route $route): ?string => $route->getName(),
+            resolve(Router::class)->getRoutes()->getRoutes(),
         );
 
-        $this->assertContains('twitch.auth', $routeNames);
-        $this->assertContains('twitch.auth.callback', $routeNames);
-        $this->assertContains('twitch.webhook', $routeNames);
+        self::assertContains('twitch.auth', $routeNames);
+        self::assertContains('twitch.auth.callback', $routeNames);
+        self::assertContains('twitch.webhook', $routeNames);
     }
 
     #[Test]
     public function it_merges_twitch_config(): void
     {
-        $this->assertNotNull(config('twitch.client_id'));
-        $this->assertNotNull(config('twitch.api.base_url'));
+        self::assertNotNull(config('twitch.client_id'));
+        self::assertNotNull(config('twitch.api.base_url'));
     }
 
     #[Test]
     public function it_registers_twitch_alias(): void
     {
-        $this->assertInstanceOf(TwitchApiService::class, $this->app->make('twitch'));
+        self::assertInstanceOf(TwitchApiService::class, resolve('twitch'));
     }
 
     // ── register ──────────────────────────────────────────────────────────────
@@ -63,26 +61,26 @@ final class TwitchServiceProviderTest extends TestCase
     #[Test]
     public function it_registers_twitch_api_service_as_singleton(): void
     {
-        $twitchApiService = $this->app->make(TwitchApiService::class);
-        $service2         = $this->app->make(TwitchApiService::class);
+        $twitchApiService = resolve(TwitchApiService::class);
+        $service2         = resolve(TwitchApiService::class);
 
-        $this->assertInstanceOf(TwitchApiService::class, $twitchApiService);
-        $this->assertSame($twitchApiService, $service2);
+        self::assertInstanceOf(TwitchApiService::class, $twitchApiService);
+        self::assertSame($twitchApiService, $service2);
     }
 
     #[Test]
     public function it_registers_twitch_oauth_alias(): void
     {
-        $this->assertInstanceOf(TwitchOAuthService::class, $this->app->make('twitch.oauth'));
+        self::assertInstanceOf(TwitchOAuthService::class, resolve('twitch.oauth'));
     }
 
     #[Test]
     public function it_registers_twitch_oauth_service_as_singleton(): void
     {
-        $twitchOAuthService = $this->app->make(TwitchOAuthService::class);
-        $service2           = $this->app->make(TwitchOAuthService::class);
+        $twitchOAuthService = resolve(TwitchOAuthService::class);
+        $service2           = resolve(TwitchOAuthService::class);
 
-        $this->assertInstanceOf(TwitchOAuthService::class, $twitchOAuthService);
-        $this->assertSame($twitchOAuthService, $service2);
+        self::assertInstanceOf(TwitchOAuthService::class, $twitchOAuthService);
+        self::assertSame($twitchOAuthService, $service2);
     }
 }

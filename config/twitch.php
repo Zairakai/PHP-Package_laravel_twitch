@@ -2,25 +2,25 @@
 
 return [
     /*
-    |--------------------------------------------------------------------------
-    | Twitch Application Credentials
-    |--------------------------------------------------------------------------
-    |
-    | These are your Twitch application credentials. You can get them from
-    | your Twitch Developer Console at https://dev.twitch.tv/console/apps
-    |
+    | Twitch application credentials, from https://dev.twitch.tv/console/apps
+    | redirect_uri: the OAuth callback. The default is the route of the package, made absolute with the URL of the
+    | application; register that URL in the Twitch console.
     */
     'client_id'     => env('TWITCH_CLIENT_ID'),
     'client_secret' => env('TWITCH_CLIENT_SECRET'),
-    'redirect_uri'  => env('TWITCH_REDIRECT_URI', '/auth/twitch/callback'),
+    'redirect_uri'  => env('TWITCH_REDIRECT_URI', '/twitch/auth/callback'),
 
     /*
-    |--------------------------------------------------------------------------
-    | Twitch API Configuration
-    |--------------------------------------------------------------------------
-    |
-    | Configuration for the Twitch API integration
-    |
+    | Where the callback goes once the user is connected (or refused): a route name, or a URL (a value that starts
+    | with `/` or `http`).
+    */
+    'oauth' => [
+        'redirect_to' => env('TWITCH_OAUTH_REDIRECT_TO', 'home'),
+    ],
+
+    /*
+    | Twitch API. retry: how many times a 429 is retried, and the wait in milliseconds when Twitch gives no
+    | Ratelimit-Reset.
     */
     'api' => [
         'base_url' => 'https://api.twitch.tv/helix/',
@@ -33,12 +33,8 @@ return [
     ],
 
     /*
-    |--------------------------------------------------------------------------
-    | OAuth Scopes
-    |--------------------------------------------------------------------------
-    |
-    | Default scopes to request during OAuth flow
-    |
+    | Scopes asked by default during the OAuth flow: the ones of a moderation and chat bot. The moderator:read:*
+    | scopes are covered by the moderator:manage:* listed (Twitch accepts either).
     */
     'scopes' => [
         // Identity
@@ -50,6 +46,7 @@ return [
         'channel:bot',
         'user:manage:chat_color',
         'user:read:emotes',
+        'user:read:subscriptions',
 
         // Moderation — required for ban/timeout/warn/mod management
         'moderation:read',
@@ -65,6 +62,7 @@ return [
         'moderator:manage:unban_requests',
         'moderator:manage:suspicious_users',
         'moderator:read:chatters',
+        'moderator:read:chat_messages',
         'moderator:read:followers',
         'moderator:read:unban_requests',
         'moderator:read:suspicious_users',
@@ -83,6 +81,11 @@ return [
         // Channel Points
         'channel:read:redemptions',
         'channel:manage:redemptions',
+
+        // Clips and videos
+        'channel:manage:clips',
+        'editor:manage:clips',
+        'channel:manage:videos',
 
         // Ads
         'channel:read:ads',
@@ -136,62 +139,20 @@ return [
     ],
 
     /*
-    |--------------------------------------------------------------------------
-    | EventSub Configuration
-    |--------------------------------------------------------------------------
-    |
-    | Configuration for Twitch EventSub webhooks
-    |
+    | EventSub. max_message_age: seconds after which a signed notification is refused as a possible replay (Twitch
+    | suggests 10 minutes). dedupe_ttl: seconds during which a message ID is remembered, to ignore the copies Twitch
+    | can send (it delivers at least once). null or 0 turns either check off.
     */
     'eventsub' => [
         'webhook_callback_url' => env('TWITCH_WEBHOOK_URL'),
         'webhook_secret'       => env('TWITCH_WEBHOOK_SECRET'),
-        'enabled_events'       => [
-            'channel.update',
-            'channel.follow',
-            'channel.subscribe',
-            'channel.chat.message',
-            'channel.subscription.gift',
-            'channel.subscription.message',
-            'channel.cheer',
-            'channel.raid',
-            'channel.subscription.end',
-            'channel.ban',
-            'channel.unban',
-            'channel.moderator.add',
-            'channel.moderator.remove',
-            'channel.vip.add',
-            'channel.vip.remove',
-            'channel.channel_points_custom_reward.add',
-            'channel.channel_points_custom_reward_redemption.add',
-            'channel.channel_points_custom_reward_redemption.update',
-            'channel.poll.begin',
-            'channel.poll.progress',
-            'channel.poll.end',
-            'channel.prediction.begin',
-            'channel.prediction.progress',
-            'channel.prediction.lock',
-            'channel.prediction.end',
-            'channel.hype_train.begin',
-            'channel.hype_train.progress',
-            'channel.hype_train.end',
-            'channel.goal.begin',
-            'channel.goal.progress',
-            'channel.goal.end',
-            'channel.shoutout.create',
-            'channel.shoutout.receive',
-            'stream.online',
-            'stream.offline',
-        ],
+        'max_message_age'      => 600,
+        'dedupe_ttl'           => 3600,
     ],
 
     /*
-    |--------------------------------------------------------------------------
-    | Badge System Configuration
-    |--------------------------------------------------------------------------
-    |
-    | Configuration for the custom badge system
-    |
+    | Custom badges (unlocked by watch time or by subscription volume, created per channel).
+    | Not used yet.
     */
     'badges' => [
         'enabled'            => env('TWITCH_BADGES_ENABLED', true),
@@ -200,25 +161,18 @@ return [
     ],
 
     /*
-    |--------------------------------------------------------------------------
-    | Database Configuration
-    |--------------------------------------------------------------------------
-    |
-    | Configuration for database storage
-    |
+    | Storage of the users and their tokens, which can live in another database than the main one. A null connection
+    | is the default one. load_migrations: false when the migration is published in the application
+    | (php artisan vendor:publish --tag=twitch-migrations).
     */
     'database' => [
-        'connection'   => env('TWITCH_DB_CONNECTION', config('database.default')),
-        'table_prefix' => 'twitch_',
+        'connection'      => env('TWITCH_DB_CONNECTION', config('database.default')),
+        'table_prefix'    => 'twitch_',
+        'load_migrations' => env('TWITCH_LOAD_MIGRATIONS', true),
     ],
 
     /*
-    |--------------------------------------------------------------------------
-    | Cache Configuration
-    |--------------------------------------------------------------------------
-    |
-    | Configuration for caching API responses
-    |
+    | Cache of the public answers, in seconds. enabled=false turns every cache off.
     */
     'cache' => [
         'enabled' => env('TWITCH_CACHE_ENABLED', true),
@@ -236,12 +190,9 @@ return [
     ],
 
     /*
-    |--------------------------------------------------------------------------
-    | Rate Limiting
-    |--------------------------------------------------------------------------
-    |
-    | Configuration for API rate limiting
-    |
+    | Rate limit of the calls to Twitch: a token bucket kept in the cache, shared by every process and per client ID.
+    | It holds burst_limit calls and is refilled at requests_per_minute per minute; a call waits when it is empty.
+    | Twitch gives each app 800 points per minute.
     */
     'rate_limit' => [
         'enabled'             => true,
